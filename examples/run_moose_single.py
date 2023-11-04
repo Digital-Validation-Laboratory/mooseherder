@@ -1,7 +1,6 @@
 #==============================================================================
-# RUN GMSH+MOOSE FROM PYTHON 
+# RUN GOOSE FROM PYTHON 
 # Use the os module and terminal commands to run gmsh and MOOSE from python
-# Allows for parallelisation with python
 #
 # Author: Lloyd Fletcher
 #==============================================================================
@@ -15,11 +14,8 @@ app_dir = '/home/lloydf/moose-workdir/proteus'
 app_name = 'proteus-opt'
 tamer = mooseherder.MooseTamer(moose_dir,app_dir,app_name)
 
-input_file = 'model-tensile-test.i'
+input_file = 'examples/model-mech-test.i'
 
 tamer.set_para_opts(4,2)
 tamer.run(input_file)
 
-cwd = os.getcwd()
-print(cwd)
-print('Finished')
