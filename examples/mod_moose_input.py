@@ -6,17 +6,21 @@
 
 import os
 
-class MooseModifier:
+class InputModifier:
     def __init__(self):
-        self.input_file = ''
+        self._vars = dict()
+        self._input_file = ''
+        self._input_lines = list()
 
     def read_vars(self,input_file):
-        self.input_file = input_file
-        with open(input_file,'r') as data_file:
-            all_lines = data_file.readlines()
+        '''
+        TODO
+        '''
+        self._input_file = input_file
+        with open(input_file,'r') as in_file:
+            self._input_lines = in_file.readlines()
 
-            self.vars = dict()
-            for ss in all_lines:
+            for ii,ss in enumerate(self._input_lines):
                 ss = ss.strip()
                 ss = ss.replace(' ','') 
                 if ss:
@@ -30,12 +34,32 @@ class MooseModifier:
 
                     # Anything left with an equals sign is a variable
                     if ss.find('=') >= 0:
-                        self.vars[ss.split('=', 1)[0]] = float(ss.split('=', 1)[1])
+                        self._vars[ss.split('=', 1)[0]] = [float(ss.split('=', 1)[1]), ii]
+
+    def mod_vars(self):
+        '''
+        TODO
+        '''
+        # Need to update the variables dictionary and the strings in the file
+        for kk in self._vars.keys():
+            print(kk)
+
+    def write_input(self,write_file):
+        '''
+        TODO
+        '''
+        with open(write_file,'w') as in_file:
+            in_file.writelines(self.input_lines)
+
+
 
 input_file = 'examples/model-mech-test.i'
-mmod = MooseModifier()
-mmod.read_vars(input_file)
+in_mod = InputModifier()
+in_mod.read_vars(input_file)
+print('Variables at the top of the MOOSE input file:')
+print(in_mod._vars)
+print()
 
-print(mmod.vars)
+in_mod.mod_vars()
 
-
+print(in_mod._vars['n_elem_x'])
