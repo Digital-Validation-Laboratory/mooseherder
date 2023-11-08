@@ -4,7 +4,6 @@
 #
 # Author: Lloyd Fletcher
 #==============================================================================
-
 import os, sys
 import mooseherder
 
@@ -14,7 +13,7 @@ app_dir = '/home/lloydf/moose-workdir/proteus'
 app_name = 'proteus-opt'
 tamer = mooseherder.MooseTamer(moose_dir,app_dir,app_name)
 
-input_file = 'examples/model-mech-test.i'
+input_file = 'examples/model-mod-vars.i'
 
 tamer.set_para_opts(4,2)
 tamer.run(input_file)

@@ -1,6 +1,7 @@
 '''
 ===============================================================================
-MOOSER Tamer Class
+MOOSE Tamer Class
+
 Used to be able to call MOOSE models from python for parallelisation and 
 coupling to python based optimisers.
 
