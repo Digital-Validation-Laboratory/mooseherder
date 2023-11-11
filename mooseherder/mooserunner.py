@@ -1,6 +1,6 @@
 '''
 ===============================================================================
-MOOSE Tamer Class
+MOOSE Runner Class
 
 Used to be able to call MOOSE models from python for parallelisation and 
 coupling to python based optimisers.
@@ -11,7 +11,7 @@ Author: Lloyd Fletcher
 
 import os
 
-class MooseTamer:
+class MooseRunner:
     def __init__(self,moose_dir,app_dir,app_name):
         self.n_threads = 1
         self.n_tasks = 1

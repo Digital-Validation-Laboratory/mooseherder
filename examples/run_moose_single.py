@@ -5,16 +5,16 @@
 # Author: Lloyd Fletcher
 #==============================================================================
 import os, sys
-import mooseherder
+from mooseherder import MooseRunner
 
 # Run moose with tamer
 moose_dir = '/home/lloydf/moose'
 app_dir = '/home/lloydf/moose-workdir/proteus'
 app_name = 'proteus-opt'
-tamer = mooseherder.MooseTamer(moose_dir,app_dir,app_name)
+runner = MooseRunner(moose_dir,app_dir,app_name)
 
-input_file = 'examples/model-mod-vars.i'
+input_file = 'examples/model-mod-vars1.i'
 
-tamer.set_para_opts(4,2)
-tamer.run(input_file)
+runner.set_para_opts(4,2)
+runner.run(input_file)
 

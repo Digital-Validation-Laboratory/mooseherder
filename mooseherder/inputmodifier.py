@@ -17,10 +17,14 @@ Author: Lloyd Fletcher
 import os
 
 class InputModifier:
-    def __init__(self):
+    def __init__(self,input_file):
+        '''
+        TODO
+        '''
         self._vars = dict()
         self._input_file = ''
         self._input_lines = list()
+        self.read_vars(input_file)
 
     def read_vars(self,input_file):
         '''
