@@ -7,7 +7,6 @@
 import os, sys
 from mooseherder import MooseRunner
 
-# Run moose with tamer
 moose_dir = '/home/lloydf/moose'
 app_dir = '/home/lloydf/moose-workdir/proteus'
 app_name = 'proteus-opt'
