@@ -3,8 +3,8 @@
 MOOSE Herder
 """
 
-from .mooserunner import MooseRunner
-from .mooseherd import MooseHerd
-from .inputmodifier import InputModifier
+from .mooseherd import *
+from .inputmodifier import *
+from .mooserunner import *
 
-__all__ = ["mooserunner" "mooseherd" "inputmodifier"]
+__all__ = ["mooseherd" "inputmodifier" "mooserunner" ]

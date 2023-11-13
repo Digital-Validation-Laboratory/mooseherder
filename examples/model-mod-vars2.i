@@ -3,7 +3,7 @@
 
 # Variables
 # n_elem_x = 100
-n_elem_y = 120 # Trying to break my code
+n_elem_y = 120 # Trying to break the code
 e_modulus = 3300000000.0 
 p_ratio = 0.33 
 
