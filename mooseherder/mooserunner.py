@@ -20,6 +20,10 @@ class MooseRunner:
         self.app_name = app_name
 
         # Find moose and set environment vars
+        self.set_env_vars()
+
+    def set_env_vars(self):
+         # Find moose and set environment vars
         os.environ['CC'] = 'mpicc'
         os.environ['CXX'] = 'mpicxx'
         os.environ['F90'] = 'mpif90'
@@ -27,6 +31,7 @@ class MooseRunner:
         os.environ['FC'] = 'mpif90'
         os.environ['MOOSE_DIR'] = self.moose_dir
         os.environ["PATH"] = os.environ["PATH"] + ':' + self.app_dir
+
 
     def set_threads(self,n_threads):
         # Need to make sure number of threads is sensible basedon cpu

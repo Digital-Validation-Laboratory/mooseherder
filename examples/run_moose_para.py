@@ -15,7 +15,7 @@ if __name__ == '__main__':
 
     # Start the herd and create working directories
     herd = MooseHerd(input_file,moose_dir,app_dir,app_name)
-    herd.create_dirs(True)
+    herd.create_dirs(False)
 
     # Create variables to sweep in a list of dictionaries
     n_elem_y = [50,100]
@@ -28,8 +28,12 @@ if __name__ == '__main__':
                 para_vars.append({'n_elem_y':nn,'e_modulus':ee,'p_ratio':pp})
 
 
+    # Set the parallelisation options
+    herd.para_opts(n_moose=4,tasks_per_moose=1,threads_per_moose=2)
+
     # Run in parallel
     herd.run_para(para_vars)
+    print()
     print('------------------------------------------')
     print('Run time = '+str(herd._run_time)+' seconds')
     print('------------------------------------------')

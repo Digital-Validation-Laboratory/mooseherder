@@ -23,16 +23,14 @@ class MooseHerd:
         self._modifier = InputModifier(input_file)
 
         # Options for high throughput parallelisation
-        self._n_moose = 4
+        self._n_moose = 2
         self._one_dir = True
-        self._sub_dir = 'moose-task'
+        self._sub_dir = 'moose-workdir'
         self._input_tag = 'moose-sim'
         self._run_dir = os.path.split(input_file)[0]+'/'+self._sub_dir
         self._keep_input = True
         self._keep_output = True
         self._sweep_vars = list()
-
-        self._test_count = 0
 
     def create_dirs(self,one_dir=True):
         self._one_dir = one_dir
@@ -48,13 +46,13 @@ class MooseHerd:
                 except OSError as error:  
                     print(error)    
 
-    def para_opts(self,n_moose,tasks_per_moose, threads_per_moose):
+    def para_opts(self,n_moose,tasks_per_moose=1, threads_per_moose=1):
         if n_moose < 0:
             n_moose = 1
         
         if self._n_moose != n_moose:
             self._n_moose = n_moose
-            self.create_dirs()
+            self.create_dirs(one_dir=self._one_dir)
 
         self._runner.set_para_opts(tasks_per_moose,threads_per_moose)
 
@@ -83,11 +81,12 @@ class MooseHerd:
         else:
             run_dir = self._run_dir+'-'+process_num+'/'
         
-        save_file = run_dir+self._input_tag +'-'+str(iter)+'.i'
+        save_file = run_dir+self._input_tag +'-'+str(iter+1)+'.i'
         
         # Modify MOOSE input file and save to correct directory
         # save_file = ''
         self._modifier.write_mod_input(run_vars,save_file)
 
         # Run MOOSE input file
+        self._runner.set_env_vars()
         self._runner.run(save_file)
