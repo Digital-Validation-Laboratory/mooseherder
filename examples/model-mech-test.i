@@ -1,6 +1,3 @@
-# source ~/.moose_profile
-# proteus-opt --n-threads=4 -i model-tensile-test.i
-
 # Variables
 # n_elem_x = 100
 n_elem_y = 100 # Trying to break the code
