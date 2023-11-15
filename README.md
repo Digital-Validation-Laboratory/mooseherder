@@ -1,2 +1,2 @@
-# mooseherder
-A python 'herder' for calling MOOSE and gmsh to run parallel parametric sweeps of simulations
+# MOOSEHerder
+A herder for calling multiple MOOSE simulations in parallel for high throughput computing. 
