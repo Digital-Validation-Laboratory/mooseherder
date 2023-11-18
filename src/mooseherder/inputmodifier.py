@@ -37,7 +37,7 @@ class InputModifier:
             for ii,ss in enumerate(self._input_lines):
                 ss = ss.strip()
                 ss = ss.replace(' ','') 
-                if ss:
+                if ss: # Make sure we aren't messing with an empty string
                     # If we find a MOOSE block stop looking for variables
                     if ss[0] == '[':
                         break

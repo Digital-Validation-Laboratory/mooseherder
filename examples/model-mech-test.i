@@ -22,6 +22,7 @@ p_ratio = 0.3
 [Modules/TensorMechanics/Master]
     [all]
         add_variables = true
+        generate_output = 'vonmises_stress strain_xx strain_yy strain_zz'
     []
 []
 

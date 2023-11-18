@@ -96,3 +96,5 @@ class MooseHerd:
         # Run MOOSE input file
         self._runner.set_env_vars()
         self._runner.run(save_file)
+
+        
