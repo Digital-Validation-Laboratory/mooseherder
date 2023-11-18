@@ -1,5 +1,6 @@
 # MOOSE files
 *.e
+examples/moose-workdir-*
 
 # Byte-compiled / optimized / DLL files
 __pycache__/
