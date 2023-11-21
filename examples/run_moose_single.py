@@ -5,10 +5,7 @@
 # Author: Lloyd Fletcher
 #==============================================================================
 import time
-import netCDF4
-import numpy as np
 from mooseherder import MooseRunner
-from pprint import pprint
 
 # Create the runner
 moose_dir = '/home/lloydf/moose'
@@ -26,7 +23,7 @@ input_file = 'examples/model-mech-test.i'
 start_time = time.perf_counter()
 
 # Run the MOOSE input file
-# runner.run(input_file)
+runner.run(input_file)
 
 # Print the run time
 end_time = time.perf_counter()
@@ -34,15 +31,4 @@ print()
 print('------------------------------------------')
 print('Run time = '+str(end_time-start_time)+' seconds')
 print('------------------------------------------')
-
-# Read the results
-output_file = 'examples/model-mech-test_out.e'
-mout = netCDF4.Dataset(output_file)
-X = np.array(mout.variables['coordx'])
-Y = np.array(mout.variables['coordy'])
-
-for vv in mout.variables:
-    pprint(vv)
-
-#pprint(mout.variables)
 
