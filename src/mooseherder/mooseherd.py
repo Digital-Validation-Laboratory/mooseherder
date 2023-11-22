@@ -9,8 +9,9 @@ Author: Lloyd Fletcher, Rory Spencer
 import os, shutil
 import multiprocessing as mp
 import time
-from .inputmodifier import InputModifier
-from .mooserunner import MooseRunner
+from mooseherder.inputmodifier import InputModifier
+from mooseherder.mooserunner import MooseRunner
+from mtgo.gmshutils import RunGmsh
 
 class MooseHerd:
     def __init__(self,input_file,moose_dir,app_dir,app_name,input_modifier):
@@ -21,6 +22,7 @@ class MooseHerd:
         # But still need to give a moose file 
         # Would now need moose file and modified file.
         self._modifier = input_modifier #InputModifier(input_file)
+        self.input_file = input_file
         #Check if modifier class is working on the input file
         
         self._moose_mod = True # Is the moose file the one that's being modified?
@@ -100,12 +102,22 @@ class MooseHerd:
         
         save_file = run_dir+self._input_tag +'-'+str(iter+1)+'.i'
         
-        # Modify MOOSE input file and save to correct directory
-        # save_file = ''
-        self._modifier.write_mod_input(run_vars,save_file)
+        # Modify the file. Check if we're modifying the moose file or not. 
+        if self._moose_mod:
+            self._modifier.write_file(run_vars,save_file)
+        else:
+            mesh_file = run_dir+'/'+ os.path.split(self._modifier._input_file)[-1].split('.')[0] +'_{}.geo'.format(iter+1)
+            self._modifier.update_vars(run_vars)
+            self._modifier.write_file(mesh_file)
+            #RunGmsh(mesh_file) # Generate the mesh
+            print(mesh_file)
+            #copy in the moose file to run
+            shutil.copyfile(self.input_file,save_file)
+
 
         # Run MOOSE input file
         self._runner.set_env_vars()
-        self._runner.run(save_file)
+        #self._runner.run(save_file)
+        print('Im running{}'.format(save_file))
 
         

@@ -1,11 +1,9 @@
-# source ~/.moose_profile
-# proteus-opt --n-threads=4 -i model-tensile-test.i
-
-# Variables
+#_* Variables
 # n_elem_x = 100
-n_elem_y = 50 # Trying to break the code
-e_modulus = 2000000000.0 
-p_ratio = 0.3 
+n_elem_y = 100 # Trying to break the code
+e_modulus = 1e9
+p_ratio = 0.3
+#**
 
 [GlobalParams]
     displacements = 'disp_x disp_y'
@@ -25,6 +23,7 @@ p_ratio = 0.3
 [Modules/TensorMechanics/Master]
     [all]
         add_variables = true
+        generate_output = 'vonmises_stress strain_xx strain_yy strain_zz'
     []
 []
 
