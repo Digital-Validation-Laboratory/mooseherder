@@ -99,8 +99,11 @@ class InputModifier:
                 if index > self.var_start and index < self.var_end:
                     current_var = index-self.var_start-1
                     #print(current_var)
-                    write_string = '{} = {}{}\n'.format(keys[current_var],values[current_var],self.end_char)
-                    out_file.write(write_string)
+                    try:
+                        write_string = '{} = {}{}\n'.format(keys[current_var],values[current_var],self.end_char)
+                        out_file.write(write_string)
+                    except(IndexError):
+                        print('All available parameters written. Check for commented out parameters in the input.')
                     continue
                 else:
                     out_file.write(line)

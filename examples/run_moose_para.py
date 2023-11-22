@@ -5,6 +5,7 @@
 #==============================================================================
 
 from mooseherder import MooseHerd
+from mooseherder.inputmodifier import InputModifier
 
 if __name__ == '__main__':
     moose_dir = '/home/rspencer/moose'
@@ -13,8 +14,11 @@ if __name__ == '__main__':
 
     input_file = 'examples/model-mech-test.i'
 
+    input_modifier = InputModifier(input_file,'#','')
     # Start the herd and create working directories
-    herd = MooseHerd(input_file,moose_dir,app_dir,app_name)
+    herd = MooseHerd(input_file,moose_dir,app_dir,app_name,input_modifier)
+    # Start the herd and create working directories
+    #herd = MooseHerd(input_file,moose_dir,app_dir,app_name)
     herd.clear_dirs()
     herd.create_dirs(one_dir=False)
 
@@ -30,7 +34,7 @@ if __name__ == '__main__':
 
 
     # Set the parallelisation options
-    herd.para_opts(n_moose=4,tasks_per_moose=1,threads_per_moose=2)
+    herd.para_opts(n_moose=len(para_vars),tasks_per_moose=1,threads_per_moose=2)
 
     # Run in parallel
     herd.run_para(para_vars)

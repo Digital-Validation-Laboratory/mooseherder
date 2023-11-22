@@ -24,6 +24,7 @@ class MooseHerd:
         self._modifier = input_modifier #InputModifier(input_file)
         self.input_file = input_file
         #Check if modifier class is working on the input file
+        self._gmsh_path = '/home/rspencer/src/gmsh/bin/gmsh'
         
         self._moose_mod = True # Is the moose file the one that's being modified?
         if self._modifier._input_file != input_file:
@@ -104,12 +105,13 @@ class MooseHerd:
         
         # Modify the file. Check if we're modifying the moose file or not. 
         if self._moose_mod:
-            self._modifier.write_file(run_vars,save_file)
+            self._modifier.update_vars(run_vars)
+            self._modifier.write_file(save_file)
         else:
             mesh_file = run_dir+'/'+ os.path.split(self._modifier._input_file)[-1].split('.')[0] +'_{}.geo'.format(iter+1)
             self._modifier.update_vars(run_vars)
             self._modifier.write_file(mesh_file)
-            #RunGmsh(mesh_file) # Generate the mesh
+            RunGmsh(self._gmsh_path,mesh_file) # Generate the mesh
             print(mesh_file)
             #copy in the moose file to run
             shutil.copyfile(self.input_file,save_file)
@@ -117,7 +119,8 @@ class MooseHerd:
 
         # Run MOOSE input file
         self._runner.set_env_vars()
-        #self._runner.run(save_file)
         print('Im running{}'.format(save_file))
+        self._runner.run(save_file)
+        
 
         
