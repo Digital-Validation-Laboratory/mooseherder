@@ -15,7 +15,8 @@ if __name__ == '__main__':
 
     # Start the herd and create working directories
     herd = MooseHerd(input_file,moose_dir,app_dir,app_name)
-    herd.create_dirs(False)
+    herd.clear_dirs()
+    herd.create_dirs(one_dir=False)
 
     # Create variables to sweep in a list of dictionaries
     n_elem_y = [50,100]
@@ -37,5 +38,4 @@ if __name__ == '__main__':
     print('------------------------------------------')
     print('Run time = '+str(herd._run_time)+' seconds')
     print('------------------------------------------')
-
 

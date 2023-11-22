@@ -6,7 +6,7 @@ Author: Lloyd Fletcher
 ===============================================================================
 '''
 
-import os
+import os, shutil
 import multiprocessing as mp
 import time
 from .inputmodifier import InputModifier
@@ -14,11 +14,6 @@ from .mooserunner import MooseRunner
 
 class MooseHerd:
     def __init__(self,input_file,moose_dir,app_dir,app_name):
-        #self._input_file = input_file
-        #self._moose_dir = moose_dir
-        #self._app_dir = app_dir
-        #self._app_name = app_name
-
         self._runner = MooseRunner(moose_dir,app_dir,app_name)
         self._modifier = InputModifier(input_file)
 
@@ -27,24 +22,35 @@ class MooseHerd:
         self._one_dir = True
         self._sub_dir = 'moose-workdir'
         self._input_tag = 'moose-sim'
-        self._run_dir = os.path.split(input_file)[0]+'/'+self._sub_dir
+        self._input_dir = os.path.split(input_file)[0]+'/'
+        self._run_dir = self._input_dir + self._sub_dir
+
         self._keep_input = True
         self._keep_output = True
         self._sweep_vars = list()
 
-    def create_dirs(self,one_dir=True):
+    def create_dirs(self,one_dir=True,sub_dir='moose-workdir'):
         self._one_dir = one_dir
+        self._sub_dir = sub_dir
         if self._one_dir:
-            try:  
+            if not(os.path.isdir(self._run_dir+'-1')):
                 os.mkdir(self._run_dir+'-1')  
-            except OSError as error:  
-                print(error)   
         else:
             for nn in range(self._n_moose):
-                try:
+                if not(os.path.isdir(self._run_dir+'-'+str(nn+1))):
                     os.mkdir(self._run_dir+'-'+str(nn+1))
-                except OSError as error:  
-                    print(error)    
+ 
+    def clear_dirs(self):
+        if os.path.isdir(self._input_dir):
+            all_dirs = os.listdir(self._input_dir)
+        else:
+            print('Input file and directory do not exist.')
+            all_dirs = list()
+
+        for dd in all_dirs:
+            if os.path.isdir(self._input_dir+dd):
+                if dd[0:dd.rfind('-')] == self._sub_dir:
+                    shutil.rmtree(self._input_dir+dd)
 
     def para_opts(self,n_moose,tasks_per_moose=1, threads_per_moose=1):
         if n_moose < 0:
@@ -90,3 +96,5 @@ class MooseHerd:
         # Run MOOSE input file
         self._runner.set_env_vars()
         self._runner.run(save_file)
+
+        
