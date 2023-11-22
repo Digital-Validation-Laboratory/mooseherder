@@ -1,30 +1,16 @@
-[build-system]
-requires = ["setuptools>=61.0"]
-build-backend = "setuptools.build_meta"
-
-[project]
+[tool.poetry]
 name = "mooseherder"
 version = "0.0.1"
 description = "A python herder for calling MOOSE and gmsh to run parallel parametric sweeps of simulations"
-authors = [
-  { name = "Lloyd Fletcher", email = "thescepticalrabbit@gmail.com" },
-]
-license = { file = "LICENSE" }
+authors = ["Lloyd Fletcher"]
+license = "MIT"
 readme = "README.md"
-classifiers = [
-    "Programming Language :: Python :: 3",
-    "License :: GNU LGPL",
-    "Operating System :: OS Independent",
-]
-requires-python = ">=3.9"
-dependencies = [
-  "matplotlib==3.7.3",
-  "numpy==1.26.0",
-]
 
-[project.urls]
-"Repository" = "https://github.com/ScepticalRabbit/mooseherder"
-"Issue Tracker" = "https://github.com/ScepticalRabbit/mooseherder/issues"
+[tool.poetry.dependencies]
+python = "^3.9"
 
-[tool.setuptools.packages.find]
-where = ["mooseherder"]
+[tool.poetry.dev-dependencies]
+
+[build-system]
+requires = ["poetry-core>=1.0.0"]
+build-backend = "poetry.core.masonry.api"

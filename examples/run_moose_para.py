@@ -7,8 +7,8 @@
 from mooseherder import MooseHerd
 
 if __name__ == '__main__':
-    moose_dir = '/home/lloydf/moose'
-    app_dir = '/home/lloydf/moose-workdir/proteus'
+    moose_dir = '/home/rspencer/moose'
+    app_dir = '/home/rspencer/proteus'
     app_name = 'proteus-opt'
 
     input_file = 'examples/model-mech-test.i'
