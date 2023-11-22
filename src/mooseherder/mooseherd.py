@@ -2,7 +2,7 @@
 ===============================================================================
 MOOSE Herd Class
 
-Author: Lloyd Fletcher
+Author: Lloyd Fletcher, Rory Spencer
 ===============================================================================
 '''
 
@@ -13,9 +13,20 @@ from .inputmodifier import InputModifier
 from .mooserunner import MooseRunner
 
 class MooseHerd:
-    def __init__(self,input_file,moose_dir,app_dir,app_name):
+    def __init__(self,input_file,moose_dir,app_dir,app_name,input_modifier):
         self._runner = MooseRunner(moose_dir,app_dir,app_name)
-        self._modifier = InputModifier(input_file)
+
+        ## Want to be able to change what the modifier is and how it works. I.e. change mesh and run vs change moose input and run.
+        # if the former, need to also have a way to give it the MOOSE file as well as mesh file.
+        # But still need to give a moose file 
+        # Would now need moose file and modified file.
+        self._modifier = input_modifier #InputModifier(input_file)
+        #Check if modifier class is working on the input file
+        
+        self._moose_mod = True # Is the moose file the one that's being modified?
+        if self._modifier._input_file != input_file:
+            self._moose_mod = False
+
 
         # Options for high throughput parallelisation
         self._n_moose = 2

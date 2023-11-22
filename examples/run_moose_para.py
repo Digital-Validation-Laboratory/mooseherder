@@ -1,7 +1,7 @@
 #==============================================================================
 # RUN PARALLEL MOOSE FROM PYTHON 
 #
-# Author: Lloyd Fletcher
+# Author: Lloyd Fletcher, Rory Spencer
 #==============================================================================
 
 from mooseherder import MooseHerd
