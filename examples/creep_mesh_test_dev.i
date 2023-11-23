@@ -30,7 +30,12 @@
     [./dts]
       type = PiecewiseLinear
       x = '0        0.5    1.0 100'
-      y = '0.05  0.05  1  1'
+      y = '0.02  0.02  1  1'
+    [../]
+
+    [./swift]
+        type = ParsedFunction
+        expression = '400E6*(1E-3 +x)^0.1'
     [../]
   []
   
@@ -39,7 +44,7 @@
       type = Pressure
       variable = disp_y
       boundary = Top-BC
-      factor = 2
+      factor = 1.7
       function = top_pull
     [../]
     [./u_bottom_fix]
@@ -89,7 +94,8 @@
     [../]
     [./plas]
       type = IsotropicPlasticityStressUpdate
-      hardening_constant = 100E6
+      #hardening_constant = 100E6
+      hardening_function = swift
       yield_stress = 200E6
     [../]
   []
@@ -114,6 +120,7 @@
     l_abs_tol = 1E-8
     start_time = 0.0
     end_time = 100
+    dtmin =1E-4
   
     [./TimeStepper]
       type = FunctionDT
