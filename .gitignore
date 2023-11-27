@@ -1,6 +1,8 @@
 # MOOSE files
 *.e
 examples/moose-workdir-*
+examples/*.csv
+proteus-opt
 
 # Byte-compiled / optimized / DLL files
 __pycache__/

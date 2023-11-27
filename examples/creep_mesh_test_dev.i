@@ -44,7 +44,7 @@
       type = Pressure
       variable = disp_y
       boundary = Top-BC
-      factor = 1.7
+      factor = 1.65
       function = top_pull
     [../]
     [./u_bottom_fix]
@@ -130,6 +130,7 @@
   
   [Outputs]
     exodus = true
+    csv = true
   []
 
   [Postprocessors]
@@ -139,4 +140,27 @@
       stress_tensor = stress
       boundary = 'Btm-BC'
     [../]
+    [./max_y_disp]
+      type = NodalExtremeValue
+      variable = disp_y 
+    [../]       
+    [./max_creep_strain]
+      type = ElementExtremeValue
+      variable = creep_strain_yy
+    [../]  
+    [./min_creep_strain]
+      type = ElementExtremeValue
+      variable = creep_strain_yy
+      value_type = min
+    [../]  
+    [./max_plas_strain]
+      type = ElementExtremeValue
+      variable = plastic_strain_yy
+    [../]  
+    [./min_plas_strain]
+      type = ElementExtremeValue
+      variable = plastic_strain_yy
+      value_type = min
+    [../] 
+
   []
