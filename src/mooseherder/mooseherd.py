@@ -10,6 +10,7 @@ import os, shutil
 import multiprocessing as mp
 import time
 from mooseherder.inputmodifier import InputModifier
+from mooseherder.outputreader import output_csv_reader
 from mooseherder.mooserunner import MooseRunner
 from mtgo.gmshutils import RunGmsh
 
@@ -95,11 +96,13 @@ class MooseHerd:
     def _run_sim(self,iter,run_vars):
         name = mp.current_process().name
         process_num = name.split('-',1)[1]
+        print(process_num)
             
         if self._one_dir:
             run_dir = self._run_dir+'-1/'
         else:
-            run_dir = self._run_dir+'-'+process_num+'/'
+            #run_dir = self._run_dir+'-'+process_num+'/'
+            run_dir = self._run_dir+'-'+str(iter+1)+'/'
         
         save_file = run_dir+self._input_tag +'-'+str(iter+1)+'.i'
         
@@ -121,6 +124,34 @@ class MooseHerd:
         self._runner.set_env_vars()
         print('Im running{}'.format(save_file))
         self._runner.run(save_file)
+
+
+    def read_results(self,reader,result_type):
+        """Read the results in all the files using a reader
+
+        Args:
+            reader (function): Function that says how to read the file
+
+            result_type (str): Extension of the result file, .csv or .e usually.
+
+        Returns:
+            data: List of dicts containing the data to pass to cost functions.
+        """
+        
+        restype = result_type.replace('.','')
+        # Get base file name
+        #filename = os.path.split(self.input_file)[-1].split('.')[0]
+        
+        data_list = []
+        # Iterate over folders to get results. if no results, throw error
+        for i in range(self._n_moose):
+            folderpath = self._run_dir+'-'+str(i+1)
+            result_path = folderpath + '/' + self._input_tag + '-' + str(i+1) + '_out.' + restype
+            data_list.append(reader(result_path))
+        
+        return data_list
+    
+
         
 
         

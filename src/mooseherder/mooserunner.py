@@ -10,6 +10,7 @@ Author: Lloyd Fletcher
 '''
 
 import os
+import subprocess
 
 class MooseRunner:
     def __init__(self,moose_dir,app_dir,app_name):
@@ -66,4 +67,5 @@ class MooseRunner:
                             ' --n-threads=' + str(self.n_threads) + ' -i ' \
                             + input_file
         
-        os.system(self.cmd_str)
+        #os.system(self.cmd_str)
+        subprocess.run(self.cmd_str,shell=True)
