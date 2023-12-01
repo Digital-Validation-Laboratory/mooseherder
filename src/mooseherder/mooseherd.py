@@ -47,6 +47,7 @@ class MooseHerd:
     def create_dirs(self,one_dir=True,sub_dir='moose-workdir'):
         self._one_dir = one_dir
         self._sub_dir = sub_dir
+        self._run_dir = self._input_dir + self._sub_dir
         if self._one_dir:
             if not(os.path.isdir(self._run_dir+'-1')):
                 os.mkdir(self._run_dir+'-1')  
@@ -73,7 +74,7 @@ class MooseHerd:
         
         if self._n_moose != n_moose:
             self._n_moose = n_moose
-            self.create_dirs(one_dir=self._one_dir)
+            self.create_dirs(one_dir=self._one_dir,sub_dir=self._sub_dir)
 
         self._runner.set_para_opts(tasks_per_moose,threads_per_moose)
 
@@ -96,7 +97,7 @@ class MooseHerd:
     def _run_sim(self,iter,run_vars):
         name = mp.current_process().name
         process_num = name.split('-',1)[1]
-        print(process_num)
+        #print(process_num)
             
         if self._one_dir:
             run_dir = self._run_dir+'-1/'
@@ -108,21 +109,23 @@ class MooseHerd:
         
         # Modify the file. Check if we're modifying the moose file or not. 
         if self._moose_mod:
+            print('*****Updating Moose Input*****')
             self._modifier.update_vars(run_vars)
             self._modifier.write_file(save_file)
         else:
+            print('*****Updating Mesh*****')
             mesh_file = run_dir+'/'+ os.path.split(self._modifier._input_file)[-1].split('.')[0] +'_{}.geo'.format(iter+1)
             self._modifier.update_vars(run_vars)
             self._modifier.write_file(mesh_file)
             RunGmsh(self._gmsh_path,mesh_file) # Generate the mesh
-            print(mesh_file)
+            #print(mesh_file)
             #copy in the moose file to run
             shutil.copyfile(self.input_file,save_file)
 
 
         # Run MOOSE input file
         self._runner.set_env_vars()
-        print('Im running{}'.format(save_file))
+        print('Running file: {}'.format(save_file))
         self._runner.run(save_file)
 
 
