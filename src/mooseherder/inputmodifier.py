@@ -113,6 +113,12 @@ class InputModifier:
         TODO
         '''
         return self._vars
+    
+    def get_var_keys(self):
+        """Return the keys of the variable dict
+        """
+
+        return list(self._vars.keys())
 
         
 
