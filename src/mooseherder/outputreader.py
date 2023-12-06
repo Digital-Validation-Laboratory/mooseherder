@@ -14,10 +14,15 @@ def output_csv_reader(filename):
     Args:   
         filename (str): Path to the file to be read.
     """
-    data = pd.read_csv(filename,
-                   delimiter=',',
-                   header= 0)
-    
-    return data.iloc[-1].to_dict()
+    try:
+        data = pd.read_csv(filename,
+                    delimiter=',',
+                    header= 0)
+
+        output = data.iloc[-1].to_dict()
+    except(FileNotFoundError):
+       print('Likely model did not run, setting data as none.')
+       output =None
+    return output
 
 #print(output_csv_reader(filename))
