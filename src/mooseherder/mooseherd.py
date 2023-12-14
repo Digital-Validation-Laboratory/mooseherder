@@ -129,7 +129,7 @@ class MooseHerd:
         self._runner.run(save_file)
 
 
-    def read_results(self,reader,result_type):
+    def read_results_old(self,reader,result_type):
         """Read the results in all the files using a reader
 
         Args:
@@ -154,7 +154,53 @@ class MooseHerd:
         
         return data_list
     
+    def read_results(self,reader,result_type,iter):
+        """Read the results in all the files using a reader
 
+        Args:
+            reader (function): Function that says how to read the file
+
+            result_type (str): Extension of the result file, .csv or .e usually.
+
+            i (int): file / folder number
+
+        Returns:
+            data: Dict containing the data to pass to cost functions.
+        """
+        
+        restype = result_type.replace('.','')      
+        # Iterate over folders to get results. if no results, throw error
+        folderpath = self._run_dir+'-'+str(iter+1)
+        result_path = folderpath + '/' + self._input_tag + '-' + str(iter+1) + '_out.' + restype
+        return reader(result_path)
+        
         
 
+    def read_results_para(self, reader):
+        """Read results in parallel. 
+
+        Args:
+            reader (_type_): _description_
+            result_type (_type_): _description_
+        """
         
+   
+        # Iterate over folders to get results. if no results, throw error
+        
+
+        with mp.Pool(self._n_moose) as pool:
+            start_time = time.perf_counter()
+
+            processes = []
+            for iter in range(self._n_moose):
+                folderpath = self._run_dir+'-'+str(iter+1)
+                result_path = folderpath + '/' + self._input_tag + '-' + str(iter+1) + '_out.' + reader._extension
+                print(result_path)
+                processes.append(pool.apply_async(reader.read, (result_path,))) # tuple is important, otherwise it unpacks strings for some reason
+
+            data_list=[pp.get() for pp in processes]
+            end_time = time.perf_counter()
+            run_time = end_time - start_time    
+            print(run_time)
+
+        return data_list
