@@ -84,9 +84,11 @@ class InputModifier:
 
 
     def write_file(self,wfile):
-        '''
-        TODO
-        '''
+        """Write the input file.
+
+        Args:
+            wfile (str): Path to where the file should be written.
+        """
         
         #Prep the values to write
         keys = list(self._vars.keys())

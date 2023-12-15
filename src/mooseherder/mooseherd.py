@@ -15,13 +15,24 @@ from mooseherder.mooserunner import MooseRunner
 from mtgo.gmshutils import RunGmsh
 
 class MooseHerd:
+    """Class to run MOOSE in parallel.
+    Manages folders, running and reading.
+    """
     def __init__(self,input_file,moose_dir,app_dir,app_name,input_modifier):
+        """Initialise class.
+
+        Args:
+            input_file (str): Path to the input file. Should be a MOOSE .i file.
+            moose_dir (str): Path to where MOOSE is installed on the system.
+            app_dir (str): Path to the specific MOOSE application installed, i.e. proteus
+            app_name (str): Name of the MOOSE application e.g. proteus-opt.
+            input_modifier (InputModifier): Instance of input modifier class.  
+        """
+        
         self._runner = MooseRunner(moose_dir,app_dir,app_name)
 
-        ## Want to be able to change what the modifier is and how it works. I.e. change mesh and run vs change moose input and run.
-        # if the former, need to also have a way to give it the MOOSE file as well as mesh file.
-        # But still need to give a moose file 
-        # Would now need moose file and modified file.
+        # Might want to change behaviour to allow herd to be initialised without deleting folders etc. Helpful for debugging.
+         
         self._modifier = input_modifier #InputModifier(input_file)
         self.input_file = input_file
         #Check if modifier class is working on the input file
@@ -45,6 +56,12 @@ class MooseHerd:
         self._sweep_vars = list()
 
     def create_dirs(self,one_dir=True,sub_dir='moose-workdir'):
+        """Create Directories to store the MOOSE instances.
+
+        Args:
+            one_dir (bool, optional): Is there only one folder?. Defaults to True.
+            sub_dir (str, optional): Name of the subdirectory. Defaults to 'moose-workdir'.
+        """
         self._one_dir = one_dir
         self._sub_dir = sub_dir
         self._run_dir = self._input_dir + self._sub_dir
@@ -57,6 +74,8 @@ class MooseHerd:
                     os.mkdir(self._run_dir+'-'+str(nn+1))
  
     def clear_dirs(self):
+        """Delete the existing directories and their contents.
+        """
         if os.path.isdir(self._input_dir):
             all_dirs = os.listdir(self._input_dir)
         else:
@@ -69,6 +88,13 @@ class MooseHerd:
                     shutil.rmtree(self._input_dir+dd)
 
     def para_opts(self,n_moose,tasks_per_moose=1, threads_per_moose=1):
+        """Set the parallelisation options. 
+
+        Args:
+            n_moose (_type_): _description_
+            tasks_per_moose (int, optional): _description_. Defaults to 1.
+            threads_per_moose (int, optional): _description_. Defaults to 1.
+        """
         if n_moose < 0:
             n_moose = 1
         
@@ -82,6 +108,11 @@ class MooseHerd:
         self._sweep_vars = in_vars
 
     def run_para(self,para_vars):
+        """Run MOOSE in parallel using multiprocessing async.
+
+        Args:
+            para_vars (list of dict): List of len(n_threads) containing the parameters to use for each process.
+        """
         with mp.Pool(self._n_moose) as pool:
             self._start_time = time.perf_counter()
 
@@ -95,6 +126,12 @@ class MooseHerd:
             self._run_time = self._end_time - self._start_time
 
     def _run_sim(self,iter,run_vars):
+        """Run a simulation. 
+
+        Args:
+            iter (int): Index of process number. 
+            run_vars (dict): Parameters to be passed to update the input.
+        """
         name = mp.current_process().name
         process_num = name.split('-',1)[1]
         #print(process_num)
@@ -127,61 +164,16 @@ class MooseHerd:
         self._runner.set_env_vars()
         print('Running file: {}'.format(save_file))
         self._runner.run(save_file)
-
-
-    def read_results_old(self,reader,result_type):
-        """Read the results in all the files using a reader
-
-        Args:
-            reader (function): Function that says how to read the file
-
-            result_type (str): Extension of the result file, .csv or .e usually.
-
-        Returns:
-            data: List of dicts containing the data to pass to cost functions.
-        """
-        
-        restype = result_type.replace('.','')
-        # Get base file name
-        #filename = os.path.split(self.input_file)[-1].split('.')[0]
-        
-        data_list = []
-        # Iterate over folders to get results. if no results, throw error
-        for i in range(self._n_moose):
-            folderpath = self._run_dir+'-'+str(i+1)
-            result_path = folderpath + '/' + self._input_tag + '-' + str(i+1) + '_out.' + restype
-            data_list.append(reader(result_path))
-        
-        return data_list
-    
-    def read_results(self,reader,result_type,iter):
-        """Read the results in all the files using a reader
-
-        Args:
-            reader (function): Function that says how to read the file
-
-            result_type (str): Extension of the result file, .csv or .e usually.
-
-            i (int): file / folder number
-
-        Returns:
-            data: Dict containing the data to pass to cost functions.
-        """
-        
-        restype = result_type.replace('.','')      
-        # Iterate over folders to get results. if no results, throw error
-        folderpath = self._run_dir+'-'+str(iter+1)
-        result_path = folderpath + '/' + self._input_tag + '-' + str(iter+1) + '_out.' + restype
-        return reader(result_path)
-        
-        
+          
 
     def read_results_para(self, reader):
         """Read results in parallel. 
 
         Args:
-            reader (_type_): _description_
-            result_type (_type_): _description_
+            reader (ReaderClass): Class for reading files, should have a read() method. Either csv or .e currently.
+        
+        Returns:
+            list: List of whatever reader reads.
         """
         
    
@@ -189,18 +181,15 @@ class MooseHerd:
         
 
         with mp.Pool(self._n_moose) as pool:
-            start_time = time.perf_counter()
-
             processes = []
             for iter in range(self._n_moose):
                 folderpath = self._run_dir+'-'+str(iter+1)
                 result_path = folderpath + '/' + self._input_tag + '-' + str(iter+1) + '_out.' + reader._extension
-                print(result_path)
                 processes.append(pool.apply_async(reader.read, (result_path,))) # tuple is important, otherwise it unpacks strings for some reason
 
+            # Occasionally seems to error, but not sure why. 
+            # Hangs, but can read files when run afterwards.
             data_list=[pp.get() for pp in processes]
-            end_time = time.perf_counter()
-            run_time = end_time - start_time    
-            print(run_time)
+
 
         return data_list

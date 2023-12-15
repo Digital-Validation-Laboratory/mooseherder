@@ -26,5 +26,6 @@ def output_csv_reader(filename):
     return output
 
 #print(output_csv_reader(filename))
+# Much of these moved over to MTGO package.
 
 
