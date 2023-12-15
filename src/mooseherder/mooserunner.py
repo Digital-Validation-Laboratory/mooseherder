@@ -10,6 +10,7 @@ Author: Lloyd Fletcher
 '''
 
 import os
+import subprocess
 
 class MooseRunner:
     def __init__(self,moose_dir,app_dir,app_name):
@@ -60,10 +61,12 @@ class MooseRunner:
             self.cmd_str = 'mpirun -np ' + str(self.n_tasks) + ' '\
                             + self.app_name \
                             + ' --n-threads=' + str(self.n_threads) + ' -i ' \
-                            + input_file
+                            + input_file + ' --redirect-stdout'
         else:
             self.cmd_str = self.app_name + \
                             ' --n-threads=' + str(self.n_threads) + ' -i ' \
-                            + input_file
+                            + input_file + ' --redirect-stdout'
         
-        os.system(self.cmd_str)
+        #os.system(self.cmd_str)
+        run_dir = os.path.split(input_file)[0]
+        subprocess.run(self.cmd_str,shell=True,cwd=run_dir)

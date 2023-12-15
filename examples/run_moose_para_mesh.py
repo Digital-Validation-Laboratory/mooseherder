@@ -12,25 +12,26 @@ if __name__ == '__main__':
     app_dir = '/home/rspencer/proteus'
     app_name = 'proteus-opt'
 
-    input_file = 'examples/model-mech-test.i'
+    input_file = 'examples/creep_mesh_test.i'
 
-    input_modifier = InputModifier(input_file,'#','')
+    geo_file = 'data/gmsh_script_3d.geo'
+    
+    input_modifier = InputModifier(geo_file,'//',';')
+    #input_modifier = InputModifier(input_file,'#','')
     # Start the herd and create working directories
     herd = MooseHerd(input_file,moose_dir,app_dir,app_name,input_modifier)
-    # Start the herd and create working directories
-    #herd = MooseHerd(input_file,moose_dir,app_dir,app_name)
     herd.clear_dirs()
     herd.create_dirs(one_dir=False)
 
-    # Create variables to sweep in a list of dictionaries
-    n_elem_y = [50,100]
-    e_mod = [1e9,2e9]
-    p_rat = [0.3,0.35]
+    # Create variables to sweep in a list of dictionaries for mesh.
+    p0 = [1E-3,2E-3]
+    p1 = [1.5E-3,2E-3]
+    p2 = [1E-3,3E-3]
     para_vars = list()
-    for nn in n_elem_y:
-        for ee in e_mod:
-            for pp in p_rat:
-                para_vars.append({'n_elem_y':nn,'e_modulus':ee,'p_ratio':pp})
+    for nn in p0:
+        for ee in p1:
+            for pp in p2:
+                para_vars.append({'p0':nn,'p1':ee,'p2':pp})
 
 
     # Set the parallelisation options

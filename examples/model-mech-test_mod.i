@@ -1,7 +1,6 @@
 #_* Variables
-# n_elem_x = 100
-n_elem_y = 100 # Trying to break the code
-e_modulus = 1e9
+n_elem_y = 100.0
+e_modulus = 1000000000.0
 p_ratio = 0.3
 #**
 
