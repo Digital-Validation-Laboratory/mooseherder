@@ -10,7 +10,7 @@ import os, shutil
 import multiprocessing as mp
 import time
 from mooseherder.mooserunner import MooseRunner
-from mtgo.gmshutils import RunGmsh
+from mooseherder.gmshutils import RunGmsh
 
 class MooseHerd:
     """Class to run MOOSE in parallel.
