@@ -9,8 +9,6 @@ Author: Lloyd Fletcher, Rory Spencer
 import os, shutil
 import multiprocessing as mp
 import time
-from mooseherder.inputmodifier import InputModifier
-from mooseherder.outputreader import output_csv_reader
 from mooseherder.mooserunner import MooseRunner
 from mtgo.gmshutils import RunGmsh
 
