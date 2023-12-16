@@ -1,6 +1,6 @@
 '''
 ==============================================================================
-EXAMPLE 1: MODIFY INPUT SCRIPTS 
+EXAMPLE 1: MODIFY INPUT SCRIPTS, MOOSE AND GMSH 
 
 Author: Lloyd Fletcher
 ==============================================================================
@@ -56,3 +56,5 @@ print(gmsh_save)
 print()
 
 print('EXAMPLES COMPLETE')
+print('------------------------------------------')
+print()

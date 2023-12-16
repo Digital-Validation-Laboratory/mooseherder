@@ -1,7 +1,7 @@
 """
 ==============================================================================
-RUN MOOSE FROM PYTHON 
-Use the os module and terminal commands to run gmsh and MOOSE from python
+EXAMPLE 2a: Run MOOSE using python once
+Use the os module and terminal commands to run MOOSE from python
 
 Author: Lloyd Fletcher
 ==============================================================================
