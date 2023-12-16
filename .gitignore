@@ -3,6 +3,7 @@
 examples/moose-workdir-*
 examples/*.csv
 proteus-opt
+*.processor.*
 
 # Byte-compiled / optimized / DLL files
 __pycache__/

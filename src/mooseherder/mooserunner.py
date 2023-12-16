@@ -57,6 +57,9 @@ class MooseRunner:
         self.set_tasks(n_tasks)
 
     def run(self,input_file):
+        if not(os.path.isfile(input_file)):
+            raise FileNotFoundError("Input file does not exist.")
+
         if self.n_tasks > 1:
             self.cmd_str = 'mpirun -np ' + str(self.n_tasks) + ' '\
                             + self.app_name \
@@ -67,6 +70,17 @@ class MooseRunner:
                             ' --n-threads=' + str(self.n_threads) + ' -i ' \
                             + input_file + ' --redirect-stdout'
         
-        #os.system(self.cmd_str)
+
         run_dir = os.path.split(input_file)[0]
-        subprocess.run(self.cmd_str,shell=True,cwd=run_dir)
+
+        print()
+        print("Input:")
+        print(input_file)
+        print("Run dir:")
+        print(run_dir)
+        print("Cmd str:")
+        print(self.cmd_str)
+        print()
+
+        #subprocess.run(self.cmd_str,shell=True,cwd=run_dir)
+        subprocess.run(self.cmd_str,shell=True,cwd=os.getcwd())

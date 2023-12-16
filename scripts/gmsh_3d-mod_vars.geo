@@ -10,12 +10,12 @@ gaugeThickness = 1E-3;
 
 // Parameterisation
 //_*
-p0 = 1.5E-3;
-p1 = 1E-3;
-p2 = 1.2E-3;
+p0 = 0.0018;
+p1 = 0.0012;
+p2 = 0.001;
 //**
 lc = 1E-4;
-filename = "test_mesh.msh";
+filename = "gmsh_test_mesh.msh";
 
 
 // Create some points defining the boundary

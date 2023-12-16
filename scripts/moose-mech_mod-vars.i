@@ -1,7 +1,7 @@
 #_* Variables
-n_elem_y = 100.0
-e_modulus = 1000000000.0
-p_ratio = 0.3
+n_elem_y = 120
+e_modulus = 3300000000.0
+p_ratio = 0.33
 #**
 
 [GlobalParams]

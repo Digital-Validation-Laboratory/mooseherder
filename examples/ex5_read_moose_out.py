@@ -45,9 +45,6 @@ vals_nod_var2
 'vals_elem_var2eb1'
 'vals_elem_var3eb1'
 'vals_elem_var4eb1'
-
-
-
 '''
 
 print()

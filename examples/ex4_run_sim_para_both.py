@@ -1,8 +1,10 @@
-#==============================================================================
-# RUN PARALLEL MOOSE FROM PYTHON 
-#
-# Author: Lloyd Fletcher, Rory Spencer
-#==============================================================================
+'''
+==============================================================================
+EXAMPLE: RUN PARALLEL MOOSE FROM PYTHON WITH GMSH 
+
+Author: Lloyd Fletcher, Rory Spencer
+==============================================================================
+'''
 
 from mooseherder import MooseHerd
 from mooseherder.inputmodifier import InputModifier

@@ -10,7 +10,7 @@ import os, shutil
 import multiprocessing as mp
 import time
 from mooseherder.mooserunner import MooseRunner
-from mtgo.gmshutils import RunGmsh
+from mooseherder.gmshrunner import GmshRunner
 
 class MooseHerd:
     """Class to run MOOSE in parallel.
@@ -35,6 +35,7 @@ class MooseHerd:
         self.input_file = input_file
         #Check if modifier class is working on the input file
         self._gmsh_path = '/home/rspencer/src/gmsh/bin/gmsh'
+        self._gmsh_runner = GmshRunner()
         
         self._moose_mod = True # Is the moose file the one that's being modified?
         if self._modifier._input_file != input_file:
@@ -152,7 +153,8 @@ class MooseHerd:
             mesh_file = run_dir+'/'+ os.path.split(self._modifier._input_file)[-1].split('.')[0] +'_{}.geo'.format(iter+1)
             self._modifier.update_vars(run_vars)
             self._modifier.write_file(mesh_file)
-            RunGmsh(self._gmsh_path,mesh_file) # Generate the mesh
+            self._gmsh_runner(self._gmsh_path,mesh_file)
+            #RunGmsh(self._gmsh_path,mesh_file) # Generate the mesh
             #print(mesh_file)
             #copy in the moose file to run
             shutil.copyfile(self.input_file,save_file)
@@ -176,8 +178,6 @@ class MooseHerd:
         
    
         # Iterate over folders to get results. if no results, throw error
-        
-
         with mp.Pool(self._n_moose) as pool:
             processes = []
             for iter in range(self._n_moose):

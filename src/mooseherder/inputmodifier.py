@@ -20,7 +20,7 @@ class InputModifier:
     """
     Class to store all information related to an input file.
     """
-    def __init__(self,input_file,comment_char,end_char):
+    def __init__(self,input_file,comment_char='#',end_char=''):
         """ Initialise the class reading in the input file.
 
         Args:
@@ -100,11 +100,11 @@ class InputModifier:
                 #If it's in the variables block, overwrite
                 if index > self.var_start and index < self.var_end:
                     current_var = index-self.var_start-1
-                    #print(current_var)
                     try:
                         write_string = '{} = {}{}\n'.format(keys[current_var],values[current_var],self.end_char)
                         out_file.write(write_string)
                     except(IndexError):
+                        # TODO: Probably should avoid printing to console inside a class
                         print('All available parameters written. Check for commented out parameters in the input.')
                     continue
                 else:
