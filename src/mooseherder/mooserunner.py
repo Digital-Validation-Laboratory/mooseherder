@@ -14,73 +14,146 @@ import subprocess
 
 class MooseRunner:
     def __init__(self,moose_dir,app_dir,app_name):
-        self.n_threads = 1
-        self.n_tasks = 1
-        self.moose_dir = moose_dir
-        self.app_dir = app_dir
-        self.app_name = app_name
+        """Constructor for MOOSE runner. 
+
+        Args:
+            moose_dir (str): Full path to main moose directory e.g. '/home/USER/moose'
+            app_dir (str): Full path to moose app e.g. '/home/USER/moose-workdir/proteus'
+            app_name (tsr): Name of the moose app to be used in the command line string e.g. 'proteus-opt'
+        """        
+        self._n_threads = 1
+        self._n_tasks = 1
+        self._redirect_stdout = False; 
+        self._moose_dir = moose_dir
+        self._app_dir = app_dir
+        self._app_name = app_name
+        self._run_str = ''
+        self._input_file = ''
 
         # Find moose and set environment vars
+        
         self.set_env_vars()
 
     def set_env_vars(self):
-         # Find moose and set environment vars
+        """Sets environment variables for calling MOOSE with mpi.
+        """         
+        # Find moose and set environment vars
         os.environ['CC'] = 'mpicc'
         os.environ['CXX'] = 'mpicxx'
         os.environ['F90'] = 'mpif90'
         os.environ['F77'] = 'mpif77'
         os.environ['FC'] = 'mpif90'
-        os.environ['MOOSE_DIR'] = self.moose_dir
-        os.environ["PATH"] = os.environ["PATH"] + ':' + self.app_dir
+        os.environ['MOOSE_DIR'] = self._moose_dir
+        os.environ["PATH"] = os.environ["PATH"] + ':' + self._app_dir
 
+    def set_threads(self,n_threads=1):
+        """Sets the number of threads asked of MOOSE on the command line.
 
-    def set_threads(self,n_threads):
+        Args:
+            n_threads (int, optional): Number of threads. Defaults to 1.
+        """        
         # Need to make sure number of threads is sensible basedon cpu
         if n_threads <= 0:
             n_threads = 1
         if n_threads > os.cpu_count():
             n_threads = os.cpu_count()
         
-        self.n_threads = n_threads
+        self._n_threads = n_threads
 
-    def set_tasks(self,n_tasks):
+    def set_tasks(self,n_tasks=1):
+        """Sets the number of mpi tasks asked of MOOSE on the command line.
+
+        Args:
+            n_tasks (int, optional): Number of mpi tasks. Defaults to 1.
+        """        
         # Need to make sure number of threads is sensible basedon cpu
         if n_tasks <= 0:
             n_tasks = 1
         if n_tasks> os.cpu_count():
             n_tasks = os.cpu_count()
         
-        self.n_tasks = n_tasks
+        self._n_tasks = n_tasks
 
-    def set_para_opts(self,n_tasks,n_threads):
+    def set_stdout(self,redirect_flag=True):
+        """Sets MOOSE to redirect output (True) to file instead of console (False).
+
+        Args:
+            redirect_flag (bool, optional): True = output to stdout file, False = output to console. Defaults to True.
+        """        
+        self._redirect_stdout = redirect_flag
+
+    def set_opts(self,n_tasks=1,n_threads=1,redirect=False):
+        """Sets all options for MOOSE run parallelisation and output.
+
+        Args:
+            n_tasks (int, optional): Number of mpi tasks for MOOSE run. Defaults to 1.
+            n_threads (int, optional): Number of threads for MOOSe run. Defaults to 1.
+            redirect (bool, optional): Redirect MOOSE output from console to file (True). Defaults to False.
+        """        
         self.set_threads(n_threads)
         self.set_tasks(n_tasks)
+        self.set_stdout(redirect)
 
-    def run(self,input_file):
+    def set_input_file(self,input_file):
+        """Sets the path to the MOOSE input file and checks it exists to avoid cryptic errors. 
+
+        Args:
+            input_file (str): Full path and name of *.i MOOSE input script.
+
+        Raises:
+            FileNotFoundError: the MOOSE input script doesn't exist
+        """        
         if not(os.path.isfile(input_file)):
             raise FileNotFoundError("Input file does not exist.")
-
-        if self.n_tasks > 1:
-            self.cmd_str = 'mpirun -np ' + str(self.n_tasks) + ' '\
-                            + self.app_name \
-                            + ' --n-threads=' + str(self.n_threads) + ' -i ' \
-                            + input_file + ' --redirect-stdout'
         else:
-            self.cmd_str = self.app_name + \
-                            ' --n-threads=' + str(self.n_threads) + ' -i ' \
-                            + input_file + ' --redirect-stdout'
+            self._input_file = input_file
+            self.assemble_run_str()
+
+    def get_run_str(self):
+        """Run string getter.
+
+        Returns:
+            str: command line string to run MOOSE.
+        """        
+        return self._run_str
+
+    def assemble_run_str(self,input_file=""):
+        """Assmebles the command line string to run MOOSE based on current options.
+
+        Args:
+            input_file (str, optional): Full path to MOOSE input file, if not empty updates the input file. Defaults to "".
+        """        
+        if input_file != "":
+            self.set_input_file(input_file)
+
+        if self._redirect_stdout:
+            redirect_str = ' --redirect-stdout'
+        else:
+            redirect_str = ''
+
+        if self._n_tasks > 1:
+            run_str = 'mpirun -np ' + str(self._n_tasks) + ' '\
+                            + self._app_name \
+                            + ' --n-threads=' + str(self._n_threads) + ' -i ' \
+                            + self._input_file + redirect_str 
+        else:
+            run_str = self._app_name + \
+                            ' --n-threads=' + str(self._n_threads) + ' -i ' \
+                            + self._input_file + redirect_str 
         
+        self._run_str = run_str
 
-        run_dir = os.path.split(input_file)[0]
 
-        print()
-        print("Input:")
-        print(input_file)
-        print("Run dir:")
-        print(run_dir)
-        print("Cmd str:")
-        print(self.cmd_str)
-        print()
+    def run(self,input_file=""):
+        """Runs MOOSE based on current options by passing run string to subprocess shell.
 
-        #subprocess.run(self.cmd_str,shell=True,cwd=run_dir)
-        subprocess.run(self.cmd_str,shell=True,cwd=os.getcwd())
+        Args:
+            input_file (str, optional): Full path to MOOSE input file, if not empty updates the input file. Defaults to "".
+        """        
+        if input_file != "":
+            self.set_input_file(input_file)
+
+        self.assemble_run_str()
+
+        #run_dir = os.path.split(input_file)[0]
+        subprocess.run(self._run_str,shell=True,cwd=os.getcwd())
