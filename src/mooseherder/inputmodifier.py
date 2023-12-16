@@ -111,16 +111,28 @@ class InputModifier:
                     out_file.write(line)
 
     def get_vars(self):
-        '''
-        TODO
-        '''
+        """_summary_
+
+        Returns:
+            _type_: _description_
+        """        
         return self._vars
     
     def get_var_keys(self):
-        """Return the keys of the variable dict
-        """
+        """_summary_
 
+        Returns:
+            _type_: _description_
+        """        
         return list(self._vars.keys())
+    
+    def get_input_file(self):
+        """_summary_
+
+        Returns:
+            _type_: _description_
+        """        
+        return self._input_file
 
         
 

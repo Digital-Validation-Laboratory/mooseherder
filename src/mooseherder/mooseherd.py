@@ -5,10 +5,9 @@ MOOSE Herd Class
 Author: Lloyd Fletcher, Rory Spencer
 ===============================================================================
 '''
-
 import os, shutil
-import multiprocessing as mp
 import time
+import multiprocessing as mp
 from mooseherder.mooserunner import MooseRunner
 from mooseherder.gmshrunner import GmshRunner
 
@@ -16,38 +15,26 @@ class MooseHerd:
     """Class to run MOOSE in parallel.
     Manages folders, running and reading.
     """
-    def __init__(self,input_file,moose_dir,app_dir,app_name,input_modifier):
-        """Initialise class.
+    def __init__(self,moose_runner,moose_mod,gmsh_runner=None,gmsh_mod=None):
+        """_summary_
 
         Args:
-            input_file (str): Path to the input file. Should be a MOOSE .i file.
-            moose_dir (str): Path to where MOOSE is installed on the system.
-            app_dir (str): Path to the specific MOOSE application installed, i.e. proteus
-            app_name (str): Name of the MOOSE application e.g. proteus-opt.
-            input_modifier (InputModifier): Instance of input modifier class.  
-        """
+            moose_runner (_type_): _description_
+            moose_mod (_type_): _description_
+            gmsh_runner (_type_, optional): _description_. Defaults to None.
+            gmsh_mod (_type_, optional): _description_. Defaults to None.
+        """        
+        self._moose_runner = moose_runner
+        self._moose_modifier = moose_mod
+        self._gmsh_runner = gmsh_runner
+        self._gmsh_modifier = gmsh_mod
         
-        self._runner = MooseRunner(moose_dir,app_dir,app_name)
-
-        # Might want to change behaviour to allow herd to be initialised without deleting folders etc. Helpful for debugging.
-         
-        self._modifier = input_modifier #InputModifier(input_file)
-        self.input_file = input_file
-        #Check if modifier class is working on the input file
-        self._gmsh_path = '/home/rspencer/src/gmsh/bin/gmsh'
-        self._gmsh_runner = GmshRunner()
-        
-        self._moose_mod = True # Is the moose file the one that's being modified?
-        if self._modifier._input_file != input_file:
-            self._moose_mod = False
-
-
-        # Options for high throughput parallelisation
         self._n_moose = 2
         self._one_dir = True
         self._sub_dir = 'moose-workdir'
-        self._input_tag = 'moose-sim'
-        self._input_dir = os.path.split(input_file)[0]+'/'
+        self._moose_input_tag = 'moose-sim'
+        self._gmsh_input_tag = 'gmsh-mesh'
+        self._input_dir = os.path.split(self._moose_modifier.get_input_file())[0]+'/'
         self._run_dir = self._input_dir + self._sub_dir
 
         self._keep_input = True
@@ -86,7 +73,7 @@ class MooseHerd:
                 if dd[0:dd.rfind('-')] == self._sub_dir:
                     shutil.rmtree(self._input_dir+dd)
 
-    def para_opts(self,n_moose,tasks_per_moose=1, threads_per_moose=1):
+    def para_opts(self,n_moose,tasks_per_moose=1, threads_per_moose=1, redirect_out=False):
         """Set the parallelisation options. 
 
         Args:
@@ -101,7 +88,7 @@ class MooseHerd:
             self._n_moose = n_moose
             self.create_dirs(one_dir=self._one_dir,sub_dir=self._sub_dir)
 
-        self._runner.set_para_opts(tasks_per_moose,threads_per_moose)
+        self._moose_runner.set_opts(tasks_per_moose,threads_per_moose,redirect_out)
 
     def set_sweep_vars(self,in_vars):
         self._sweep_vars = in_vars
@@ -138,10 +125,27 @@ class MooseHerd:
         if self._one_dir:
             run_dir = self._run_dir+'-1/'
         else:
-            #run_dir = self._run_dir+'-'+process_num+'/'
-            run_dir = self._run_dir+'-'+str(iter+1)+'/'
+            # Each moose has it's own directory but multiple files can be save in this directory
+            run_dir = self._run_dir+'-'+process_num+'/'
         
-        save_file = run_dir+self._input_tag +'-'+str(iter+1)+'.i'
+        #------------------------------------------------------------------
+        # LF
+            
+        # Need to create the mesh first, if required
+        if self._gmsh_modifier != None:
+            gmsh_save = run_dir+self._gmsh_input_tag +'-'+str(iter+1)+'.i'
+            self._gmsh_modifier.update_vars(TODO)
+            self._gmsh_modifier.write_file(gmsh_save)
+            self._gmsh_runner.run()
+
+        # Need to save the moose file with the current iteration to not overwrite
+        moose_save = run_dir+self._moose_input_tag_input_tag +'-'+str(iter+1)+'.i'
+        self._moose_modifier.update_vars(run_vars)
+        self._moose_modifier.write_file(moose_save)
+
+
+        #------------------------------------------------------------------
+        # RS
         
         # Modify the file. Check if we're modifying the moose file or not. 
         if self._moose_mod:
@@ -158,7 +162,7 @@ class MooseHerd:
             #print(mesh_file)
             #copy in the moose file to run
             shutil.copyfile(self.input_file,save_file)
-
+        #------------------------------------------------------------------
 
         # Run MOOSE input file
         self._runner.set_env_vars()

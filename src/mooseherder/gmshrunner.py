@@ -10,7 +10,9 @@ Author: Rory Spencer, Lloyd Fletcher
 import os
 
 class GmshRunner:
-    def __init__(self,gmsh_path):
+    """_summary_
+    """    
+    def __init__(self,gmsh_path=""):
         """Constructor for gmsh runner.
 
         Args:

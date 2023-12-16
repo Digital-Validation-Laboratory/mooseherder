@@ -15,7 +15,7 @@ path_parts = Path(os.getcwd()).parts
 user_dir = os.path.join(path_parts[0],path_parts[1],path_parts[2])
 
 print('------------------------------------------')
-print('EXAMPLE 2a: Run MOOSE')
+print('EXAMPLE 2a: Run MOOSE once')
 print('------------------------------------------')
 # Create the moose runner with correct paths to moose and apps
 moose_dir = os.path.join(user_dir,'moose')
