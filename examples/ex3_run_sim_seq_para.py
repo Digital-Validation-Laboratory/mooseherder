@@ -55,7 +55,7 @@ if __name__ == '__main__':
     
     herd.run_once(0,moose_vars[0])
 
-    print('Run time (once) = '+str(herd.get_iter_time())+' seconds')
+    print('Run time (once) = '+'{:.3f}'.format(herd.get_iter_time())+' seconds')
     print('------------------------------------------')
     print()
     print('------------------------------------------')
@@ -64,16 +64,16 @@ if __name__ == '__main__':
 
     herd.run_sequential(moose_vars)
 
-    print('Run time (sequential) = '+str(herd.get_sweep_time())+' seconds')
+    print('Run time (sequential) = '+'{:.3f}'.format(herd.get_sweep_time())+' seconds')
     print('------------------------------------------')
     print()
     print('------------------------------------------')
-    print('EXAMPLE 3c: Run MOOSE sequentially')
+    print('EXAMPLE 3c: Run MOOSE in parallel')
     print('------------------------------------------')
 
     herd.run_para(moose_vars)
 
-    print('Run time (parallel) = '+str(herd.get_sweep_time())+' seconds')
+    print('Run time (parallel) = '+'{:.3f}'.format(herd.get_sweep_time())+' seconds')
     print('------------------------------------------')
     print()
 

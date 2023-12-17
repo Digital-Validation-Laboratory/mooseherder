@@ -30,15 +30,15 @@ class MooseHerd:
         self._gmsh_modifier = gmsh_mod
         
         self._n_moose = 2
-        self._one_dir = True
         self._sub_dir = 'moose-workdir'
         self._moose_input_tag = 'moose-sim'
         self._gmsh_input_tag = 'gmsh-mesh'
         self._input_dir = os.path.split(self._moose_modifier.get_input_file())[0]+'/'
         self._run_dir = self._input_dir + self._sub_dir
 
-        self._keep_input = True
-        self._keep_output = True
+        self._one_dir = True
+        self._keep_all = True
+
         self._moose_vars = list()
         self._gmsh_vars = list()
 
@@ -47,9 +47,18 @@ class MooseHerd:
         self._iter_start_time = -1.0
         self._iter_run_time = -1.0
 
+    def set_flags(self,one_dir,keep_all):
+        """_summary_
+
+        Args:
+            one_dir (_type_): _description_
+            keep_all (_type_): _description_
+        """        
+        self._one_dir = one_dir
+        self._keep_all = keep_all
 
     def create_dirs(self,one_dir=True,sub_dir='moose-workdir'):
-        """Create Directories to store the MOOSE instances.
+        """Create Directories to store the MOOSE instance outputs.
 
         Args:
             one_dir (bool, optional): Is there only one folder?. Defaults to True.
@@ -72,9 +81,9 @@ class MooseHerd:
         if os.path.isdir(self._input_dir):
             all_dirs = os.listdir(self._input_dir)
         else:
-            print('Input file and directory do not exist.')
             all_dirs = list()
-
+            raise FileNotFoundError('Input file and directory do not exist.')
+            
         for dd in all_dirs:
             if os.path.isdir(self._input_dir+dd):
                 if dd[0:dd.rfind('-')] == self._sub_dir:
@@ -123,28 +132,32 @@ class MooseHerd:
         self._iter_start_time = time.perf_counter()
 
         name = mp.current_process().name
-        # If we are calling this from main we 
+        # If we are calling this from main we need to set the process number
         if name == 'MainProcess':
             process_num = '1'
         else:
             process_num = name.split('-',1)[1]
-            
+
         if self._one_dir:
             run_dir = self._run_dir+'-1/'
         else:
             # Each moose has it's own directory but multiple files can be save in this directory
             run_dir = self._run_dir+'-'+process_num+'/'
         
-            
+        if self._keep_all:
+            run_num = str(iter+1)
+        else: # Set to overwrite based on working directory
+            run_num = process_num
+
         # Need to create the mesh first, if required
         if (self._gmsh_modifier != None) or (gmsh_vars != None):
-            gmsh_save = run_dir+self._gmsh_input_tag +'-'+str(iter+1)+'.i'
+            gmsh_save = run_dir+self._gmsh_input_tag +'-'+run_num+'.geo'
             self._gmsh_modifier.update_vars(gmsh_vars)
             self._gmsh_modifier.write_file(gmsh_save)
             self._gmsh_runner.run(gmsh_save)
 
         # Save the moose file with the current iteration to not overwrite
-        moose_save = run_dir+self._moose_input_tag +'-'+str(iter+1)+'.i'
+        moose_save = run_dir+self._moose_input_tag +'-'+run_num+'.i'
         self._moose_modifier.update_vars(moose_vars)
         self._moose_modifier.write_file(moose_save)
 
