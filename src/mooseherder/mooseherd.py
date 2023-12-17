@@ -39,7 +39,14 @@ class MooseHerd:
 
         self._keep_input = True
         self._keep_output = True
-        self._sweep_vars = list()
+        self._moose_vars = list()
+        self._gmsh_vars = list()
+
+        self._sweep_start_time = -1.0
+        self._sweep_run_time = -1.0
+        self._iter_start_time = -1.0
+        self._iter_run_time = -1.0
+
 
     def create_dirs(self,one_dir=True,sub_dir='moose-workdir'):
         """Create Directories to store the MOOSE instances.
@@ -90,37 +97,37 @@ class MooseHerd:
 
         self._moose_runner.set_opts(tasks_per_moose,threads_per_moose,redirect_out)
 
-    def set_sweep_vars(self,in_vars):
-        self._sweep_vars = in_vars
-
-    def run_para(self,para_vars):
-        """Run MOOSE in parallel using multiprocessing async.
+    def set_sweep_vars(self,moose_vars,gmsh_vars=None):
+        """_summary_
 
         Args:
-            para_vars (list of dict): List of len(n_threads) containing the parameters to use for each process.
-        """
-        with mp.Pool(self._n_moose) as pool:
-            self._start_time = time.perf_counter()
+            moose_vars (_type_): _description_
+            gmsh_vars (_type_, optional): _description_. Defaults to None.
+        """        
+        self._moose_vars = moose_vars
+        self._gmsh_vars = gmsh_vars
 
-            processes = []
-            for ii,vv in enumerate(para_vars):
-                processes.append(pool.apply_async(self._run_sim, args=(ii,vv)))
+    def get_sweep_time(self):
+        return self._sweep_run_time
+    
+    def get_iter_time(self):
+        return self._iter_run_time
 
-            self._para_res = [pp.get() for pp in processes]
-
-            self._end_time = time.perf_counter()
-            self._run_time = self._end_time - self._start_time
-
-    def _run_sim(self,iter,run_vars):
-        """Run a simulation. 
+    def run_once(self,iter,moose_vars,gmsh_vars=None):
+        """Run a single simulation. Writes relevant moose and gmsh input decks to process working directory.
 
         Args:
             iter (int): Index of process number. 
             run_vars (dict): Parameters to be passed to update the input.
         """
+        self._iter_start_time = time.perf_counter()
+
         name = mp.current_process().name
-        process_num = name.split('-',1)[1]
-        #print(process_num)
+        # If we are calling this from main we 
+        if name == 'MainProcess':
+            process_num = '1'
+        else:
+            process_num = name.split('-',1)[1]
             
         if self._one_dir:
             run_dir = self._run_dir+'-1/'
@@ -128,25 +135,26 @@ class MooseHerd:
             # Each moose has it's own directory but multiple files can be save in this directory
             run_dir = self._run_dir+'-'+process_num+'/'
         
-        #------------------------------------------------------------------
-        # LF
             
         # Need to create the mesh first, if required
-        if self._gmsh_modifier != None:
+        if (self._gmsh_modifier != None) or (gmsh_vars != None):
             gmsh_save = run_dir+self._gmsh_input_tag +'-'+str(iter+1)+'.i'
-            self._gmsh_modifier.update_vars(TODO)
+            self._gmsh_modifier.update_vars(gmsh_vars)
             self._gmsh_modifier.write_file(gmsh_save)
-            self._gmsh_runner.run()
+            self._gmsh_runner.run(gmsh_save)
 
-        # Need to save the moose file with the current iteration to not overwrite
-        moose_save = run_dir+self._moose_input_tag_input_tag +'-'+str(iter+1)+'.i'
-        self._moose_modifier.update_vars(run_vars)
+        # Save the moose file with the current iteration to not overwrite
+        moose_save = run_dir+self._moose_input_tag +'-'+str(iter+1)+'.i'
+        self._moose_modifier.update_vars(moose_vars)
         self._moose_modifier.write_file(moose_save)
 
+        self._moose_runner.set_env_vars()
+        self._moose_runner.run(moose_save)
 
-        #------------------------------------------------------------------
+        self._iter_run_time = time.perf_counter() - self._iter_start_time
+
         # RS
-        
+        '''
         # Modify the file. Check if we're modifying the moose file or not. 
         if self._moose_mod:
             print('*****Updating Moose Input*****')
@@ -162,13 +170,57 @@ class MooseHerd:
             #print(mesh_file)
             #copy in the moose file to run
             shutil.copyfile(self.input_file,save_file)
-        #------------------------------------------------------------------
 
         # Run MOOSE input file
         self._runner.set_env_vars()
         print('Running file: {}'.format(save_file))
         self._runner.run(save_file)
-          
+        '''
+
+    def run_para(self,moose_vars,gmsh_vars=None):
+        """Run MOOSE in parallel using multiprocessing async.
+
+        Args:
+            para_vars (list of dict): List containing the parameters to use for each process.
+        """
+        with mp.Pool(self._n_moose) as pool:
+            self._sweep_start_time = time.perf_counter()
+
+            processes = []
+            if gmsh_vars == None:
+                for ii,vv in enumerate(moose_vars):
+                        processes.append(pool.apply_async(self.run_once, args=(ii,vv)))
+            else:
+                ii = 0
+                for vv in moose_vars:
+                    for ww in gmsh_vars:
+                        processes.append(pool.apply_async(self.run_once, args=(ii,vv,ww)))
+                        ii += 1
+                
+            self._para_res = [pp.get() for pp in processes]
+ 
+            self._sweep_run_time = time.perf_counter() - self._sweep_start_time
+
+    def run_sequential(self,moose_vars,gmsh_vars=None):
+        """_summary_
+
+        Args:
+            moose_vars (_type_): _description_
+            gmsh_vars (_type_, optional): _description_. Defaults to None.
+        """        
+        self._sweep_start_time = time.perf_counter()
+
+        if gmsh_vars == None:
+            for ii,vv in enumerate(moose_vars):
+                self.run_once(ii,vv)
+        else:
+            ii = 0
+            for vv in moose_vars:
+                for ww in gmsh_vars:
+                    self.run_once(ii,vv,ww)
+                    ii += 1
+
+        self._sweep_run_time = time.perf_counter() - self._sweep_start_time
 
     def read_results_para(self, reader):
         """Read results in parallel. 

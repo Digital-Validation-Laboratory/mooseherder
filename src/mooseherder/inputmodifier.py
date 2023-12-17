@@ -105,7 +105,8 @@ class InputModifier:
                         out_file.write(write_string)
                     except(IndexError):
                         # TODO: Probably should avoid printing to console inside a class
-                        print('All available parameters written. Check for commented out parameters in the input.')
+                        #print('All available parameters written. Check for commented out parameters in the input.')
+                        pass
                     continue
                 else:
                     out_file.write(line)

@@ -2,7 +2,8 @@
 *.e
 examples/moose-workdir-*
 examples/*.csv
-proteus-opt
+scripts/moose-workdir-*
+scripts/*.csv
 *.processor.*
 
 # Byte-compiled / optimized / DLL files
