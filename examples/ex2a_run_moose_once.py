@@ -42,7 +42,7 @@ moose_runner.run()
 end_time = time.perf_counter()
 
 print()
-print('MOOSE run time = '+str(end_time-start_time)+' seconds')
+print('MOOSE run time = '+'{:.3f}'.format(end_time-start_time)+' seconds')
 print('------------------------------------------')
 print()
 
