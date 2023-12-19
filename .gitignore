@@ -1,10 +1,13 @@
-# MOOSE files
+# MOOSE output files
 *.e
 examples/moose-workdir-*
 examples/*.csv
 scripts/moose-workdir-*
 scripts/*.csv
 *.processor.*
+
+# Gmsh output files
+*.msh
 
 # Byte-compiled / optimized / DLL files
 __pycache__/
