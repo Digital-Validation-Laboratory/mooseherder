@@ -15,7 +15,7 @@ p1 = 1E-3;
 p2 = 1.2E-3;
 //**
 lc = 1E-4;
-filename = "tens_spline_2d.msh";
+filename = "mesh_tens_spline_2d.msh";
 
 
 // Create some points defining the boundary

@@ -10,7 +10,7 @@ from mooseherder import InputModifier
 print('------------------------------------------')
 print('EXAMPLE 1a: Modify MOOSE input script')
 print('------------------------------------------')
-moose_input = 'scripts/moose-mech.i'
+moose_input = 'scripts/moose-mech-simple.i'
 moose_mod = InputModifier(moose_input,comment_char='#',end_char='')
 
 print('Variables found the top of the MOOSE input file:')
@@ -24,7 +24,7 @@ print('New variables inserted:')
 print(moose_mod.get_vars())
 print()
 
-moose_save = 'scripts/moose-mech_mod-vars.i'
+moose_save = 'scripts/moose-mech-simple_mod-vars.i'
 moose_mod.write_file(moose_save)
 
 print('Modified input script written to:')
@@ -34,7 +34,7 @@ print()
 print('------------------------------------------')
 print('EXAMPLE 1b: Modify gmsh input script')
 print('------------------------------------------')
-gmsh_input = 'scripts/gmsh_3d.geo'
+gmsh_input = 'scripts/gmsh_tens_spline_2d.geo'
 gmsh_mod = InputModifier(gmsh_input,'//',';')
 
 print('Variables found the top of the gmsh input file:')
@@ -48,7 +48,7 @@ print('New variables inserted:')
 print(gmsh_mod.get_vars())
 print()
 
-gmsh_save = 'scripts/gmsh_3d-mod_vars.geo'
+gmsh_save = 'scripts/gmsh_tens_spline_2d-mod_vars.geo'
 gmsh_mod.write_file(gmsh_save)
 
 print('Modified input script written to:')

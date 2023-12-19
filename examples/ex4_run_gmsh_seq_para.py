@@ -32,7 +32,7 @@ if __name__ == '__main__':
 
     # Setup Gmsh
     gmsh_path = os.path.join(user_dir,'moose-workdir/gmsh/bin/gmsh')
-    gmsh_input = 'scripts/gmsh_3d.geo'
+    gmsh_input = 'scripts/gmsh_2d.geo'
 
     gmsh_runner = GmshRunner(gmsh_path)
     gmsh_runner.set_input_file(gmsh_input)
