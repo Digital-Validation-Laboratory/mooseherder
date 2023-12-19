@@ -24,7 +24,7 @@ if __name__ == '__main__':
     moose_dir = os.path.join(user_dir,'moose')
     moose_app_dir = os.path.join(user_dir,'moose-workdir/proteus')
     moose_app_name = 'proteus-opt'
-    moose_input = 'scripts/moose-mech.i'
+    moose_input = 'scripts/moose-mech-gmsh.i'
 
     moose_modifier = InputModifier(moose_input,'#','')
     moose_runner = MooseRunner(moose_dir,moose_app_dir,moose_app_name)
@@ -32,7 +32,7 @@ if __name__ == '__main__':
 
     # Setup Gmsh
     gmsh_path = os.path.join(user_dir,'moose-workdir/gmsh/bin/gmsh')
-    gmsh_input = 'scripts/gmsh_2d.geo'
+    gmsh_input = 'scripts/gmsh_tens_spline_2d.geo'
 
     gmsh_runner = GmshRunner(gmsh_path)
     gmsh_runner.set_input_file(gmsh_input)

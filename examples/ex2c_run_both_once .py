@@ -21,7 +21,7 @@ print('------------------------------------------')
 gmsh_path = os.path.join(user_dir,'moose-workdir/gmsh/bin/gmsh')
 gmsh_runner = GmshRunner(gmsh_path)
 
-gmsh_input = 'scripts/gmsh_tens_spline_3d.geo'
+gmsh_input = 'scripts/gmsh_tens_spline_2d.geo'
 gmsh_runner.set_input_file(gmsh_input)
 
 print('Gmsh path:' + gmsh_path)
@@ -47,7 +47,7 @@ print()
 
 # Set input and parallelisation options
 moose_runner.set_opts(n_tasks=4,n_threads=2,redirect=True)
-input_file = 'scripts/moose-mech-simple.i'
+input_file = 'scripts/moose-mech-gmsh.i'
 moose_runner.set_input_file(input_file)
 
 # Run the MOOSE!

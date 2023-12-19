@@ -22,7 +22,7 @@ if __name__ == '__main__':
     moose_dir = os.path.join(user_dir,'moose')
     moose_app_dir = os.path.join(user_dir,'moose-workdir/proteus')
     moose_app_name = 'proteus-opt'
-    moose_input = 'scripts/moose-mech.i'
+    moose_input = 'scripts/moose-mech-simple.i'
 
     moose_modifier = InputModifier(moose_input,'#','')
     moose_runner = MooseRunner(moose_dir,moose_app_dir,moose_app_name)

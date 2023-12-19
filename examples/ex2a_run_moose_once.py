@@ -30,7 +30,7 @@ print()
 
 # Set input and parallelisation options
 moose_runner.set_opts(n_tasks=4,n_threads=2,redirect=False)
-input_file = 'scripts/moose-mech-gmsh.i'
+input_file = 'scripts/moose-mech-simple.i'
 moose_runner.set_input_file(input_file)
 
 # Run the MOOSE!
