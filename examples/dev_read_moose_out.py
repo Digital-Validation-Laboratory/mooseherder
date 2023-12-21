@@ -12,7 +12,12 @@ from pprint import pprint
 
 #------------------------------------------------------------------------------
 class ExodusReader:
-    def __init__(self,exodus_file):
+    def __init__(self,exodus_file: str):
+        """_summary_
+
+        Args:
+            exodus_file (str): _description_
+        """        
         self._data = nc.Dataset(exodus_file)
     
         self.node_var_names = self._get_names('name_nod_var')
@@ -30,15 +35,43 @@ class ExodusReader:
         self._data.close()
 
     def _get_names(self,key: str) -> np.array:
+        """_summary_
+
+        Args:
+            key (str): _description_
+
+        Returns:
+            np.array: _description_
+        """        
         if key in self._data.variables:
             return nc.chartostring(np.array(self._data.variables[key]))
         else: 
             return np.array([])
         
+    def get_var(self,key: str) -> np.array:
+        return np.array(self._data.variables[key])
+        
     def get_node_data(self,key: str) -> np.array:
+        """_summary_
+
+        Args:
+            key (str): _description_
+
+        Returns:
+            np.array: _description_
+        """        
         return self.node_data[key]
     
     def get_elem_data(self,key: str,block: int,) -> np.array:
+        """_summary_
+
+        Args:
+            key (str): _description_
+            block (int): _description_
+
+        Returns:
+            np.array: _description_
+        """        
         ind = np.where(self.elem_var_names == key)[0][0]
         name = 'vals_elem_var{:d}eb{:d}'.format(ind+1,block)
         return np.array(self._data.variables[name])
@@ -121,6 +154,26 @@ coords = ex_data.get_coords()
 
 ex_data.get_elem_data('strain_xx',1)
 
+node_map = ex_data.get_var('node_num_map')
+print()
+print(type(node_map))
+print(node_map)
+print(node_map.shape)
+print()
+
+elem_map = ex_data.get_var('elem_num_map')
+print()
+print(type(elem_map))
+print(elem_map)
+print(elem_map.shape)
+print()
+
+connect = ex_data.get_var('connect1')
+print()
+print(type(connect))
+print(connect)
+print(connect.shape)
+print()
 
 
 '''
