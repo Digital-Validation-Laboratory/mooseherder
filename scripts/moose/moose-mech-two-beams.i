@@ -40,8 +40,8 @@
 [Modules/TensorMechanics/Master]
   [all]
     add_variables = true
-    # we anticipate large deformation
     strain = FINITE
+    generate_output = 'vonmises_stress strain_xx strain_yy strain_zz strain_xy'
   []
 []
 

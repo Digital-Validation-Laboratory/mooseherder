@@ -27,10 +27,9 @@ moose_runner = MooseRunner(moose_dir,moose_app_dir,moose_app_name)
 moose_runner.set_opts(n_tasks=4,n_threads=2,redirect=True)
 
 # These are all the test cases required
-input_files = [ 'scripts/moose-mech-simple.i', \
-                'scripts/moose-mech-sub-dom.i', \
-                'scripts/moose-mech-sub-dom-order2.i', \
-                'scripts/moose-mech-two-beams.i', \
+input_path = 'scripts/moose-test-cases/'
+input_files = [ 'moose-mech-block-2d-order0.i', \
+
                 'scripts/moose-mech-thermal-exp.i']
 
 for ii in input_files:
