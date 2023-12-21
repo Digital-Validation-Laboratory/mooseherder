@@ -3,6 +3,7 @@
 examples/moose-workdir-*
 examples/*.csv
 scripts/moose-workdir-*
+scripts/moose/moose-workdir-*
 scripts/*.csv
 *.processor.*
 
