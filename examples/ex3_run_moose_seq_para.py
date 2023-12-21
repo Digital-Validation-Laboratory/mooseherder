@@ -29,6 +29,9 @@ if __name__ == '__main__':
     
     # Start the herd and create working directories
     herd = MooseHerd(moose_runner,moose_modifier)
+
+     # Send all the output to the examples directory and clear out old output
+    herd.set_base_dir('examples/')
     herd.clear_dirs()
     herd.create_dirs(one_dir=False)
 
@@ -58,6 +61,7 @@ if __name__ == '__main__':
     print('Run time (once) = '+'{:.3f}'.format(herd.get_iter_time())+' seconds')
     print('------------------------------------------')
     print()
+
     print('------------------------------------------')
     print('EXAMPLE 3b: Run MOOSE sequentially')
     print('------------------------------------------')
