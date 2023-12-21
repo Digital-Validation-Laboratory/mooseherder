@@ -20,7 +20,7 @@ print('------------------------------------------')
 gmsh_path = os.path.join(user_dir,'moose-workdir/gmsh/bin/gmsh')
 gmsh_runner = GmshRunner(gmsh_path)
 
-gmsh_input = 'scripts/gmsh_tens_spline_2d.geo'
+gmsh_input = 'scripts/gmsh/gmsh_tens_spline_2d.geo'
 gmsh_runner.set_input_file(gmsh_input)
 
 print('Gmsh path:' + gmsh_path)
@@ -42,7 +42,7 @@ print('------------------------------------------')
 gmsh_path = os.path.join(user_dir,'moose-workdir/gmsh/bin/gmsh')
 gmsh_runner = GmshRunner(gmsh_path)
 
-gmsh_input = 'scripts/gmsh_tens_spline_3d.geo'
+gmsh_input = 'scripts/gmsh/gmsh_tens_spline_3d.geo'
 gmsh_runner.set_input_file(gmsh_input)
 
 print('Gmsh path:' + gmsh_path)

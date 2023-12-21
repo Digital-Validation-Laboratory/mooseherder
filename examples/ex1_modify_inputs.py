@@ -10,7 +10,7 @@ from mooseherder import InputModifier
 print('------------------------------------------')
 print('EXAMPLE 1a: Modify MOOSE input script')
 print('------------------------------------------')
-moose_input = 'scripts/moose-mech-simple.i'
+moose_input = 'scripts/moose/moose-mech-simple.i'
 moose_mod = InputModifier(moose_input,comment_char='#',end_char='')
 
 print('Variables found the top of the MOOSE input file:')
@@ -34,7 +34,7 @@ print()
 print('------------------------------------------')
 print('EXAMPLE 1b: Modify gmsh input script')
 print('------------------------------------------')
-gmsh_input = 'scripts/gmsh_tens_spline_2d.geo'
+gmsh_input = 'scripts/gmsh/gmsh_tens_spline_2d.geo'
 gmsh_mod = InputModifier(gmsh_input,'//',';')
 
 print('Variables found the top of the gmsh input file:')
