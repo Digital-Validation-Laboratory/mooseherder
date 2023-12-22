@@ -24,18 +24,19 @@ moose_app_name = 'proteus-opt'
 moose_runner = MooseRunner(moose_dir,moose_app_dir,moose_app_name)
 
 # Set input and parallelisation options
-moose_runner.set_opts(n_tasks=4,n_threads=2,redirect=True)
+moose_runner.set_opts(n_tasks=1,n_threads=4,redirect=True)
 
 # These are all the test cases required
 input_path = 'scripts/moose-test-cases/'
-input_files = [ 'moose-mech-block-2d-order0.i', \
-
-                'scripts/moose-mech-thermal-exp.i']
+input_files = [ 'moose-mech-block-2d-o1.i', \
+                'moose-mech-block-2d-o2.i', \
+                'moose-mech-block-3d-o1.i', \
+                'moose-mech-block-3d-o2.i']
 
 for ii in input_files:
     start_time = time.perf_counter()
 
-    moose_runner.set_input_file(ii)
+    moose_runner.set_input_file(input_path+ii)
     print('Running moose test case with:')
     print(moose_runner.get_run_str())
 
