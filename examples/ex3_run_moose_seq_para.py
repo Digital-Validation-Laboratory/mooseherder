@@ -30,10 +30,14 @@ if __name__ == '__main__':
     # Start the herd and create working directories
     herd = MooseHerd(moose_runner,moose_modifier)
 
+    # Set the parallelisation options, we have 8 combinations of variables and
+    # 4 MOOSE intances running, so 2 runs will be saved in each working directory
+    herd.para_opts(n_moose=4,tasks_per_moose=1,threads_per_moose=2,redirect_out=True)
+
      # Send all the output to the examples directory and clear out old output
     herd.set_base_dir('examples/')
     herd.clear_dirs()
-    herd.create_dirs(one_dir=False)
+    herd.create_dirs()
 
     # Create variables to sweep in a list of dictionaries, 8 combinations possible.
     n_elem_y = [25,50]
@@ -44,12 +48,7 @@ if __name__ == '__main__':
         for ee in e_mod:
             for pp in p_rat:
                 moose_vars.append({'n_elem_y':nn,'e_modulus':ee,'p_ratio':pp})
-
-
-    # Set the parallelisation options, we have 8 combinations of variables and
-    # 4 MOOSE intances running, so 2 runs will be saved in each working directory
-    herd.para_opts(n_moose=4,tasks_per_moose=1,threads_per_moose=2,redirect_out=True)
-    
+        
     print()
     print('------------------------------------------')
     print('EXAMPLE 3a: Run MOOSE once')
