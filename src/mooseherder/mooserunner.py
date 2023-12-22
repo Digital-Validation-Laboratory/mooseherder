@@ -149,7 +149,7 @@ class MooseRunner:
         self._run_str = run_str
 
 
-    def run(self, input_file = "") -> None:
+    def run(self, input_file="") -> None:
         """Runs MOOSE based on current options by passing run string to 
         subprocess shell.
 
