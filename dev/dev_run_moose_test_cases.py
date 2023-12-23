@@ -28,10 +28,20 @@ moose_runner.set_opts(n_tasks=1,n_threads=4,redirect=True)
 
 # These are all the test cases required
 input_path = 'scripts/moose-test-cases/'
+'''
 input_files = [ 'moose-mech-block-2d-o1.i', \
                 'moose-mech-block-2d-o2.i', \
                 'moose-mech-block-3d-o1.i', \
-                'moose-mech-block-3d-o2.i']
+                'moose-mech-block-3d-o2.i', \
+                'moose-mech-block-2d-o2-moo2.i', \
+                'moose-mech-block-3d-o2-moo2.i']
+'''
+input_files = [ 'moose-mech-block-2d-o2-moo0.i', \
+                'moose-mech-block-2d-o2-moo1.i', \
+                'moose-mech-block-2d-o2-moo2.i', \
+                'moose-mech-subdom-2d-o2-moo0.i', \
+                'moose-mech-subdom-2d-o2-moo1.i', \
+                'moose-mech-subdom-2d-o2-moo2.i']
 
 for ii in input_files:
     start_time = time.perf_counter()

@@ -16,17 +16,20 @@ Authors: Lloyd Fletcher
 ===============================================================================
 """
 
-import time
 import netCDF4 as nc
 import numpy as np
 from pprint import pprint
 
 class ExodusReader:
+    """Class to read exodus files output by MOOSE using netCDF package.
+    """    
     def __init__(self,exodus_file: str):
-        """_summary_
+        """Construct class by reading the exodus file using the netCDF package. 
+        Also reads the node and element variable names as well as the nodal 
+        variables. 
 
         Args:
-            exodus_file (str): _description_
+            exodus_file (str): exodus file and path to read.
         """        
         self._data = nc.Dataset(exodus_file)
     
@@ -59,6 +62,14 @@ class ExodusReader:
             return np.array([])
         
     def get_var(self,key: str) -> np.array:
+        """_summary_
+
+        Args:
+            key (str): _description_
+
+        Returns:
+            np.array: _description_
+        """        
         return np.array(self._data.variables[key])
         
     def get_node_data(self,key: str) -> np.array:
@@ -149,11 +160,18 @@ class ExodusReader:
             return coord
     
     def get_time(self) -> np.array:
+        """_summary_
+
+        Returns:
+            np.array: _description_
+        """        
         if 'time_whole' in self._data.variables:
             return np.array(self._data.variables['time_whole'])
         else:
             return np.array([])
         
     def print_vars(self) -> None:
+        """_summary_
+        """        
         for vv in self._data.variables:
             pprint(vv)

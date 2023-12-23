@@ -1,16 +1,17 @@
-#
-# Read the csv outputs from Moose.
-#
+'''
+==============================================================================
+CSVReader Class
 
-# Can use pandas to read in csvs. But won't know what the headers are necessarily, may be different for each problem .
-
+Author: Rory Spencer, Lloyd Fletcher
+==============================================================================
+'''
 import pandas as pd
 import os
 
-class OutputCSVReader():
-    """Class to support reading in of csv files in parallels
+class CSVReader():
+    """Class to support reading in of csv files in parallel.
     An instance of this class will be passed to the mooseherder 
-    which will call read() in paralle;.
+    which will call read() in parallel. 
     """
 
     def __init__(self):
@@ -35,7 +36,7 @@ class OutputCSVReader():
             output = data.iloc[-1].to_dict()
         except(FileNotFoundError):
             print('Likely model did not run, setting data as none.')
-            output =None
+            output = None
         return output
 
 

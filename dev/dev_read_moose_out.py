@@ -11,47 +11,37 @@ import numpy as np
 from pprint import pprint
 from mooseherder import ExodusReader
 
+def debug_var(tag,var):
+    print(tag)
+    print(type(var))
+    print(var.shape)
+    print()
+
 # Read the results
-output_file = 'scripts/moose-test-cases/moose-mech-block-2d-o1.e'
-ex_data = ExodusReader(output_file)
+output_dir = 'scripts/moose-test-cases/'
+output_file = 'moose-mech-subdom-2d-o2-moo2_out.e'
+
+ex_data = ExodusReader(output_dir+output_file)
 
 coords = ex_data.get_coords()
-
-ex_data.get_elem_data('strain_xx',1)
-
-node_map = ex_data.get_var('node_num_map')
 print()
-print(type(node_map))
-print(node_map)
-print(node_map.shape)
+print('NODE COORDS')
+print(type(coords))
+print(coords.shape)
 print()
 
-elem_map = ex_data.get_var('elem_num_map')
-print()
-print(type(elem_map))
-print(elem_map)
-print(elem_map.shape)
-print()
+var_str = 'strain_xx'
 
-connect = ex_data.get_var('connect1')
-print()
-print(type(connect))
-print(connect)
-print(connect.shape)
-print()
+try:
+    node_data = ex_data.get_node_data(var_str)
+except:
+    node_data = np.array([])
 
-ex_data.print_vars()
+elem_data = ex_data.get_elem_data(var_str,1)
 
-print()
-print('node var names')
-pprint(ex_data.node_var_names)
-print()
-print('elem var names')
-pprint(ex_data.elem_var_names)
-print()
+debug_var(var_str,node_data)
+debug_var(var_str,elem_data)
 
-#print()
-#print(ex_data._data.variables['elem_var_tab'])
 
 '''
 Required Variables:
