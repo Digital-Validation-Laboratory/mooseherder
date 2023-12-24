@@ -29,7 +29,7 @@ print('MOOSE app name: ' + moose_app_name)
 print()
 
 # Set input and parallelisation options
-moose_runner.set_opts(n_tasks=4,n_threads=2,redirect=False)
+moose_runner.set_opts(n_tasks=2,n_threads=4,redirect=False)
 input_file = 'scripts/moose/moose-mech-simple.i'
 moose_runner.set_input_file(input_file)
 

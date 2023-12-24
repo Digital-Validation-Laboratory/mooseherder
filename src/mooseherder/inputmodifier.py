@@ -16,16 +16,20 @@ class InputModifier:
     Variable definition blocks should begin #comment character#* and end 
     #comment character#**, e.g. //_* and //** for gmsh
     """
-    def __init__(self, input_file: str, comment_char='#', end_char=''):
+    def __init__(self, input_file: str, comment_char='#', end_char='', var_start='_*', var_end='**'):
         """ Initialise the class by reading in the input file. Find and read 
         any variables that are at the top of the file. Default comment_char
         and end_char are set based on reading MOOSE *.i files.
 
         Args:
-            input_file (string): Path to the input text file.
-            comment_char (string): character(s) describing what a comment look
+            input_file (str): Path to the input text file.
+            comment_char (str): character(s) describing what a comment look
                 like in the file. 
-            end_char (string): character (if any) that ends a line, i.e. ; 
+            end_char (str): character (if any) that ends a line, i.e. ; for gmsh
+            var_start (str): character sequence used to specify the start of 
+                the variable block to edit.
+            var_end (str): character sequence used to specify the end of the
+                variabled block to edit.
         """
         self._vars = dict()
         self._input_file = input_file
@@ -35,81 +39,123 @@ class InputModifier:
 
         self._comment_char = comment_char
         self._end_char = end_char
+
+        self._var_start_str = var_start
+        self._var_end_str = var_end
+
+        self._var_start_ind = 0
+        self._var_end_ind = -1
+
         self.find_vars()
         self.read_vars()
         
     def read_vars(self) -> None:
         """ Reads the variables in the file 
         """
-        for ii,ss in enumerate(self._input_lines[self._var_start+1:self._var_end]):
-            ss = ss.strip()
-            ss = ss.replace(' ','') 
-            ss = ss.replace(self._end_char,'') 
-            ss = ss.split(self._comment_char)[0]  # Remove trailing comments should they exist
-            if ss:
-                # Anything left with an equals sign is a variable
-                if ss.find('=') >= 0:
-                    self._vars[ss.split('=', 1)[0]] = float(ss.split('=', 1)[1])
+        for ss in self._input_lines[self._var_start_ind+1:self._var_end_ind]:
+            [var_key,var_val,_] = self._extract_var_str(ss)
+            if len(var_key) != 0: 
+                self._vars[var_key] = var_val
+
+    def _extract_var_str(self,var_line: str) -> [str,str,str]:
+        """Helper function to split a string from the input file variable block
+        into the variable key, the variable value and any remaining comment.
+
+        Args:
+            var_line (str): line from the input file to process
+
+        Returns:
+            [str,str/float,str]: returns a three element list. The first element
+                is the variable key, the second is the variable value as a float
+                or string, the third is any comment string remaining.
+        """        
+        # Strip all whitespace and comments to separate variable name, equals sign and value
+        extract_var = var_line.strip()
+        extract_var = extract_var.replace(' ','') 
+        extract_var = extract_var.replace(self._end_char,'') 
+        extract_var = extract_var.split(self._comment_char)[0]  # Remove trailing comments should they exist
+        
+        # Split the variable key and value based on the equals sign return an empty string if not
+        var_key = ''
+        var_val = ''
+        if extract_var:
+            if extract_var.find('=') >= 0:
+                try:
+                    var_val = float(extract_var.split('=', 1)[1])
+                except:
+                    var_val = extract_var.split('=', 1)[1]
+
+                var_key = extract_var.split('=', 1)[0]
+
+        # Get the comment string 
+        if len(var_line.split(self._comment_char)) > 1:
+            com_loc = var_line.find(self._comment_char)
+            comment_str = var_line[com_loc+1:]
+        else:
+            comment_str = ''
+        
+        return [var_key, var_val, comment_str]
 
 
     def find_vars(self) -> None:
         """ Find what lines the variables are defined on.
         """
-        self._var_start = 0
-        self._var_end = -1
-        start_string = self._comment_char+'_*'
-        end_string = self._comment_char+'**'
+        # TODO: this needs to be made more robust to multiple occurences of variable block characters.
+        # Also need to handle cases when the start and end block characters are the same
+
+        start_string = self._comment_char + self._var_start_str
+        end_string = self._comment_char + self._var_end_str
     
         for index,line in enumerate(self._input_lines):
             if start_string in line:
-                self._var_start = index
+                self._var_start_ind = index
             if end_string in line:
-                self._var_end = index
+                self._var_end_ind = index
                 break
 
     def update_vars(self,new_vars: dict) -> None:
-        """Updates the dict of varaibles
+        """Updates the variable dictionary that will be written to the input
+        file.
 
         Args:
-            new_vars (dict): New values for the variables. Must have the same 
-                keys as variables found in the input file.
+            new_vars (dict): new variables to be written to the input file. 
+                The keys must exist within the dictionary of variables 
+                extracted from the input file. Only the variables to be edited
+                need to be present.
+        """        
+        for kk in new_vars:
+            if kk in self._vars:
+                self._vars[kk] = new_vars[kk]
+            else:
+                raise KeyError("Key {} does not exist in the variables found in the input file. Check input file to make sure the variable exists.".format(kk)) 
 
-        Raises:
-            KeyError: Keys don't match between existing and updated dicts.
-        """
-        if self._vars.keys() == new_vars.keys():
-            self._vars = new_vars
-        else:
-            raise KeyError('Dictionary keys of input variables for not match those founde in the input file.')
-
-
-    def write_file(self,wfile: str) -> None:
-        """Write the input file.
+    def write_file(self,input_write_file: str) -> None:
+        """Write the input file using the current variable dictionary.
 
         Args:
-            wfile (str): Path to where the file should be written.
+            input_write_file (str): Path to where the file should be written.
         """
-        
-        # Prep the values to write
-        keys = list(self._vars.keys())
-        values = list(self._vars.values())
+        var_block = self._input_lines[self._var_start_ind+1:self._var_end_ind]
 
-        #Write file
-        with open(wfile,'w') as out_file:
-            for index,line in enumerate(self._input_lines):
-                #If it's in the variables block, overwrite
-                if index > self._var_start and index < self._var_end:
-                    current_var = index-self._var_start-1
-                    try:
-                        write_string = '{} = {}{}\n'.format(keys[current_var],values[current_var],self._end_char)
-                        out_file.write(write_string)
-                    except(IndexError):
-                        # TODO: Probably should avoid printing to console inside a class
-                        #print('All available parameters written. Check for commented out parameters in the input.')
-                        pass
-                    continue
+        for ii,ll in enumerate(var_block):
+            [var_key,_,com_str] = self._extract_var_str(ll)
+            if (len(var_key) != 0) and (var_key in self._vars):
+                if len(com_str) == 0:
+                    var_line = '{} = {}{}\n'.format(var_key,
+                                                    self._vars[var_key],
+                                                    self._end_char)
                 else:
-                    out_file.write(line)
+                    # NOTE: comment string includes the new line character already
+                    var_line = '{} = {}{} {}{}'.format(var_key,
+                                                        self._vars[var_key],
+                                                        self._end_char,
+                                                        self._comment_char,
+                                                        com_str)
+                line_ind = ii+self._var_start_ind+1
+                self._input_lines[line_ind] = var_line
+
+        with open(input_write_file,'w') as out_file:
+            out_file.writelines(self._input_lines)
 
     def get_vars(self) -> dict:
         """Gets the variables found in the file.

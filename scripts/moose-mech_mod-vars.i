@@ -1,7 +1,14 @@
+# Adding a bunch of comments up the top here to test
+test_var = 10 # A variable outside the block
+
 #_* Variables
-n_elem_y = 120
+# n_elem_x = 100
+n_elem_y = 120 # Trying to break the code
 e_modulus = 3300000000.0
-p_ratio = 0.33
+p_ratio = 0.33 #Another comment to test with 
+order = SECOND
+# Random comment here as well
+func = $fparse{2*x}
 #**
 
 [GlobalParams]
