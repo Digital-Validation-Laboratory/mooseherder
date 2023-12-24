@@ -106,11 +106,15 @@ class InputModifier:
         start_string = self._comment_char + self._var_start_str
         end_string = self._comment_char + self._var_end_str
     
-        for index,line in enumerate(self._input_lines):
-            if start_string in line:
-                self._var_start_ind = index
-            if end_string in line:
-                self._var_end_ind = index
+        # Flag to make sure we only find the first instance of the character
+        # also allows case when start and end block strings are the same
+        start_found = False
+        for ii,ll in enumerate(self._input_lines):
+            if start_string in ll and (not start_found):
+                self._var_start_ind = ii
+                start_found = True
+            if end_string in ll:
+                self._var_end_ind = ii
                 break
 
     def update_vars(self,new_vars: dict) -> None:
