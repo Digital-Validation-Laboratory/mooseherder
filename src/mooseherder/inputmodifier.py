@@ -49,14 +49,6 @@ class InputModifier:
         self.find_vars()
         self.read_vars()
         
-    def read_vars(self) -> None:
-        """ Reads the variables in the file 
-        """
-        for ss in self._input_lines[self._var_start_ind+1:self._var_end_ind]:
-            [var_key,var_val,_] = self._extract_var_str(ss)
-            if len(var_key) != 0: 
-                self._vars[var_key] = var_val
-
     def _extract_var_str(self,var_line: str) -> (str,str,str):
         """Helper function to split a string from the input file variable block
         into the variable key, the variable value and any remaining comment.
@@ -96,6 +88,13 @@ class InputModifier:
         
         return (var_key, var_val, comment_str)
 
+    def read_vars(self) -> None:
+        """ Reads the variables in the file 
+        """
+        for ss in self._input_lines[self._var_start_ind+1:self._var_end_ind]:
+            [var_key,var_val,_] = self._extract_var_str(ss)
+            if len(var_key) != 0: 
+                self._vars[var_key] = var_val
 
     def find_vars(self) -> None:
         """ Find what lines the variables are defined on.

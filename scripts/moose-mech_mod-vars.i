@@ -2,20 +2,13 @@
 n_elem_x = 40 # Putting this variable outside the block to test
 
 #_* Variables Block
-# n_elem_x = 50 putting an equals sign here to test
-n_elem_y = 120 # Testing comments in the variables block
+# n_elem_x = 50
+n_elem_y = 40 # Testing comments in the variables block
 e_modulus = 3300000000.0
 # Comment line to test
-p_ratio = 0.33 # Another comment to test with
-# The next variables test strings
+p_ratio = 0.3 # Another comment to test with 
 e_type = QUAD4
-add_vars = true
-y_max = 1.0
-x_max = ${fparse2*y_max}
 #**
-
-# Another variable outside the block 
-spatial_dims = 2
 
 [GlobalParams]
     displacements = 'disp_x disp_y'
@@ -24,22 +17,26 @@ spatial_dims = 2
 [Mesh]
     [generated]
         type = GeneratedMeshGenerator
-        dim = ${spatial_dims}
+        dim = 2
         nx = ${n_elem_x}
         ny = ${n_elem_y}
-        xmax = ${x_max}
-        ymax = ${y_max}
+        xmax = 2
+        ymax = 1
         elem_type = ${e_type}
     []
 []
 
 [Modules/TensorMechanics/Master]
     [all]
-        add_variables = ${add_vars}
+        add_variables = true
         generate_output = 'vonmises_stress strain_xx strain_yy strain_xy strain_zz'
     []
 []
 
+#
+# Added boundary/loading conditions
+# https://mooseframework.inl.gov/modules/tensor_mechanics/tutorials/introduction/step02.html
+#
 [BCs]
     [bottom_x]
         type = DirichletBC

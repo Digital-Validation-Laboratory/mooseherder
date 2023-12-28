@@ -13,6 +13,7 @@ from mooseherder.inputmodifier import InputModifier
 '''
 -------------------------------------------------------------------------------
 MOOSE Tests
+TODO: create tests for case with custom variable block characters
 -------------------------------------------------------------------------------
 ''' 
 @pytest.fixture
@@ -103,6 +104,7 @@ def test_moose_get_input_file(moose_mod):
 '''
 -------------------------------------------------------------------------------
 Gmsh Tests
+TODO: flesh out gmsh tests
 -------------------------------------------------------------------------------
 '''    
 @pytest.fixture
