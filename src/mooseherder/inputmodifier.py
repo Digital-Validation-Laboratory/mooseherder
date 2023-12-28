@@ -57,7 +57,7 @@ class InputModifier:
             if len(var_key) != 0: 
                 self._vars[var_key] = var_val
 
-    def _extract_var_str(self,var_line: str) -> [str,str,str]:
+    def _extract_var_str(self,var_line: str) -> (str,str,str):
         """Helper function to split a string from the input file variable block
         into the variable key, the variable value and any remaining comment.
 
@@ -94,7 +94,7 @@ class InputModifier:
         else:
             comment_str = ''
         
-        return [var_key, var_val, comment_str]
+        return (var_key, var_val, comment_str)
 
 
     def find_vars(self) -> None:
