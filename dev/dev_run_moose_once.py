@@ -12,7 +12,7 @@ from pathlib import Path
 from mooseherder import MooseRunner
 
 #=======================================================================
-input_file = 'scripts/moose-test-cases/moose-mech-subdom-3d-o2.i'
+input_file = 'tests/moose/moose-vartest.i'
 #=======================================================================
 
 path_parts = Path(os.getcwd()).parts

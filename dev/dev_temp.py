@@ -7,10 +7,7 @@ Author: Lloyd Fletcher
 '''
 from mooseherder import InputModifier
 
-print('------------------------------------------')
-print('EXAMPLE 1a: Modify MOOSE input script')
-print('------------------------------------------')
-moose_input = 'scripts/moose/moose-mech-vartest.i'
+moose_input = 'tests/moose/moose-vartest.i'
 moose_mod = InputModifier(moose_input,comment_char='#',end_char='')
 
 print('Variables found the top of the MOOSE input file:')

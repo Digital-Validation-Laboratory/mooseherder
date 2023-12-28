@@ -3,18 +3,18 @@ n_elem_x = 40 # Putting this variable outside the block to test
 
 #_* Variables Block
 # n_elem_x = 50 putting an equals sign here to test
-n_elem_y = 120 # Testing comments in the variables block
-e_modulus = 3300000000.0
+n_elem_y = 25 # Testing comments in the variables block
+e_modulus = 2000000000.0
 # Comment line to test
-p_ratio = 0.33 # Another comment to test with
+p_ratio = 0.3 # Another comment to test with
 # The next variables test strings
-e_type = QUAD4
+e_type = QUAD8
 add_vars = true
 y_max = 1.0
 x_max = ${fparse2*y_max}
 #**
 
-# Another variable outside the block 
+# Another variable outside the block to test
 spatial_dims = 2
 
 [GlobalParams]
