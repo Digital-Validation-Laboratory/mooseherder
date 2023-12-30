@@ -10,8 +10,9 @@ gaugeThickness = 1E-3;
 
 // Parameterisation
 //_*
+// Testing comments in the variable block
 p0 = 1.5E-3;
-p1 = 1E-3;
+p1 = 1E-3;  // Another test comment
 p2 = 1.2E-3;
 //**
 lc = 1E-4;

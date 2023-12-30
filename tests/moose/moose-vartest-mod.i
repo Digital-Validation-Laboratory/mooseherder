@@ -1,9 +1,21 @@
-#_* Variables
-n_elem_x = 40
-n_elem_y = 20
-e_modulus = 1e9
-p_ratio = 0.3
+# This is a simple MOOSE tensor mechanics input script for testing the herder
+n_elem_x = 40 # Putting this variable outside the block to test
+
+#_* Variables Block
+# n_elem_x = 50 putting an equals sign here to test
+n_elem_y = 25 # Testing comments in the variables block
+e_modulus = 2000000000.0
+# Comment line to test
+p_ratio = 0.3 # Another comment to test with
+# The next variables test strings
+e_type = QUAD8
+add_vars = true
+y_max = 1.0
+x_max = ${fparse2*y_max}
 #**
+
+# Another variable outside the block to test
+spatial_dims = 2
 
 [GlobalParams]
     displacements = 'disp_x disp_y'
@@ -12,20 +24,19 @@ p_ratio = 0.3
 [Mesh]
     [generated]
         type = GeneratedMeshGenerator
-        dim = 2
+        dim = ${spatial_dims}
         nx = ${n_elem_x}
         ny = ${n_elem_y}
-        xmax = 2
-        ymax = 1
-        elem_type = QUAD4
-        # EDGE, EDGE2, EDGE3, EDGE4, QUAD, QUAD4, QUAD8, QUAD9, TRI, TRI3, TRI6, TRI7, HEX, HEX8, HEX20, HEX27, TET, TET4, TET10, TET14, PRISM, PRISM6, PRISM15, PRISM18, PYRAMID, PYRAMID5, PYRAMID13, PYRAMID14
+        xmax = ${x_max}
+        ymax = ${y_max}
+        elem_type = ${e_type}
     []
 []
 
 [Modules/TensorMechanics/Master]
     [all]
-        add_variables = true
-        generate_output = 'vonmises_stress strain_xx strain_yy strain_zz'
+        add_variables = ${add_vars}
+        generate_output = 'vonmises_stress strain_xx strain_yy strain_xy strain_zz'
     []
 []
 
@@ -61,6 +72,7 @@ p_ratio = 0.3
     []
 []
 
+# consider all off-diagonal Jacobians for preconditioning
 [Preconditioning]
     [SMP]
         type = SMP
@@ -70,9 +82,9 @@ p_ratio = 0.3
 
 [Executioner]
     type = Transient
-    solve_type = 'PJFNK'
-    petsc_options_iname = '-pc_type -pc_hypre_type'
-    petsc_options_value = 'hypre boomeramg'
+    # we chose a direct solver here
+    petsc_options_iname = '-pc_type'
+    petsc_options_value = 'lu'
     end_time = 5
     dt = 1
 []

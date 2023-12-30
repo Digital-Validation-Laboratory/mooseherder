@@ -15,6 +15,7 @@
     ny = 20
     xmax = 2
     ymax = 1
+    elem_type = QUAD8
   []
 
   # assign two subdomains
@@ -37,8 +38,9 @@
 [Modules/TensorMechanics/Master]
   [all]
     add_variables = true
+    material_output_family = MONOMIAL   # MONOMIAL, LAGRANGE
+    material_output_order = FIRST       # CONSTANT, FIRST, SECOND, 
     generate_output = 'vonmises_stress strain_xx strain_yy strain_zz'
-    material_output_order = SECOND
   []
 []
 
@@ -83,9 +85,9 @@
 
 [Executioner]
   type = Transient
-  solve_type = NEWTON
-  petsc_options_iname = '-pc_type'
-  petsc_options_value = 'lu'
+  solve_type = 'PJFNK'
+  petsc_options_iname = '-pc_type -pc_hypre_type'
+  petsc_options_value = 'hypre boomeramg'
   end_time = 5
   dt = 1
 []

@@ -1,8 +1,21 @@
-#_* Variables
-n_elem_y = 120
-e_modulus = 3300000000.0
-p_ratio = 0.33
+# This is a simple MOOSE tensor mechanics input script for testing the herder
+n_elem_x = 40 # Putting this variable outside the block to test
+
+#_* Variables Block
+# n_elem_x = 50 putting an equals sign here to test
+n_elem_y = 20 # Testing comments in the variables block
+e_modulus = 1e9
+# Comment line to test
+p_ratio = 0.3# Another comment to test with
+# The next variables test strings
+e_type = QUAD4
+add_vars = true
+y_max = 1 
+x_max = ${fparse 2*y_max}
 #**
+
+# Another variable outside the block to test
+spatial_dims = 2
 
 [GlobalParams]
     displacements = 'disp_x disp_y'
@@ -11,25 +24,22 @@ p_ratio = 0.33
 [Mesh]
     [generated]
         type = GeneratedMeshGenerator
-        dim = 2
-        nx = 100 # ${n_elem_x}
+        dim = ${spatial_dims}
+        nx = ${n_elem_x}
         ny = ${n_elem_y}
-        xmax = 2
-        ymax = 1
+        xmax = ${x_max}
+        ymax = ${y_max}
+        elem_type = ${e_type}
     []
 []
 
 [Modules/TensorMechanics/Master]
     [all]
-        add_variables = true
-        generate_output = 'vonmises_stress strain_xx strain_yy strain_zz'
+        add_variables = ${add_vars}
+        generate_output = 'vonmises_stress strain_xx strain_yy strain_xy strain_zz'
     []
 []
 
-#
-# Added boundary/loading conditions
-# https://mooseframework.inl.gov/modules/tensor_mechanics/tutorials/introduction/step02.html
-#
 [BCs]
     [bottom_x]
         type = DirichletBC

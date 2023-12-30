@@ -10,12 +10,13 @@ gaugeWidth = 2.5E-3;
 
 // Parameterisation
 //_*
-p0 = 0.0018;
-p1 = 0.0012;
+p0 = 0.0015;
+p1 = 0.0009; // Testing comments in the variable block
+// Another test comment
 p2 = 0.001;
+filename = "mesh_tens_spline_2d.msh"; // String variable
 //**
 lc = 1E-4;
-filename = "mesh_tens_spline_2d.msh";
 
 
 // Create some points defining the boundary

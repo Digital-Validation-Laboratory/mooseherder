@@ -3,6 +3,7 @@ n_elem_x = 40
 n_elem_y = 20
 e_modulus = 1e9
 p_ratio = 0.3
+
 #**
 
 [GlobalParams]
@@ -17,7 +18,7 @@ p_ratio = 0.3
         ny = ${n_elem_y}
         xmax = 2
         ymax = 1
-        elem_type = QUAD4
+        elem_type = QUAD8
         # EDGE, EDGE2, EDGE3, EDGE4, QUAD, QUAD4, QUAD8, QUAD9, TRI, TRI3, TRI6, TRI7, HEX, HEX8, HEX20, HEX27, TET, TET4, TET10, TET14, PRISM, PRISM6, PRISM15, PRISM18, PYRAMID, PYRAMID5, PYRAMID13, PYRAMID14
     []
 []
@@ -25,6 +26,8 @@ p_ratio = 0.3
 [Modules/TensorMechanics/Master]
     [all]
         add_variables = true
+        material_output_family = MONOMIAL   # MONOMIAL, LAGRANGE
+        material_output_order = FIRST       # CONSTANT, FIRST, SECOND, 
         generate_output = 'vonmises_stress strain_xx strain_yy strain_zz'
     []
 []
