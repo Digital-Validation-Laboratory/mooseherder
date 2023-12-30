@@ -82,7 +82,7 @@ class InputModifier:
         # Get the comment string 
         if len(var_line.split(self._comment_char)) > 1:
             com_loc = var_line.find(self._comment_char)
-            comment_str = var_line[com_loc+1:]
+            comment_str = var_line[com_loc+len(self._comment_char):]
         else:
             comment_str = ''
         

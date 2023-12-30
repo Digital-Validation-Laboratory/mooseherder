@@ -25,8 +25,10 @@ def runner():
     (
         (0, 1),
         (-1,1),
-        
+        (2.5,2),
+        (os.cpu_count()+1,os.cpu_count())
     )
 )
-def test_set_threads(runner,):
-    runner
+def test_set_threads(n_threads,expected,runner):
+    runner.set_threads(n_threads)
+    assert runner._n_threads == expected

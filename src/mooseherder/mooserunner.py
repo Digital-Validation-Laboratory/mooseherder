@@ -56,7 +56,7 @@ class MooseRunner:
         if n_threads > os.cpu_count():
             n_threads = os.cpu_count()
         
-        self._n_threads = n_threads
+        self._n_threads = int(n_threads)
 
     def set_tasks(self, n_tasks: int) -> None:
         """Sets the number of MPI tasks asked of MOOSE on the command line.
@@ -70,7 +70,7 @@ class MooseRunner:
         if n_tasks> os.cpu_count():
             n_tasks = os.cpu_count()
         
-        self._n_tasks = n_tasks
+        self._n_tasks = int(n_tasks)
 
     def set_stdout(self, redirect_flag=True) -> None:
         """Sets MOOSE to redirect output (True) to file instead of console (False).
