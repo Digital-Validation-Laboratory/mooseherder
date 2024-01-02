@@ -1,6 +1,6 @@
 '''
 ==============================================================================
-EXAMPLE 1a: MODIFY INPUT SCRIPT FOR MOOSE 
+EXAMPLE 1a: Modify input script for MOOSE with mooseherder
 
 Author: Lloyd Fletcher
 ==============================================================================

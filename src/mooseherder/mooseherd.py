@@ -42,6 +42,7 @@ class MooseHerd:
         self._gmsh_input_name = 'gmsh-mesh'
         self._base_dir = os.path.split(self._moose_modifier.get_input_file())[0]+'/'
         self._run_dir = self._base_dir + self._sub_dir
+        self._output_files = list()
 
         self._one_dir = False
         self._keep_all = True
@@ -188,8 +189,23 @@ class MooseHerd:
             float: time to complete specific iteration.
         """        
         return self._iter_run_time
+        
+    def _get_process_num(self) -> str:
+        """Helper function to get the process number for directory naming.
 
-    def run_once(self, iter: int, moose_vars: dict, gmsh_vars=None) -> None:
+        Returns:
+            str: One character string with the process number. If this is the 
+                main process returns '1' 
+        """        
+        name = mp.current_process().name
+        # If we are calling this from main we need to set the process number
+        if name == 'MainProcess':
+            process_num = '1'
+        else:
+            process_num = name.split('-',1)[1]
+        return process_num
+
+    def run_once(self, iter: int, moose_vars: dict, gmsh_vars=None) -> str:
         """Run a single simulation. Writes relevant moose and gmsh input decks 
         to process working directory.
 
@@ -202,16 +218,14 @@ class MooseHerd:
                 MOOSE input file to run in the 
             gmsh_vars (dict, optional): same as moose_vars but applies to gmsh
                 input file. Defaults to None.
+
+        Returns:
+            str: full path to the output exodus file.
         """        
 
         self._iter_start_time = time.perf_counter()
 
-        name = mp.current_process().name
-        # If we are calling this from main we need to set the process number
-        if name == 'MainProcess':
-            process_num = '1'
-        else:
-            process_num = name.split('-',1)[1]
+        process_num = self._get_process_num()
 
         if self._one_dir:
             run_dir = self._run_dir+'-1/'
@@ -240,6 +254,8 @@ class MooseHerd:
         self._moose_runner.run(moose_save)
 
         self._iter_run_time = time.perf_counter() - self._iter_start_time
+
+        return self._moose_runner.get_output_exodus_path()
 
     def run_para(self, moose_var_list: list(dict()), gmsh_var_list=None) -> None:
         """Runs MOOSE (and gmsh if specified) in parallel using multiprocessing
@@ -272,7 +288,14 @@ class MooseHerd:
                         ii += 1
                 
             self._para_res = [pp.get() for pp in processes]
- 
+
+            print('PARA RES')
+            print(type(self._para_res))
+            print(len(self._para_res))
+            print()
+            print(self._para_res)
+            print()
+
             self._sweep_run_time = time.perf_counter() - self._sweep_start_time
 
     def run_sequential(self,moose_var_list: list(dict()), gmsh_var_list=None) -> None:
@@ -292,6 +315,7 @@ class MooseHerd:
         """        
         self._sweep_start_time = time.perf_counter()
 
+        output_files = list()
         if gmsh_var_list == None:
             for ii,vv in enumerate(moose_var_list):
                 self.run_once(ii,vv)
@@ -299,10 +323,17 @@ class MooseHerd:
             ii = 0
             for vv in moose_var_list:
                 for ww in gmsh_var_list:
-                    self.run_once(ii,vv,ww)
+                    output_files.append(self.self.run_once(ii,vv,ww))
                     ii += 1
 
+        self._output_files = output_files
         self._sweep_run_time = time.perf_counter() - self._sweep_start_time
+
+    def read_results_once(self, output_reader):
+        process_num = self._get_process_num()
+
+    def read_results_sequentially(self):
+        pass
 
     #TODO: need to write once, sequential and parallel reader functions.
     def read_results_para(self, reader):
@@ -329,3 +360,4 @@ class MooseHerd:
 
 
         return data_list
+

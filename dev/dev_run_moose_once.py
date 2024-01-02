@@ -33,15 +33,30 @@ print('MOOSE app name: ' + moose_app_name)
 print()
 
 # Set input and parallelisation options
-moose_runner.set_opts(n_tasks=1,n_threads=4,redirect=False)
+moose_runner.set_opts(n_tasks=1,n_threads=4,redirect=True)
 moose_runner.set_input_file(input_file)
+
+print('Input Dir:')
+print(moose_runner.get_input_dir())
+print()
+print('Input Tag:')
+print(moose_runner.get_input_tag())
+print()
+print('Exodus file:')
+print(moose_runner.get_output_exodus_file())
+print()
+print('Exodus with path:')
+print(moose_runner.get_output_exodus_path())
+print()
+
+quit()
 
 # Run the MOOSE!
 print('Running moose with:')
 print(moose_runner.get_run_str())
 
 start_time = time.perf_counter()
-moose_runner.run()
+#moose_runner.run()
 end_time = time.perf_counter()
 
 print()

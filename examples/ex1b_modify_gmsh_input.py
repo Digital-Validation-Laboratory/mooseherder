@@ -1,6 +1,6 @@
 '''
 ==============================================================================
-EXAMPLE 1b: MODIFY INPUT SCRIPT FOR GMSH 
+EXAMPLE 1b: Modify input script for gmsh with mooseherder
 
 Author: Lloyd Fletcher
 ==============================================================================

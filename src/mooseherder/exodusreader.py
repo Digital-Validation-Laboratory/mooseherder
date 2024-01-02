@@ -39,7 +39,7 @@ class ExodusReader:
         self.node_data = dict()
         for ii,nn in enumerate(self.node_var_names):
             key = 'vals_nod_var{:d}'.format(ii+1)
-            self.node_data[nn] = np.array(self._data.variables[key])
+            self.node_data[nn] = np.array(self._data.variables[key]).T
 
         if self.elem_var_names.shape[0] != 0:
             pass
@@ -120,7 +120,7 @@ class ExodusReader:
         name = 'vals_elem_var{:d}eb{:d}'.format(ind+1,block)
 
         if name in self._data.variables:
-            return np.array(self._data.variables[name])
+            return np.array(self._data.variables[name]).T
         else:
             return np.array([])
             

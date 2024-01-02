@@ -1,7 +1,6 @@
 """
 ==============================================================================
-EXAMPLE 2a: Run MOOSE using python once
-Use the os module and terminal commands to run MOOSE from python
+EXAMPLE 2a: Run MOOSE using mooseherder once
 
 Author: Lloyd Fletcher
 ==============================================================================
