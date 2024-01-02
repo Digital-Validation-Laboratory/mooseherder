@@ -1,11 +1,9 @@
-# source ~/.moose_profile
-# proteus-opt --n-threads=4 -i model-tensile-test.i
-
-# Variables
+#_* Variables
 # n_elem_x = 100
-n_elem_y = 100 # Trying to break my code
-e_modulus = 1e9
-p_ratio = 0.3
+#n_elem_y = 100 # Trying to break the code
+#e_modulus = 1e9
+#p_ratio = 0.3
+#**
 
 [GlobalParams]
     displacements = 'disp_x disp_y'
@@ -16,7 +14,7 @@ p_ratio = 0.3
         type = GeneratedMeshGenerator
         dim = 2
         nx = 100 # ${n_elem_x}
-        ny = ${n_elem_y}
+        ny = 100 # ${n_elem_y}
         xmax = 2
         ymax = 1
     []
@@ -25,6 +23,7 @@ p_ratio = 0.3
 [Modules/TensorMechanics/Master]
     [all]
         add_variables = true
+        generate_output = 'vonmises_stress strain_xx strain_yy strain_zz'
     []
 []
 
@@ -56,8 +55,8 @@ p_ratio = 0.3
 [Materials]
     [elasticity]
         type = ComputeIsotropicElasticityTensor
-        youngs_modulus = ${e_modulus}
-        poissons_ratio = ${p_ratio}
+        youngs_modulus = 1e9 # ${e_modulus}
+        poissons_ratio = 0.3 # ${p_ratio}
     []
     [stress]
         type = ComputeLinearElasticStress

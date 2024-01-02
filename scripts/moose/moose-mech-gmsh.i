@@ -1,6 +1,4 @@
 #_* Variables
-# n_elem_x = 100
-n_elem_y = 100 # Trying to break the code
 e_modulus = 1e9
 p_ratio = 0.3
 #**
@@ -10,14 +8,8 @@ p_ratio = 0.3
 []
 
 [Mesh]
-    [generated]
-        type = GeneratedMeshGenerator
-        dim = 2
-        nx = 100 # ${n_elem_x}
-        ny = ${n_elem_y}
-        xmax = 2
-        ymax = 1
-    []
+    type = FileMesh
+    file = 'mesh_tens_spline_2d.msh'
 []
 
 [Modules/TensorMechanics/Master]
@@ -26,32 +18,28 @@ p_ratio = 0.3
         generate_output = 'vonmises_stress strain_xx strain_yy strain_zz'
     []
 []
-
-#
-# Added boundary/loading conditions
-# https://mooseframework.inl.gov/modules/tensor_mechanics/tutorials/introduction/step02.html
-#
+  
 [BCs]
-    [bottom_x]
-        type = DirichletBC
-        variable = disp_x
-        boundary = bottom
-        value = 0
-    []
-    [bottom_y]
+    [./u_top_pull]
+        type = Pressure
+        variable = disp_y
+        boundary = Top-BC
+        function = -1e7*t
+    [../]
+    [./u_bottom_fix]
         type = DirichletBC
         variable = disp_y
-        boundary = bottom
-        value = 0
-    []
-    [Pressure]
-        [top]
-        boundary = top
-        function = 1e7*t
-        []
-    []
+        boundary = Btm-BC
+        value = 0.0
+    [../]
+    [./u_yz_fix]
+        type = DirichletBC
+        variable = disp_x
+        boundary = Mid-BC
+        value = 0.0
+    [../]
 []
-
+  
 [Materials]
     [elasticity]
         type = ComputeIsotropicElasticityTensor
@@ -60,10 +48,10 @@ p_ratio = 0.3
     []
     [stress]
         type = ComputeLinearElasticStress
+        #type = ComputeFiniteStrainElasticStress
     []
 []
 
-# consider all off-diagonal Jacobians for preconditioning
 [Preconditioning]
     [SMP]
         type = SMP
@@ -73,12 +61,12 @@ p_ratio = 0.3
 
 [Executioner]
     type = Transient
-    # we chose a direct solver here
     petsc_options_iname = '-pc_type'
     petsc_options_value = 'lu'
     end_time = 5
     dt = 1
 []
+  
 
 [Outputs]
     exodus = true

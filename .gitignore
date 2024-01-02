@@ -1,8 +1,13 @@
-# MOOSE files
+# MOOSE output files
 *.e
 examples/moose-workdir-*
 examples/*.csv
-proteus-opt
+scripts/moose-workdir-*
+scripts/*.csv
+*.processor.*
+
+# Gmsh output files
+*.msh
 
 # Byte-compiled / optimized / DLL files
 __pycache__/

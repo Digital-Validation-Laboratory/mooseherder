@@ -6,16 +6,17 @@
 // Geometry Variables
 gaugeHeight = 10E-3;
 gaugeWidth = 2.5E-3;
-gaugeThickness = 1E-3; 
+// gaugeThickness = 1E-3; //2D for now
 
 // Parameterisation
 //_*
 p0 = 1.5E-3;
-p1 = 1E-3;
+p1 = 1E-3;  // Testing comments in the variable block
+// Another test comment
 p2 = 1.2E-3;
 //**
 lc = 1E-4;
-filename = "test_mesh.msh";
+filename = "mesh_tens_spline_2d.msh";
 
 
 // Create some points defining the boundary
@@ -48,41 +49,14 @@ Transfinite Curve{2} = 50;
 Transfinite Surface{1};
 
 Recombine Surface{:};
-
-Extrude {0, 0, gaugeThickness} { Surface{:}; Layers{3}; Recombine;}
-
-Mesh 3;
-
-Physical Volume("Specimen",1) = {1};
+Mesh 2;
 
 
-delta = 0.005E-3;
-topsurf() = Surface In BoundingBox 
-{0-delta,gaugeHeight-delta,0-delta,
-gaugeWidth+delta, gaugeHeight+delta,gaugeThickness+delta};
+Physical Surface("Specimen",1) = {1};
 
-btmsurf() = Surface In BoundingBox 
-{0-delta,-gaugeHeight-delta,0-delta,
-gaugeWidth+delta,-gaugeHeight+delta,gaugeThickness+delta};
-
-bcksurf() = Surface In BoundingBox 
-{-1,-gaugeHeight-delta,0-delta,
-1,gaugeHeight+delta,0+delta};
-
-midsurf() = Surface In BoundingBox 
-{0-delta,-gaugeHeight-delta,0-delta,
-0+delta,gaugeHeight+delta,gaugeThickness+delta};
-
-// We now can use these variables to assign physical surfaces.
-// Again note the tags! Physical tags start at 1 and tags are shared between all physical entities.
-// Physical Volume("Vol",1) and Physical Surface("Sur",1) will cause errors!
-// The names given to these surfaces will be used as the BC names in MOOSE.
-
-Physical Surface("Top-BC",2) = {topsurf()};
-Physical Surface("Btm-BC",3) = {btmsurf()};
-Physical Surface("Bck-BC",4) = {bcksurf()};
-Physical Surface("Mid-BC",5) = {midsurf()};
-
+Physical Curve("Top-BC",2) = {3};
+Physical Curve("Mid-BC",3) = {4};
+Physical Curve("Btm-BC",4) = {1};
 
 Save Str(filename);
 Exit;

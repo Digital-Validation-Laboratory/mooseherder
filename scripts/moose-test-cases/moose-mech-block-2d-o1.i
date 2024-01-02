@@ -1,6 +1,7 @@
 #_* Variables
-n_elem_y = 100.0
-e_modulus = 1000000000.0
+n_elem_x = 40
+n_elem_y = 20
+e_modulus = 1e9
 p_ratio = 0.3
 #**
 
@@ -12,10 +13,12 @@ p_ratio = 0.3
     [generated]
         type = GeneratedMeshGenerator
         dim = 2
-        nx = 100 # ${n_elem_x}
+        nx = ${n_elem_x}
         ny = ${n_elem_y}
         xmax = 2
         ymax = 1
+        elem_type = QUAD4
+        # EDGE, EDGE2, EDGE3, EDGE4, QUAD, QUAD4, QUAD8, QUAD9, TRI, TRI3, TRI6, TRI7, HEX, HEX8, HEX20, HEX27, TET, TET4, TET10, TET14, PRISM, PRISM6, PRISM15, PRISM18, PYRAMID, PYRAMID5, PYRAMID13, PYRAMID14
     []
 []
 
@@ -26,10 +29,6 @@ p_ratio = 0.3
     []
 []
 
-#
-# Added boundary/loading conditions
-# https://mooseframework.inl.gov/modules/tensor_mechanics/tutorials/introduction/step02.html
-#
 [BCs]
     [bottom_x]
         type = DirichletBC
@@ -62,7 +61,6 @@ p_ratio = 0.3
     []
 []
 
-# consider all off-diagonal Jacobians for preconditioning
 [Preconditioning]
     [SMP]
         type = SMP
@@ -72,9 +70,9 @@ p_ratio = 0.3
 
 [Executioner]
     type = Transient
-    # we chose a direct solver here
-    petsc_options_iname = '-pc_type'
-    petsc_options_value = 'lu'
+    solve_type = 'PJFNK'
+    petsc_options_iname = '-pc_type -pc_hypre_type'
+    petsc_options_value = 'hypre boomeramg'
     end_time = 5
     dt = 1
 []
