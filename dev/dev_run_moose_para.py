@@ -10,7 +10,6 @@ from pathlib import Path
 from mooseherder import MooseHerd
 from mooseherder import MooseRunner
 from mooseherder import InputModifier
-from mooseherder import ExodusReader
 
 if __name__ == '__main__':
     print('------------------------------------------')

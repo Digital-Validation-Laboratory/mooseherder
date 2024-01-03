@@ -382,7 +382,6 @@ class MooseHerd:
 
         return read_vars
 
-
     def read_results_sequential(self, var_keys: list, elem_var_blocks=None) -> list:
         """_summary_
 
