@@ -61,3 +61,5 @@ if __name__ == '__main__':
     print('------------------------------------------')
     print()
 
+    herd.read_results_once()
+

@@ -8,6 +8,7 @@ Authors: Lloyd Fletcher, Rory Spencer
 import os, shutil
 import time
 import multiprocessing as mp
+import json
 from mooseherder.inputmodifier import InputModifier
 from mooseherder.mooserunner import MooseRunner
 from mooseherder.gmshrunner import GmshRunner
@@ -287,16 +288,11 @@ class MooseHerd:
                         processes.append(pool.apply_async(self.run_once, args=(ii,vv,ww)))
                         ii += 1
                 
-            self._para_res = [pp.get() for pp in processes]
-
-            print('PARA RES')
-            print(type(self._para_res))
-            print(len(self._para_res))
-            print()
-            print(self._para_res)
-            print()
-
+            self._output_files = [pp.get() for pp in processes]
             self._sweep_run_time = time.perf_counter() - self._sweep_start_time
+
+            with open(self.get_output_key_file(), "w") as okf:
+                json.dump(self._output_files, okf)
 
     def run_sequential(self,moose_var_list: list(dict()), gmsh_var_list=None) -> None:
         """Runs MOOSE (and gmsh if specified) sequentially. Each item in the 
@@ -329,11 +325,25 @@ class MooseHerd:
         self._output_files = output_files
         self._sweep_run_time = time.perf_counter() - self._sweep_start_time
 
-    def read_results_once(self, output_reader):
+    def get_output_key_file(self) -> str:
+
+        return self._run_dir+'-1/' + 'output_key.json'
+
+    def read_results_once(self):
         process_num = self._get_process_num()
+
+        with open(self.get_output_key_file()) as okf:
+            output_key = json.load(okf)
+
+        print('Output key file:')
+        print(output_key)
+        print()
 
     def read_results_sequentially(self):
         pass
+
+
+        
 
     #TODO: need to write once, sequential and parallel reader functions.
     def read_results_para(self, reader):
