@@ -1,76 +1,110 @@
-'''
+"""
 ==============================================================================
-DEV: READ EXODUS FILE
+EXAMPLE 5: Run MOOSE with mooseherder and read exodus
 
 Author: Lloyd Fletcher
 ==============================================================================
-'''
+"""
 import time
-import netCDF4 as nc
-import numpy as np
-from pprint import pprint
+import os
+from pathlib import Path
+from mooseherder import MooseRunner
 from mooseherder import ExodusReader
 
-def debug_var(tag,var):
-    print(tag)
-    #print(type(var))
-    print(var.shape)
-    print()
+path_parts = Path(os.getcwd()).parts
+user_dir = os.path.join(path_parts[0],path_parts[1],path_parts[2])
 
-# Read the results
-output_dir = 'scripts/moose-test-cases/'
-output_file = 'moose-mech-subdom-2d-o2-moo0_out.e'
+print('------------------------------------------')
+print('EXAMPLE 5: Run MOOSE, read exodus.')
+print('------------------------------------------')
+# Create the moose runner with correct paths to moose and apps
+moose_dir = os.path.join(user_dir,'moose')
+moose_app_dir = os.path.join(user_dir,'moose-workdir/proteus')
+moose_app_name = 'proteus-opt'
+moose_runner = MooseRunner(moose_dir,moose_app_dir,moose_app_name)
 
-ex_data = ExodusReader(output_dir+output_file)
+# Set input and parallelisation options
+moose_runner.set_opts(n_tasks=1, n_threads=4, redirect=True)
+input_file = 'scripts/moose/moose-mech-simple.i'
+moose_runner.set_input_file(input_file)
 
-coords = ex_data.get_coords()
+# Run the MOOSE!
+print('Running moose with:')
+print(moose_runner.get_run_str())
+
+start_time = time.perf_counter()
+moose_runner.run()
+end_time = time.perf_counter()
+
 print()
-print('NODE COORDS')
+print('MOOSE run time = '+'{:.3f}'.format(end_time-start_time)+' seconds')
+print()
+print('------------------------------------------')
+
+output_file = 'scripts/moose/moose-mech-simple_out.e'
+print('Reading exodus file:')
+print(output_file)
+print()
+
+exodus_reader = ExodusReader(output_file)
+
+coords = exodus_reader.get_coords()
+print('Nodal Coordinates N[x,y,z]:')
 print(type(coords))
 print(coords.shape)
 print()
 
-var_str = 'strain_xx'
-
-try:
-    node_data = ex_data.get_node_data(var_str)
-except:
-    node_data = np.array([])
-
-elem_data = ex_data.get_elem_data(var_str,1)
-
-debug_var('name_nod_var',ex_data.get_var('name_nod_var'))
-debug_var('name_elem_var',ex_data.get_var('name_elem_var'))
-debug_var(var_str,node_data)
-debug_var(var_str,elem_data)
-
-print()
-print(ex_data._get_names('name_nod_var'))
-print(type(ex_data._get_names('name_nod_var')))
+sim_time = exodus_reader.get_time()
+print('Simulation time [t]:')
+print(type(sim_time))
+print(sim_time.shape)
 print()
 
-print()
-pprint(ex_data.get_time())
-pprint(ex_data.get_time().shape)
+disp = exodus_reader.get_node_data('disp_x')
+print('X Displacement at nodes [N,t]:')
+print(type(disp))
+print(disp.shape)
 print()
 
+strain = exodus_reader.get_elem_data('strain_xx',1)
+print('XX Strain at elements [E,t]')
+print(type(strain))
+print(strain.shape)
+print()
 
-'''
-Required Variables:
-time_whole
-coordx
-coordy
-coordz
-name_elem_var
-vals_nod_var1
-vals_nod_var2
-'coor_names'
-'node_num_map'
-'connect1'
-'elem_num_map'
-'name_elem_var'
-'vals_elem_var1eb1'
-'vals_elem_var2eb1'
-'vals_elem_var3eb1'
-'vals_elem_var4eb1'
-'''
+print('Printing all variable keys in exodus file:')
+exodus_reader.print_vars()
+print()
+
+print('Extracting variable: connect1 [E,4]')
+print('Note: simulation uses QUAD4 2D elements = 4 nodes per element.')
+ext_var = exodus_reader.get_var('connect1')
+print(type(ext_var))
+print(ext_var.shape)
+print()
+
+node_var_names = exodus_reader.get_node_var_names()
+elem_var_names = exodus_reader.get_elem_var_names()
+all_var_names = exodus_reader.get_all_var_names()
+
+print('Node var names')
+print(type(node_var_names))
+print(node_var_names)
+print()
+
+print('Elem var names')
+print(type(elem_var_names))
+print(elem_var_names)
+print()
+
+print('All var names')
+print(type(all_var_names))
+print(all_var_names)
+print()
+
+print('------------------------------------------')
+print()
+
+read_vars = ['disp_x','disp_y','disp_z','strain_xx']
+
+

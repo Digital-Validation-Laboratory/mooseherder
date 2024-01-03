@@ -33,16 +33,13 @@ class ExodusReader:
         """        
         self._data = nc.Dataset(exodus_file)
     
-        self.node_var_names = self._get_names('name_nod_var')
-        self.elem_var_names = self._get_names('name_elem_var')
+        self._node_var_names = self._get_names('name_nod_var')
+        self._elem_var_names = self._get_names('name_elem_var')
 
-        self.node_data = dict()
-        for ii,nn in enumerate(self.node_var_names):
+        self._node_data = dict()
+        for ii,nn in enumerate(self._node_var_names):
             key = 'vals_nod_var{:d}'.format(ii+1)
-            self.node_data[nn] = np.array(self._data.variables[key]).T
-
-        if self.elem_var_names.shape[0] != 0:
-            pass
+            self._node_data[nn] = np.array(self._data.variables[key]).T
 
     def __del__(self):
         """Safely close the exodus file.
@@ -66,6 +63,15 @@ class ExodusReader:
             return nc.chartostring(np.array(self._data.variables[key]))
         else: 
             return np.array([])
+        
+    def get_all_var_names(self):
+        return list(self._data.variables)
+    
+    def get_node_var_names(self):
+        return list(self._node_var_names)
+    
+    def get_elem_var_names(self):
+        return list(self._elem_var_names)
         
     def get_var(self,key: str) -> np.array:
         """Gets a variable from the exodus file. If the variable does not exist
@@ -96,7 +102,7 @@ class ExodusReader:
             np.array: returns an array with shape (T,N) where T is the number 
                 of time steps and N is the number of nodes in the simulation.
         """      
-        return self.node_data[key]
+        return self._node_data[key]
     
     def get_elem_data(self,key: str, block: int) -> np.array:
         """Gets the simulation data at elements for the variable requested with
@@ -113,10 +119,10 @@ class ExodusReader:
                 block. Returns an empty array if there are no element variables
                 or if the requested key/block does not exist.
         """
-        if self.elem_var_names.shape[0] == 0:
+        if self._elem_var_names.shape[0] == 0:
             return np.array([])
                 
-        ind = np.where(self.elem_var_names == key)[0][0]
+        ind = np.where(self._elem_var_names == key)[0][0]
         name = 'vals_elem_var{:d}eb{:d}'.format(ind+1,block)
 
         if name in self._data.variables:

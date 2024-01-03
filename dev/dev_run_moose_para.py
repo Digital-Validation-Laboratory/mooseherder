@@ -10,6 +10,7 @@ from pathlib import Path
 from mooseherder import MooseHerd
 from mooseherder import MooseRunner
 from mooseherder import InputModifier
+from mooseherder import ExodusReader
 
 if __name__ == '__main__':
     print('------------------------------------------')
@@ -61,5 +62,34 @@ if __name__ == '__main__':
     print('------------------------------------------')
     print()
 
-    herd.read_results_once()
+    output_files = herd.get_output_files()
+    print('Output Files:')
+    print(output_files)
+    print()
 
+    vars_to_read = ['disp_x','disp_y','disp_z','strain_xx']
+    elem_blocks = [0,0,0,1]
+
+    read_vars = herd.read_results_once(output_files[0],vars_to_read)
+    print('Read Vars')
+    print(read_vars)
+    print()
+
+    read_vars = herd.read_results_once(output_files[0],vars_to_read,elem_blocks)
+    print('Read Vars')
+    print(read_vars)
+    print()
+
+    read_all = herd.read_results_sequential(vars_to_read)
+    print('Read All Vars')
+    print(read_all)
+    print(len(read_all))
+    print(type(read_all))
+    print()
+
+    read_all = herd.read_results_para(vars_to_read)
+    print('Read All Vars')
+    print(read_all)
+    print(len(read_all))
+    print(type(read_all))
+    print()

@@ -7,11 +7,13 @@ Authors: Lloyd Fletcher, Rory Spencer
 '''
 import os, shutil
 import time
-import multiprocessing as mp
 import json
+import numpy as np
+import multiprocessing as mp
 from mooseherder.inputmodifier import InputModifier
 from mooseherder.mooserunner import MooseRunner
 from mooseherder.gmshrunner import GmshRunner
+from mooseherder.exodusreader import ExodusReader
 
 class MooseHerd:
     """Class to run MOOSE and gmsh in parallel.
@@ -43,7 +45,9 @@ class MooseHerd:
         self._gmsh_input_name = 'gmsh-mesh'
         self._base_dir = os.path.split(self._moose_modifier.get_input_file())[0]+'/'
         self._run_dir = self._base_dir + self._sub_dir
+
         self._output_files = list()
+        self._sweep_results = list()
 
         self._one_dir = False
         self._keep_all = True
@@ -277,7 +281,7 @@ class MooseHerd:
         with mp.Pool(self._n_moose) as pool:
             self._sweep_start_time = time.perf_counter()
 
-            processes = []
+            processes = list()
             if gmsh_var_list == None:
                 for ii,vv in enumerate(moose_var_list):
                         processes.append(pool.apply_async(self.run_once, args=(ii,vv)))
@@ -326,48 +330,99 @@ class MooseHerd:
         self._sweep_run_time = time.perf_counter() - self._sweep_start_time
 
     def get_output_key_file(self) -> str:
+        """_summary_
 
+        Returns:
+            str: _description_
+        """        
         return self._run_dir+'-1/' + 'output_key.json'
-
-    def read_results_once(self):
-        process_num = self._get_process_num()
-
+    
+    def get_output_files(self) -> list(str()):
+        return self._output_files
+    
+    def read_output_keys(self) -> None:
+        """_summary_
+        """        
         with open(self.get_output_key_file()) as okf:
-            output_key = json.load(okf)
+            self._output_files = json.load(okf)
 
-        print('Output key file:')
-        print(output_key)
-        print()
-
-    def read_results_sequentially(self):
-        pass
-
-
-        
-
-    #TODO: need to write once, sequential and parallel reader functions.
-    def read_results_para(self, reader):
-        """Read results in parallel. 
+    def read_results_once(self, output_file: str,var_keys: list, elem_var_blocks = None) -> dict:
+        """_summary_
 
         Args:
-            reader (ReaderClass): Class for reading files, should have a read() method. Either csv or .e currently.
-        
+            output_file (str): _description_
+            var_keys (list): _description_
+            elem_var_blocks (_type_, optional): _description_. Defaults to None.
+
         Returns:
-            list: List of whatever reader reads.
-        """
-        
-        # Iterate over folders to get results. if no results, throw error
+            dict: _description_
+        """        
+
+        # Create the 
+        reader = ExodusReader(output_file)         
+        read_vars = dict()
+
+        # Always get the nodal coords and the time vector
+        read_vars['coords'] = reader.get_coords()
+        read_vars['time'] = reader.get_time()
+
+        # Three cases:
+        # 1) nodal data (no block)
+        # 2) element data (with block)
+        # 3) standard variable string to access anything in exodus
+        for ii,kk in enumerate(var_keys):
+            if kk in reader.get_node_var_names():
+                read_vars[kk] = reader.get_node_data(kk)
+            elif (elem_var_blocks != None) and (kk in reader.get_elem_var_names()): 
+                read_vars[kk] = reader.get_elem_data(kk,elem_var_blocks[ii])
+            elif kk in reader.get_all_var_names():
+                read_vars[kk] = reader.get_var(kk)
+            else:
+                read_vars[kk] = None
+
+        return read_vars
+
+
+    def read_results_sequential(self, var_keys: list, elem_var_blocks=None) -> list:
+        """_summary_
+
+        Args:
+            var_keys (list): _description_
+            elem_var_blocks (_type_, optional): _description_. Defaults to None.
+
+        Returns:
+            list: _description_
+        """        
+        if self._output_files == '':
+            self.read_output_keys()
+
+        self._sweep_results = list()
+        for ff in self._output_files:
+            self._sweep_results.append(
+                self.read_results_once(ff,var_keys,elem_var_blocks))
+
+        return self._sweep_results
+            
+    def read_results_para(self, var_keys: list, elem_var_blocks = None) -> list:
+        """_summary_
+
+        Args:
+            var_keys (list): _description_
+            elem_var_blocks (_type_, optional): _description_. Defaults to None.
+
+        Returns:
+            list: _description_
+        """        
+        if self._output_files == '':
+            self.read_output_keys()        
+
         with mp.Pool(self._n_moose) as pool:
-            processes = []
-            for iter in range(self._n_moose):
-                folderpath = self._run_dir+'-'+str(iter+1)
-                result_path = folderpath + '/' + self._input_tag + '-' + str(iter+1) + '_out.' + reader._extension
-                processes.append(pool.apply_async(reader.read, (result_path,))) # tuple is important, otherwise it unpacks strings for some reason
+            processes = list()
+            for ff in self._output_files:
+                processes.append(pool.apply_async(
+                    self.read_results_once, args=(ff,var_keys,elem_var_blocks))) 
 
-            # Occasionally seems to error, but not sure why. 
-            # Hangs, but can read files when run afterwards.
-            data_list=[pp.get() for pp in processes]
+            self._sweep_results = [pp.get() for pp in processes]
 
-
-        return data_list
+        return self._sweep_results
 
