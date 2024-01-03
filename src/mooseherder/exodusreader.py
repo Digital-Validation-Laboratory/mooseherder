@@ -36,6 +36,7 @@ class ExodusReader:
         self.node_var_names = self._get_names('name_nod_var')
         self.elem_var_names = self._get_names('name_elem_var')
         self.global_var_names = self._get_names('name_glo_var')
+        self.side_set_names = self._get_names('ss_names')
 
         self.node_data = dict()
         for ii,nn in enumerate(self.node_var_names):
@@ -50,6 +51,14 @@ class ExodusReader:
         for ii,nn in enumerate(self.global_var_names):
             key = 'vals_glo_var'
             self.global_data[nn] = np.array(self._data.variables[key][:,ii])
+
+        self.side_set_nodes = dict()
+        for ii,nn in enumerate(self.side_set_names):
+            key = 'node_ns{:d}'.format(ii+1)
+            self.side_set_nodes[nn] = np.array(self._data.variables[key])
+
+
+
         
 
 
