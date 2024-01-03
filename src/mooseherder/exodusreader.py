@@ -13,7 +13,7 @@ There are several different cases that lead to different MOOSE output formats.
     2.2) Element output is split by block if material_output_order = CONSTANT
 4) Sub-domains may or may not be present but see 2.1 above for exception
 
-Authors: Lloyd Fletcher
+Authors: Lloyd Fletcher, Rory Spencer
 ===============================================================================
 """
 
@@ -35,6 +35,7 @@ class ExodusReader:
     
         self.node_var_names = self._get_names('name_nod_var')
         self.elem_var_names = self._get_names('name_elem_var')
+        self.global_var_names = self._get_names('name_glo_var')
 
         self.node_data = dict()
         for ii,nn in enumerate(self.node_var_names):
@@ -43,6 +44,14 @@ class ExodusReader:
 
         if self.elem_var_names.shape[0] != 0:
             pass
+
+        # Adding in reading of global variables (such as reaction force)
+        self.global_data = dict()
+        for ii,nn in enumerate(self.global_var_names):
+            key = 'vals_glo_var'
+            self.global_data[nn] = np.array(self._data.variables[key][:,ii])
+        
+
 
     def __del__(self):
         """Safely close the exodus file.
