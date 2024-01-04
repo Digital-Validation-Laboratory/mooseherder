@@ -42,10 +42,8 @@ if __name__ == '__main__':
 
     # Create variables to sweep in a list of dictionaries, 8 combinations possible.
     n_elem_y = [25,50]
-    e_mod = [1e9]
-    p_rat = [0.3]
-    #e_mod = [1e9,2e9]
-    #p_rat = [0.3,0.35]
+    e_mod = [1e9,2e9]
+    p_rat = [0.3,0.35]
     moose_vars = list()
     for nn in n_elem_y:
         for ee in e_mod:
@@ -75,16 +73,17 @@ if __name__ == '__main__':
     vars_to_read = ['disp_x','disp_y','disp_z','strain_xx']
     elem_blocks = [0,0,0,1]
 
-    print('Variable keys to read:')
+    print('Variable keys to read as list:')
     pprint(vars_to_read)
     print()
 
-    print('Element blocks associated with variable keys:')
+    print('Element blocks associated with variable keys as list:')
     pprint(elem_blocks)
     print()
 
     print('-----------------------------------------------------------')
     print('Reading the first output file, no element blocks specified.')
+    print('Variables returned as dict.')
     read_vars = herd.read_results_once(output_files[0],vars_to_read)
     print()
 
@@ -127,14 +126,19 @@ if __name__ == '__main__':
     print()
 
     print('-----------------------------------------------------------')
-    print('Reading all output files sequentially.')
+    print('Reading all output files sequentially as a list(dict).')
     print()
-    read_all = herd.read_results_sequential(vars_to_read)
+    read_all = herd.read_results_sequential(vars_to_read,elem_blocks)
+    
+    print('Number of simulations outputs: {:d}'.format(len(read_all)))
+    print('Variable keys for simulation output:')
+    print(list(read_all[0].keys()))
+    print()
 
     print('-----------------------------------------------------------')
-    print('Reading all output files in parallel.')
+    print('Reading all output files in parallel as list(dict).')
     print()
-    read_all = herd.read_results_para(vars_to_read)
+    read_all = herd.read_results_para(vars_to_read,elem_blocks)
 
     print('-----------------------------------------------------------')
 

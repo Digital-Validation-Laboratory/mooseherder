@@ -35,11 +35,17 @@ class ExodusReader:
     
         self._node_var_names = self._get_names('name_nod_var')
         self._elem_var_names = self._get_names('name_elem_var')
+        self._global_var_names = self._get_names('name_glo_var')
+        self._side_set_names = self._get_names('ss_names')
 
-        self._node_data = dict()
-        for ii,nn in enumerate(self._node_var_names):
-            key = 'vals_nod_var{:d}'.format(ii+1)
-            self._node_data[nn] = np.array(self._data.variables[key]).T
+        self._node_data = self._get_vars_from_names(self._node_var_names,'vals_nod_var')
+        self._side_set_nodes = self._get_vars_from_names(self._side_set_names,'node_ns')
+
+        # Global variables and element variables behave differently
+        self._global_data = dict()
+        for ii,nn in enumerate(self._global_var_names):
+            key = 'vals_glo_var'
+            self._global_data[nn] = np.array(self._data.variables[key][:,ii])
 
     def __del__(self):
         """Safely close the exodus file.
@@ -64,13 +70,32 @@ class ExodusReader:
         else: 
             return np.array([])
         
-    def get_all_var_names(self):
+    def _get_vars_from_names(self,names: np.array, key_tag: str) -> dict:
+        """_summary_
+
+        Args:
+            names (np.array): _description_
+            key_tag (str): _description_
+
+        Returns:
+            dict: _description_
+        """        
+        vars = dict()
+        for ii,nn in enumerate(names):
+            key = key_tag+'{:d}'.format(ii+1)
+            vars[nn] = np.array(self._data.variables[key]).T
+        return vars
+
+    def get_all_var_names(self) -> list(str()):
+        
         return list(self._data.variables)
     
     def get_node_var_names(self):
+
         return list(self._node_var_names)
     
-    def get_elem_var_names(self):
+    def get_elem_var_names(self) -> list(str()):
+      
         return list(self._elem_var_names)
         
     def get_var(self,key: str) -> np.array:
@@ -101,8 +126,11 @@ class ExodusReader:
         Returns:
             np.array: returns an array with shape (T,N) where T is the number 
                 of time steps and N is the number of nodes in the simulation.
-        """      
-        return self._node_data[key]
+        """
+        if key in self._node_data:      
+            return self._node_data[key]
+        else:
+            return np.array([])
     
     def get_elem_data(self,key: str, block: int) -> np.array:
         """Gets the simulation data at elements for the variable requested with
@@ -129,6 +157,35 @@ class ExodusReader:
             return np.array(self._data.variables[name]).T
         else:
             return np.array([])
+        
+    def get_global_data(self,key) -> np.array:
+        """_summary_
+
+        Args:
+            key (_type_): _description_
+
+        Returns:
+            np.array: _description_
+        """        
+        if key in self._global_data:
+            return self._global_data[key]
+        else:
+            return np.array([])
+        
+    def get_sideset_nodes(self, key: str) -> np.array:
+        """_summary_
+
+        Args:
+            key (_type_): _description_
+
+        Returns:
+            np.array: _description_
+        """        
+        if key in self._side_set_nodes:
+            return self._side_set_nodes[key]
+        else:
+            return np.array([])
+        
             
     def get_coords(self) -> np.array:
         """Gets the nodal coordinates in each spatial dimension setting any
