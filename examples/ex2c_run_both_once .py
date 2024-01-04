@@ -1,7 +1,7 @@
 """
 ==============================================================================
-EXAMPLE 2c: 
-Use the os module and terminal commands to run gmsh and MOOSE from python
+EXAMPLE 2c: Run gmsh+MOOSE once with mooseherder with MOOSE reading the gmsh
+generated mesh.
 
 Author: Lloyd Fletcher
 ==============================================================================
@@ -46,7 +46,7 @@ print('MOOSE app name: ' + moose_app_name)
 print()
 
 # Set input and parallelisation options
-moose_runner.set_opts(n_tasks=2,n_threads=4,redirect=True)
+moose_runner.set_opts(n_tasks=1,n_threads=4,redirect=True)
 input_file = 'scripts/moose/moose-mech-gmsh.i'
 moose_runner.set_input_file(input_file)
 

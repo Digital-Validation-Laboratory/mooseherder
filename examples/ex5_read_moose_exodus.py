@@ -1,6 +1,6 @@
 """
 ==============================================================================
-EXAMPLE 5: Run MOOSE with mooseherder and read exodus
+EXAMPLE 5: Run MOOSE once with mooseherder and read the exodus output
 
 Author: Lloyd Fletcher
 ==============================================================================
@@ -15,7 +15,7 @@ path_parts = Path(os.getcwd()).parts
 user_dir = os.path.join(path_parts[0],path_parts[1],path_parts[2])
 
 print('------------------------------------------')
-print('EXAMPLE 5: Run MOOSE, read exodus.')
+print('EXAMPLE 5: Run MOOSE once, read exodus.')
 print('------------------------------------------')
 # Create the moose runner with correct paths to moose and apps
 moose_dir = os.path.join(user_dir,'moose')

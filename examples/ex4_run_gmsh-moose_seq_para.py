@@ -1,6 +1,6 @@
 '''
 ==============================================================================
-EXAMPLE 4: Run parallel gmsh
+EXAMPLE 4: Run parallel gmsh+MOOSE simulation editing the gmsh parameters only
 
 Author: Lloyd Fletcher, Rory Spencer
 ==============================================================================
@@ -57,6 +57,9 @@ if __name__ == '__main__':
             for pp in p2:
                 gmsh_vars.append({'p0':nn,'p1':ee,'p2':pp})
 
+    print('Herd sweep variables:')
+    for vv in moose_vars:
+        print(vv)
 
     # Set the parallelisation options
     herd.para_opts(n_moose=4,tasks_per_moose=1,threads_per_moose=2,redirect_out=True)
