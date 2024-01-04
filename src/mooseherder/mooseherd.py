@@ -328,22 +328,15 @@ class MooseHerd:
 
         self._output_files = output_files
         self._sweep_run_time = time.perf_counter() - self._sweep_start_time
-
-    def get_output_key_file(self) -> str:
-        """_summary_
-
-        Returns:
-            str: _description_
-        """        
-        return self._run_dir+'-1/' + 'output_key.json'
     
     def get_output_files(self) -> list(str()):
         return self._output_files
     
     def read_output_keys(self) -> None:
         """_summary_
-        """        
-        with open(self.get_output_key_file()) as okf:
+        """
+        output_key_file = self._run_dir+'-1/' + 'output_key.json'        
+        with open(output_key_file) as okf:
             self._output_files = json.load(okf)
 
     def read_results_once(self, output_file: str,var_keys: list, elem_var_blocks = None) -> dict:
