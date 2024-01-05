@@ -10,6 +10,8 @@ import time
 import json
 import numpy as np
 import multiprocessing as mp
+from multiprocessing.pool import Pool
+from multiprocessing.pool import ThreadPool 
 from mooseherder.inputmodifier import InputModifier
 from mooseherder.mooserunner import MooseRunner
 from mooseherder.gmshrunner import GmshRunner
@@ -318,7 +320,7 @@ class MooseHerd:
         """
         self._start_sweep()
 
-        with mp.Pool(self._n_moose) as pool:
+        with ThreadPool(self._n_moose) as pool:
             processes = list()
             if gmsh_var_list == None:
                 ii = self._sim_iter
@@ -480,7 +482,7 @@ class MooseHerd:
         """        
         self._start_read(sweep_iter)      
 
-        with mp.Pool(self._n_moose) as pool:
+        with ThreadPool(self._n_moose) as pool:
             processes = list()
             for ff in self._output_files:
                 processes.append(pool.apply_async(
