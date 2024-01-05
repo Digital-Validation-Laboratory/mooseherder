@@ -29,6 +29,8 @@ class MooseRunner:
         self._app_name = app_name
         self._run_str = ''
         self._input_file = ''
+        self._input_dir = ''
+        self._input_tag = ''
 
         self.set_env_vars()
 
@@ -97,8 +99,7 @@ class MooseRunner:
         self.set_stdout(redirect)
 
     def set_input_file(self, input_file):
-        """Sets the path to the MOOSE input file and checks it exists to avoid 
-        cryptic errors. 
+        """Sets the path to the MOOSE input file and checks it exists.
 
         Args:
             input_file (str): full path and name of *.i MOOSE input script.
@@ -110,8 +111,54 @@ class MooseRunner:
             raise FileNotFoundError("Input file does not exist.")
         else:
             self._input_file = input_file
+            self._input_dir = os.path.split(input_file)[0]+'/'
+            self._input_tag = str(os.path.split(input_file)[1]).split('.')[0]
             self.assemble_run_str()
 
+    def get_input_dir(self) -> str:
+        """Gets the path to the directory for the specified input file.
+
+        Returns:
+            str: path to input file directory, if no input file is specified
+                returns an empty string.
+        """        
+        return self._input_dir
+    
+    def get_input_tag(self) -> str:
+        """Gets the input file name string without the path or the .i
+
+        Returns:
+            str: input file string, if no input file is specified returns an
+                empty string.
+        """        
+        return self._input_tag
+
+    def get_output_exodus_file(self) -> str:
+        """Gets the file name (without path) for the output exodus file based 
+        on the specified input file. Includes '_out.e'.
+
+        Returns:
+            str: output exodus file name without path, returns an empty string
+                if no input file is specified.
+        """        
+        if self._input_tag != '':
+            return self._input_tag + '_out.e' 
+        else:
+            return ''
+        
+    def get_output_exodus_path(self) -> str:
+        """Gets the file and path for the output exodus file based 
+        on the specified input file. Includes '_out.e'.
+
+        Returns:
+            str: output exodus file name with path, returns an empty string
+                if no input file is specified.
+        """     
+        if self._input_tag != '':
+            return self._input_dir + self._input_tag + '_out.e' 
+        else:
+            return ''
+    
     def get_run_str(self) -> str:
         """Run string getter.
 

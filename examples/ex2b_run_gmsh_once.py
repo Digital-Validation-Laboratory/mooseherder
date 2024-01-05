@@ -1,7 +1,6 @@
 """
 ==============================================================================
-EXAMPLE 2b: 
-Use the os module and terminal commands to run gmsh and MOOSE from python
+EXAMPLE 2b: Run gmsh with mooseherder once
 
 Author: Lloyd Fletcher
 ==============================================================================

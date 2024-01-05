@@ -1,6 +1,6 @@
 '''
 ==============================================================================
-EXAMPLE 3: Run MOOSE in sequential then parallel
+EXAMPLE 3: Run MOOSE in sequential then parallel mode with mooseherder
 
 Author: Lloyd Fletcher, Rory Spencer
 ==============================================================================
@@ -48,6 +48,10 @@ if __name__ == '__main__':
         for ee in e_mod:
             for pp in p_rat:
                 moose_vars.append({'n_elem_y':nn,'e_modulus':ee,'p_ratio':pp})
+    
+    print('Herd sweep variables:')
+    for vv in moose_vars:
+        print(vv)
         
     print()
     print('------------------------------------------')
@@ -82,4 +86,5 @@ if __name__ == '__main__':
     print('Run time (parallel) = '+'{:.3f}'.format(herd.get_sweep_time())+' seconds')
     print('------------------------------------------')
     print()
+
 

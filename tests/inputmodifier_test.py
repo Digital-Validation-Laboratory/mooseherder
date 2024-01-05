@@ -180,7 +180,6 @@ def test_gmsh_write_file(gmsh_mod):
                                     'p2': 0.001, 
                                     'filename': '"mesh_tens_spline_2d.msh"'}
 
-
 @pytest.mark.parametrize(
         ('input_str','expected'),
         (
