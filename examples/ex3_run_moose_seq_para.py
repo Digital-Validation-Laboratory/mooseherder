@@ -11,7 +11,7 @@ from mooseherder import MooseHerd
 from mooseherder import MooseRunner
 from mooseherder import InputModifier
 
-if __name__ == '__main__':
+def main():
     print('------------------------------------------')
     print('EXAMPLE 3: Herd Setup')
     print('------------------------------------------')
@@ -86,5 +86,8 @@ if __name__ == '__main__':
     print('Run time (parallel) = '+'{:.3f}'.format(herd.get_sweep_time())+' seconds')
     print('------------------------------------------')
     print()
+
+if __name__ == '__main__':
+    main()
 
 

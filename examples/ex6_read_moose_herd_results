@@ -12,7 +12,7 @@ from mooseherder import MooseHerd
 from mooseherder import MooseRunner
 from mooseherder import InputModifier
 
-if __name__ == '__main__':
+def main():
     print('-----------------------------------------------------------')
     print('EXAMPLE 6: Parallel Herd Setup & Run')
     print('-----------------------------------------------------------')
@@ -50,7 +50,6 @@ if __name__ == '__main__':
             for pp in p_rat:
                 moose_vars.append({'n_elem_y':nn,'e_modulus':ee,'p_ratio':pp})
         
-  
     print('Herd sweep variables:')
     pprint(moose_vars)
 
@@ -128,7 +127,7 @@ if __name__ == '__main__':
     print('-----------------------------------------------------------')
     print('Reading all output files sequentially as a list(dict).')
     print()
-    read_all = herd.read_results_sequential(vars_to_read,elem_blocks)
+    read_all = herd.read_results_sequential(vars_to_read,None,elem_blocks)
     
     print('Number of simulations outputs: {:d}'.format(len(read_all)))
     print('Variable keys for simulation output:')
@@ -138,7 +137,9 @@ if __name__ == '__main__':
     print('-----------------------------------------------------------')
     print('Reading all output files in parallel as list(dict).')
     print()
-    read_all = herd.read_results_para(vars_to_read,elem_blocks)
+    read_all = herd.read_results_para(vars_to_read,None,elem_blocks)
 
     print('-----------------------------------------------------------')
 
+if __name__ == '__main__':
+    main()
