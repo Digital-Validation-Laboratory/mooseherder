@@ -231,6 +231,8 @@ class MooseHerd:
         self._iter_start_time = time.perf_counter()
 
         process_num = self._get_process_num()
+        if int(process_num) > self._n_moose:
+            process_num = str((int(process_num) % self._n_moose)+1)
 
         if self._one_dir:
             run_dir = self._run_dir+'-1/'
@@ -323,7 +325,7 @@ class MooseHerd:
             ii = 0
             for vv in moose_var_list:
                 for ww in gmsh_var_list:
-                    output_files.append(self.self.run_once(ii,vv,ww))
+                    output_files.append(self.run_once(ii,vv,ww))
                     ii += 1
 
         self._output_files = output_files
@@ -428,6 +430,29 @@ class MooseHerd:
             for ff in self._output_files:
                 processes.append(pool.apply_async(
                     self.read_results_once, args=(ff,var_keys,elem_var_blocks))) 
+
+            self._sweep_results = [pp.get() for pp in processes]
+
+        return self._sweep_results
+    
+ 
+    def read_results_para_generic(self, reader) -> list:
+        """Generic reading results in parallel. Will read the exodus files using reader function
+        Anticipating this will work with moose_to_spatialdata() to return spatialdata objects.
+
+        Args:
+            reader(function): function read the exodus file. Will call reader() to return some data you want.
+            
+        Returns:
+            list: _description_
+        """        
+        if self._output_files == '':
+            self.read_output_keys()        
+
+        with mp.Pool(self._n_moose) as pool:
+            processes = list()
+            for ff in self._output_files:
+                processes.append(pool.apply_async(reader(), args=(ff))) 
 
             self._sweep_results = [pp.get() for pp in processes]
 

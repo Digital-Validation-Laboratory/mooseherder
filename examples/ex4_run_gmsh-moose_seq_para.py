@@ -31,7 +31,7 @@ if __name__ == '__main__':
     moose_vars = [moose_modifier.get_vars()]
 
     # Setup Gmsh
-    gmsh_path = os.path.join(user_dir,'moose-workdir/gmsh/bin/gmsh')
+    gmsh_path = '/home/rspencer/src/gmsh/bin/gmsh'#os.path.join(user_dir,'moose-workdir/gmsh/bin/gmsh')
     gmsh_input = 'scripts/gmsh/gmsh_tens_spline_2d.geo'
 
     gmsh_runner = GmshRunner(gmsh_path)
@@ -92,7 +92,7 @@ if __name__ == '__main__':
     # Run all variable combinations across 4 MOOSE instances with two runs saved in
     # each moose-workdir
     herd.run_para(moose_vars,gmsh_vars)
-
+    herd.run_para(moose_vars,gmsh_vars) # Running para the second time starts looking for workdir-5 onwards as process names keep incrementing
     print('Run time (parallel) = '+'{:.3f}'.format(herd.get_sweep_time())+' seconds')
     print('------------------------------------------')
     print()
