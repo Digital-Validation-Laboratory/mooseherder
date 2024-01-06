@@ -1,17 +1,17 @@
 # This is a simple MOOSE tensor mechanics input script for testing the herder
-n_elem_x = 40 # Putting this variable outside the block to test
+n_elem_x = 20 # Putting this variable outside the block to test
 
 #_* Variables Block
-# n_elem_x = 50 putting an equals sign here to test
-n_elem_y = 25 # Testing comments in the variables block
-e_modulus = 2000000000.0
+# n_elem_x = 25 putting an equals sign here to test
+n_elem_y = 10 # Testing comments in the variables block
+e_modulus = 1e9
 # Comment line to test
-p_ratio = 0.3 # Another comment to test with
+p_ratio = 0.3# Another comment to test with
 # The next variables test strings
-e_type = QUAD8
+e_type = QUAD4
 add_vars = true
-y_max = 1.0
-x_max = ${fparse2*y_max}
+y_max = 1 
+x_max = ${fparse 2*y_max}
 #**
 
 # Another variable outside the block to test

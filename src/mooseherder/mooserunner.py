@@ -167,16 +167,23 @@ class MooseRunner:
         """        
         return self._run_str
 
-    def assemble_run_str(self, input_file="") -> None:
+    def assemble_run_str(self, input_file = '') -> str:  
         """Assmebles the command line string to run MOOSE based on current 
         options.
 
         Args:
             input_file (str, optional): Full path to MOOSE input file, if not 
                 empty updates the input file. Defaults to "".
-        """        
-        if input_file != "":
+
+        Returns:
+            str: command line string that will be used by the runner when run 
+                is called.
+        """
+        if input_file != '':
             self.set_input_file(input_file)
+
+        if self._input_file == '':
+            raise RuntimeError('No input file specified, set one using set_input_file or by passing on into this function.')
 
         if self._redirect_stdout:
             redirect_str = ' --redirect-stdout'
@@ -194,6 +201,7 @@ class MooseRunner:
                             + self._input_file + redirect_str 
         
         self._run_str = run_str
+        return self._run_str
 
 
     def run(self, input_file="") -> None:

@@ -3,7 +3,7 @@ n_elem_x = 40 # Putting this variable outside the block to test
 
 #_* Variables Block
 # n_elem_x = 50 putting an equals sign here to test
-n_elem_y = 20 # Testing comments in the variables block
+# n_elem_y = 20 # Testing comments in the variables block
 e_modulus = 1e9
 # Comment line to test
 p_ratio = 0.3# Another comment to test with
