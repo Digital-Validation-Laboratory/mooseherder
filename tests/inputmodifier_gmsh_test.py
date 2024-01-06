@@ -12,7 +12,7 @@ from mooseherder.inputmodifier import InputModifier
 
 @pytest.fixture
 def gmsh_mod():
-    input_file = 'tests/gmsh/gmsh_vartest.geo'
+    input_file = 'tests/gmsh/gmsh-test.geo'
     return InputModifier(input_file,'//',';')
 
 @pytest.fixture(autouse=True)

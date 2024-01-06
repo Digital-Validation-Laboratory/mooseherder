@@ -36,7 +36,7 @@ class GmshRunner:
         if os.path.exists(gmsh_app):
             self._gmsh_app = gmsh_app
         else:
-            raise FileNotFoundError('Specified gmsh app not found.')
+            raise FileNotFoundError('Gmsh app not found at given path.')
 
     def set_input_file(self, input_file: str) -> None:
         """Sets the input geo file for gmsh.
@@ -52,7 +52,7 @@ class GmshRunner:
             raise FileNotFoundError('Incorrect file type. Must be *.geo.')
         
         if not os.path.exists(input_file):
-            raise FileNotFoundError('Gmsh geo file not found.')
+            raise FileNotFoundError('Specified gmsh geo file does not exist.')
         
         self._input_file = input_file
 

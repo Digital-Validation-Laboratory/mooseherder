@@ -204,7 +204,7 @@ class MooseRunner:
         return self._run_str
 
 
-    def run(self, input_file="") -> None:
+    def run(self, input_file = '') -> None:
         """Runs MOOSE based on current options by passing run string to 
         subprocess shell.
 
@@ -212,7 +212,7 @@ class MooseRunner:
             input_file (str, optional): Full path to MOOSE input file, if not 
                 empty updates the input file. Defaults to "".
         """        
-        if input_file != "":
+        if input_file != '':
             self.set_input_file(input_file)
 
         self.assemble_run_str()

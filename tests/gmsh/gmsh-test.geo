@@ -14,10 +14,9 @@ p0 = 1.5E-3;
 p1 = 1E-3;  // Testing comments in the variable block
 // Another test comment
 p2 = 1.2E-3;
-filename = "mesh_tens_spline_2d.msh"; // String variable
+filename = "mesh-test.msh"; // String variable
 //**
 lc = 1E-4;
-
 
 // Create some points defining the boundary
 // Will have vertical symmetry
