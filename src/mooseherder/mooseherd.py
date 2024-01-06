@@ -482,6 +482,7 @@ class MooseHerd:
         """        
         self._start_read(sweep_iter)      
 
+        # NOTE: throws a seg fault!
         with ThreadPool(self._n_moose) as pool:
             processes = list()
             for ff in self._output_files:

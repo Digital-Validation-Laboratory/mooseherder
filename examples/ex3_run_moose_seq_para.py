@@ -40,7 +40,7 @@ def main():
     herd.create_dirs()
 
     # Create variables to sweep in a list of dictionaries, 8 combinations possible.
-    n_elem_y = [25,50]
+    n_elem_y = [20,40]
     e_mod = [1e9,2e9]
     p_rat = [0.3,0.35]
     moose_vars = list()

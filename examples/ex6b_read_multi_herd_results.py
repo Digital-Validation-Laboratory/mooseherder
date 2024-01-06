@@ -42,8 +42,8 @@ def main():
     herd.create_dirs()
 
     # Create variables to sweep in a list of dictionaries, 8 combinations possible.
-    n_elem_x = [50,100]
-    n_elem_y = [50,100]
+    n_elem_x = [10,20]
+    n_elem_y = [10,20]
     e_mod = [1e9,2e9]
     moose_vars = list()
     for nx in n_elem_x:
@@ -55,7 +55,7 @@ def main():
     pprint(moose_vars)
 
     print()
-    num_runs = 10
+    num_runs = 4
     print('Running MOOSE in parallel x{:d}.'.format(num_runs))
     print()
 
