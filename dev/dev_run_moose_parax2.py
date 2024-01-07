@@ -7,11 +7,12 @@ Author: Lloyd Fletcher, Rory Spencer
 '''
 import os
 from pathlib import Path
+from pprint import pprint
 from mooseherder import MooseHerd
 from mooseherder import MooseRunner
 from mooseherder import InputModifier
 
-if __name__ == '__main__':
+def main():
     print('------------------------------------------')
     print('EXAMPLE 3: Herd Setup')
     print('------------------------------------------')
@@ -52,43 +53,31 @@ if __name__ == '__main__':
     print('------------------------------------------')
     print('EXAMPLE 3c: Run MOOSE in parallel')
     print('------------------------------------------')
+    print()
 
     # Run all variable combinations across 4 MOOSE instances with two runs saved in
     # each moose-workdir
-    herd.run_para(moose_vars)
+    for rr in range(2):
+        herd.run_para(moose_vars)
 
-    print('Run time (parallel) = '+'{:.3f}'.format(herd.get_sweep_time())+' seconds')
-    print('------------------------------------------')
-    print()
+        print('Sim Iter = {:d}'.format(herd._sim_iter))
+        print('Run time, {:d} (parallel) = {:.3f}'.format(rr+1,herd.get_sweep_time())+' seconds')
+        print('------------------------------------------')
+        print()
 
-    output_files = herd.get_output_files()
-    print('Output Files:')
-    print(output_files)
-    print()
-
-    vars_to_read = ['disp_x','disp_y','disp_z','strain_xx']
+    vars_to_read = ['disp_x','disp_y','strain_xx']
     elem_blocks = [0,0,0,1]
 
-    read_vars = herd.read_results_once(output_files[0],vars_to_read)
-    print('Read Vars')
-    print(read_vars)
-    print()
+    all_output_files = herd.read_all_output_keys()
+    all_results = herd.read_results_para(vars_to_read,None,elem_blocks)
 
-    read_vars = herd.read_results_once(output_files[0],vars_to_read,elem_blocks)
-    print('Read Vars')
-    print(read_vars)
+    print('All output files:')
+    for ff in all_output_files:
+        print(ff)
     print()
+    print('Sweep iter = {:d}'.format(herd._sweep_iter))
+    print('Total results = {:d}'.format(len(all_results)))
 
-    read_all = herd.read_results_sequential(vars_to_read)
-    print('Read All Vars')
-    print(read_all)
-    print(len(read_all))
-    print(type(read_all))
-    print()
-
-    read_all = herd.read_results_para(vars_to_read)
-    print('Read All Vars')
-    print(read_all)
-    print(len(read_all))
-    print(type(read_all))
-    print()
+if __name__ == '__main__':
+    main()
+    

@@ -11,7 +11,7 @@ from mooseherder import MooseHerd
 from mooseherder import MooseRunner
 from mooseherder import InputModifier
 
-if __name__ == '__main__':
+def main():
     print('------------------------------------------')
     print('EXAMPLE 3: Herd Setup')
     print('------------------------------------------')
@@ -40,7 +40,7 @@ if __name__ == '__main__':
     herd.create_dirs()
 
     # Create variables to sweep in a list of dictionaries, 8 combinations possible.
-    n_elem_y = [25,50]
+    n_elem_y = [20,40]
     e_mod = [1e9,2e9]
     p_rat = [0.3,0.35]
     moose_vars = list()
@@ -86,5 +86,8 @@ if __name__ == '__main__':
     print('Run time (parallel) = '+'{:.3f}'.format(herd.get_sweep_time())+' seconds')
     print('------------------------------------------')
     print()
+
+if __name__ == '__main__':
+    main()
 
 
