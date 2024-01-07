@@ -112,5 +112,7 @@ def main():
 
     print('-----------------------------------------------------------')
     
+    print('NOTE: depening on hardware and simulations parallel read may be slower!')
+
 if __name__ == '__main__':
     main()
