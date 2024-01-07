@@ -320,7 +320,7 @@ class MooseHerd:
         """
         self._start_sweep()
 
-        with ThreadPool(self._n_moose) as pool:
+        with Pool(self._n_moose) as pool:
             processes = list()
             if gmsh_var_list == None:
                 ii = self._sim_iter
@@ -415,7 +415,7 @@ class MooseHerd:
         """        
         return self._output_files
     
-    def read_results_once(self, output_file: str,var_keys: list, elem_var_blocks = None) -> dict:
+    def read_results_once(self, output_file: str, var_keys: list, elem_var_blocks = None) -> dict:
         """_summary_
 
         Args:
@@ -482,8 +482,7 @@ class MooseHerd:
         """        
         self._start_read(sweep_iter)      
 
-        # NOTE: throws a seg fault!
-        with ThreadPool(self._n_moose) as pool:
+        with Pool(self._n_moose) as pool:
             processes = list()
             for ff in self._output_files:
                 processes.append(pool.apply_async(

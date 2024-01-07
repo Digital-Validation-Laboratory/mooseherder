@@ -50,9 +50,6 @@ def main():
         for ny in n_elem_y:
             for ee in e_mod:
                 moose_vars.append({'n_elem_x':nx,'n_elem_y':ny,'e_modulus':ee})
-        
-    print('Herd sweep variables:')
-    pprint(moose_vars)
 
     print()
     num_runs = 4
@@ -103,7 +100,7 @@ def main():
     print('Reading all output files in parallel as list(dict).')
     print()
     start_read = time.perf_counter()
-    read_all = herd.read_results_para(vars_to_read,None,elem_blocks)
+    read_all = herd.read_results_para(vars_to_read)
     end_read = time.perf_counter()
 
     print('Read time (parallel) = {:.3f} seconds'.format(end_read-start_read))

@@ -145,15 +145,6 @@ def test_get_output_exodus_file(runner,input_runner):
     assert runner.get_output_exodus_path() == ''
     assert input_runner.get_output_exodus_path() == 'tests/moose/moose-test_out.e'
      
-
-'''
-CASES:
-- raise error because input file not specified
-- pass in input file that does/does not exits
-- redirect stdout on/off
-- n_tasks == 1, or n_tasks > 1
-- n_threads
-'''
 @pytest.mark.parametrize(
     ('opts','expected'),
     (
@@ -195,14 +186,6 @@ def test_assemble_run_str_err_with_input(runner,input_noexist):
 
     msg, = err_info.value.args
     assert msg == 'Input file does not exist.'
-
-'''
-TEST CASES
-- Run with/without passing in the input file
-    - Input file that works
-    - Input file that is broken
-- Error when passing in non-existent input file
-'''
 
 @pytest.mark.parametrize(
     ('opts','stdout_exist'),
