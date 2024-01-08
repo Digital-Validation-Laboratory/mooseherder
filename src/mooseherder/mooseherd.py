@@ -452,7 +452,8 @@ class MooseHerd:
         with mp.Pool(self._n_moose) as pool:
             processes = list()
             for ff in self._output_files:
-                processes.append(pool.apply_async(reader(), args=(ff))) 
+                #print(ff)
+                processes.append(pool.apply_async(reader, args=((ff,)))) 
 
             self._sweep_results = [pp.get() for pp in processes]
 

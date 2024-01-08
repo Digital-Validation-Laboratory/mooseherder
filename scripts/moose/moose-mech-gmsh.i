@@ -52,6 +52,16 @@ p_ratio = 0.3
     []
 []
 
+# Adding in so there are global variables in the files.
+[Postprocessors] 
+  [./react_y]
+    type = SidesetReaction
+    direction = '0 1 0'
+    stress_tensor = stress
+    boundary = 'Btm-BC'
+  [../]
+[]
+
 [Preconditioning]
     [SMP]
         type = SMP
