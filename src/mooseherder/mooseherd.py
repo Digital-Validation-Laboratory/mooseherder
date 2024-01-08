@@ -80,7 +80,7 @@ class MooseHerd:
         else:
             self._base_dir = base_dir
 
-    def set_names(self, sub_dir = 'moose-workdir', moose_name = 'moose-sim', gmsh_name = 'gmsh_name') -> None:
+    def set_names(self, sub_dir = 'moose-workdir', moose_name = 'moose-sim', gmsh_name = 'gmsh-mesh') -> None:
         """Sets the names of the working directories for each MOOSE instance
         and the default names for the MOOSE and gmsh inputs that will be 
         copied to those directories.
@@ -91,7 +91,7 @@ class MooseHerd:
             moose_name (str, optional): name of the created/modified MOOSE 
                 input files. Defaults to 'moose-sim'.
             gmsh_name (str, optional): name of the created/modified gmsh input 
-                files. Defaults to 'gmsh_name'.
+                files. Defaults to 'gmsh-mesh'.
         """        
         self._sub_dir = sub_dir
         self._moose_input_name = moose_name
@@ -112,6 +112,12 @@ class MooseHerd:
         self._one_dir = one_dir
         self._keep_all = keep_all
 
+    #TODO
+    def run_dir_exists(self) -> bool:
+        all_dirs = os.listdir(self._base_dir)
+        
+
+
     def create_dirs(self) -> None:
         """Create directories to store the MOOSE instance outputs.
         """
@@ -128,18 +134,13 @@ class MooseHerd:
         """Delete the existing working directories in the base_dir and their 
         contents.
         """
-        if os.path.isdir(self._base_dir):
-            all_dirs = os.listdir(self._base_dir)
-        else:
-            all_dirs = list()
-            raise FileNotFoundError('Base directory does not exist.')
-            
+        all_dirs = os.listdir(self._base_dir)            
         for dd in all_dirs:
             if os.path.isdir(self._base_dir+dd):
-                if dd[0:dd.rfind('-')] == self._sub_dir:
+                if  self._sub_dir in dd:
                     shutil.rmtree(self._base_dir+dd)
 
-    def para_opts(self, n_moose: int, tasks_per_moose=1, threads_per_moose=1, redirect_out=False, create_dirs=True) -> None:
+    def para_opts(self, n_moose = 1, tasks_per_moose = 1, threads_per_moose = 1, redirect_out = False, create_dirs=True) -> None:
         """Set MOOSE parallelisation options.
 
         Args:
@@ -152,9 +153,12 @@ class MooseHerd:
                 file stdout. Defaults to False.
             create_dirs (bool, optional): If n_moose changes then create new 
                 directories. Defaults to True.
-        """        
+        """
+        n_moose = int(n_moose)        
         if n_moose < 0:
             n_moose = 1
+        elif n_moose > os.cpu_count():
+            n_moose = os.cpu_count()
         
         if self._n_moose != n_moose:
             self._n_moose = n_moose
