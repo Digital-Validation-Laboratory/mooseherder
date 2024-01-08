@@ -52,12 +52,12 @@ Recombine Surface{:};
 Mesh 2;
 
 
-Physical Surface("Specimen",1) = {1};
+Physical Surface("Visible-Surface",1) = {1};
 
 Physical Curve("Top-BC",2) = {3};
-Physical Curve("Mid-BC",3) = {4};
+Physical Curve("X-Symm",3) = {4};
 Physical Curve("Btm-BC",4) = {1};
-Physical Surface("Visible-Surface",5) = {2}; //Adding in to work with spatialdata imports
+
 
 Save Str(filename);
 Exit;

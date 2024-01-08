@@ -47,21 +47,6 @@ class ExodusReader:
             key = 'vals_glo_var'
             self._global_data[nn] = np.array(self._data.variables[key][:,ii])
 
-        # Adding in reading of global variables (such as reaction force)
-        self.global_data = dict()
-        for ii,nn in enumerate(self.global_var_names):
-            key = 'vals_glo_var'
-            self.global_data[nn] = np.array(self._data.variables[key][:,ii])
-
-        self.side_set_nodes = dict()
-        for ii,nn in enumerate(self.side_set_names):
-            key = 'node_ns{:d}'.format(ii+1)
-            self.side_set_nodes[nn] = np.array(self._data.variables[key])
-
-
-
-        
-
 
     def __del__(self):
         """Safely close the exodus file.

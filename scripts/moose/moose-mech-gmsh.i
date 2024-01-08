@@ -35,7 +35,7 @@ p_ratio = 0.3
     [./u_yz_fix]
         type = DirichletBC
         variable = disp_x
-        boundary = Mid-BC
+        boundary = X-Symm
         value = 0.0
     [../]
 []

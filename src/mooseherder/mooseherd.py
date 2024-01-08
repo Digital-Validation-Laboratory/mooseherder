@@ -492,6 +492,27 @@ class MooseHerd:
 
         return self._sweep_results
     
+    def read_results_para_generic(self, reader) -> list:
+        """_summary_
+
+        Args:
+            var_keys (list): _description_
+            elem_var_blocks (_type_, optional): _description_. Defaults to None.
+
+        Returns:
+            list: _description_
+        """        
+        #self._start_read(sweep_iter)      
+
+        with Pool(self._n_moose) as pool:
+            processes = list()
+            for ff in self._output_files:
+                processes.append(pool.apply_async(reader, args=(ff,))) 
+
+            self._sweep_results = [pp.get() for pp in processes]
+
+        return self._sweep_results
+    
     def _start_read(self,sweep_iter):
         if self._output_files == '':
             self._output_files = self.read_output_key(sweep_iter=1)
