@@ -496,18 +496,17 @@ class MooseHerd:
         """_summary_
 
         Args:
-            var_keys (list): _description_
-            elem_var_blocks (_type_, optional): _description_. Defaults to None.
+            reader (class) : class with a read() method that will read the exodus files 
 
         Returns:
-            list: _description_
+            list: list of whatever reader.read() returns
         """        
         #self._start_read(sweep_iter)      
 
         with Pool(self._n_moose) as pool:
             processes = list()
             for ff in self._output_files:
-                processes.append(pool.apply_async(reader, args=(ff,))) 
+                processes.append(pool.apply_async(reader.read, args=(ff,))) 
 
             self._sweep_results = [pp.get() for pp in processes]
 

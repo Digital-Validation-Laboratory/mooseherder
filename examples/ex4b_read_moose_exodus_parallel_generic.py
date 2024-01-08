@@ -14,7 +14,7 @@ from mooseherder import ExodusReader
 from mooseherder import GmshRunner
 from mooseherder import InputModifier
 from mooseherder import MooseHerd
-from pycoatl.spatialdata.importmoose import moose_to_spatialdata
+from mtgo.mooseutils.outputreaders import OutputExodusReader
 
 if __name__ == '__main__':
     print('------------------------------------------')
@@ -41,6 +41,9 @@ if __name__ == '__main__':
     gmsh_runner = GmshRunner(gmsh_path)
     gmsh_runner.set_input_file(gmsh_input)
     gmsh_modifier = InputModifier(gmsh_input,'//',';')
+
+    # Output reader
+    output_reader = OutputExodusReader(True,0.2E-3,data_range='last')
     
     # Start the herd and create working directories
     herd = MooseHerd(moose_runner,moose_modifier,gmsh_runner,gmsh_modifier)
@@ -87,7 +90,8 @@ if __name__ == '__main__':
     print('Reading in using the generic parallel reader.')
     print('------------------------------------------')
 
-    outputs = herd.read_results_para_generic(moose_to_spatialdata)
-    outputs[0].data_sets[0].plot()
+    outputs = herd.read_results_para_generic(output_reader)
+    print(outputs[0].data_sets[0])
+    outputs[0].data_sets[-1].plot()
 
 
