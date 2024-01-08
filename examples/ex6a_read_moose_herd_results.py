@@ -1,6 +1,6 @@
 '''
 ==============================================================================
-EXAMPLE6: Run MOOSE in sequential then parallel mode then read sweep results
+EXAMPLE 6a: Run MOOSE in sequential then parallel mode then read sweep results
 
 Author: Lloyd Fletcher, Rory Spencer
 ==============================================================================
@@ -12,9 +12,9 @@ from mooseherder import MooseHerd
 from mooseherder import MooseRunner
 from mooseherder import InputModifier
 
-if __name__ == '__main__':
+def main():
     print('-----------------------------------------------------------')
-    print('EXAMPLE 6: Parallel Herd Setup & Run')
+    print('EXAMPLE 6a: Parallel Herd Setup & Run')
     print('-----------------------------------------------------------')
 
     path_parts = Path(os.getcwd()).parts
@@ -50,7 +50,6 @@ if __name__ == '__main__':
             for pp in p_rat:
                 moose_vars.append({'n_elem_y':nn,'e_modulus':ee,'p_ratio':pp})
         
-  
     print('Herd sweep variables:')
     pprint(moose_vars)
 
@@ -63,7 +62,7 @@ if __name__ == '__main__':
     print()
 
     print('-----------------------------------------------------------')
-    print('EXAMPLE 6: Read Herd Ouput')
+    print('EXAMPLE 6a: Read Herd Output')
     print('-----------------------------------------------------------')
     output_files = herd.get_output_files()
     print('Herd output files (from output_keys.json):')
@@ -128,7 +127,7 @@ if __name__ == '__main__':
     print('-----------------------------------------------------------')
     print('Reading all output files sequentially as a list(dict).')
     print()
-    read_all = herd.read_results_sequential(vars_to_read,elem_blocks)
+    read_all = herd.read_results_sequential(vars_to_read,None,elem_blocks)
     
     print('Number of simulations outputs: {:d}'.format(len(read_all)))
     print('Variable keys for simulation output:')
@@ -138,7 +137,14 @@ if __name__ == '__main__':
     print('-----------------------------------------------------------')
     print('Reading all output files in parallel as list(dict).')
     print()
-    read_all = herd.read_results_para(vars_to_read,elem_blocks)
+    read_all = herd.read_results_para(vars_to_read,None,elem_blocks)
+
+    print('Number of simulations outputs: {:d}'.format(len(read_all)))
+    print('Variable keys for simulation output:')
+    print(list(read_all[0].keys()))
+    print()
 
     print('-----------------------------------------------------------')
 
+if __name__ == '__main__':
+    main()

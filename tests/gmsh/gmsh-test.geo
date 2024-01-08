@@ -10,14 +10,13 @@ gaugeWidth = 2.5E-3;
 
 // Parameterisation
 //_*
-p0 = 0.0015;
-p1 = 0.0009; // Testing comments in the variable block
+p0 = 1.5E-3;
+p1 = 1E-3;  // Testing comments in the variable block
 // Another test comment
-p2 = 0.001;
-filename = "mesh_tens_spline_2d.msh"; // String variable
+p2 = 1.2E-3;
+filename = "mesh-test.msh"; // String variable
 //**
 lc = 1E-4;
-
 
 // Create some points defining the boundary
 // Will have vertical symmetry

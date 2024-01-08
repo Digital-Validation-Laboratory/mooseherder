@@ -4,8 +4,8 @@
 // Date:  Nov-2023
 
 // Geometry Variables
-gaugeHeight = 10E-3;
-gaugeWidth = 2.5E-3;
+gaugeHeight = 10E-3
+gaugeWidth = ;
 // gaugeThickness = 1E-3; //2D for now
 
 // Parameterisation
@@ -14,7 +14,7 @@ p0 = 1.5E-3;
 p1 = 1E-3;  // Testing comments in the variable block
 // Another test comment
 p2 = 1.2E-3;
-filename = "mesh_tens_spline_2d.msh"; // String variable
+filename = "mesh-test.msh"; // String variable
 //**
 lc = 1E-4;
 

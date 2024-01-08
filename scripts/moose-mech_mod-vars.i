@@ -1,8 +1,8 @@
 # This is a simple MOOSE tensor mechanics input script for testing the herder
-n_elem_x = 40 # Putting this variable outside the block to test
+dimension = 2 # Putting this variable outside the block to test
 
 #_* Variables Block
-# n_elem_x = 50
+n_elem_x = 50.0
 n_elem_y = 40 # Testing comments in the variables block
 e_modulus = 3300000000.0
 # Comment line to test
@@ -17,7 +17,7 @@ e_type = QUAD4
 [Mesh]
     [generated]
         type = GeneratedMeshGenerator
-        dim = 2
+        dim = ${dimension}
         nx = ${n_elem_x}
         ny = ${n_elem_y}
         xmax = 2
