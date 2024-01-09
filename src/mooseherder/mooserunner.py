@@ -201,10 +201,11 @@ class MooseRunner:
                             + self._input_file + redirect_str 
         
         self._run_str = run_str
+        
         return self._run_str
 
 
-    def run(self, input_file = '') -> None:
+    def run(self, input_file = '',run_dir='') -> None:
         """Runs MOOSE based on current options by passing run string to 
         subprocess shell.
 
@@ -214,6 +215,9 @@ class MooseRunner:
         """        
         if input_file != '':
             self.set_input_file(input_file)
+        if run_dir == '':
+            run_dir = os.getcwd()
 
         self.assemble_run_str()
-        subprocess.run(self._run_str,shell=True,cwd=os.getcwd())
+        
+        subprocess.run(self._run_str,shell=True,cwd=run_dir)
