@@ -239,18 +239,21 @@ class MooseHerd:
         # Save the moose file with the current iteration to not overwrite
         moose_save = run_dir+self._moose_input_name +'-'+run_num+'.i'
         self._moose_modifier.update_vars(moose_vars)
+
         self._moose_modifier.write_file(moose_save)
 
         self._moose_runner.set_env_vars()
-        self._moose_runner.run(moose_save)
 
+        self._moose_runner.run(moose_save,run_dir)
+        
         self._iter_run_time = time.perf_counter() - self._iter_start_time
 
         return self._moose_runner.get_output_exodus_path()
     
     def _start_sweep(self):
         """_summary_
-        """        
+        """     
+           
         if not self._keep_all:
             self._sim_iter = 0
             self.clear_dirs()
