@@ -63,10 +63,10 @@ def setup_teardown(input_runner):
         if '.e' in ff:
             os.remove(os.path.join(input_runner.get_input_dir() + ff))
 
-    stdout_files = os.listdir(os.getcwd())
+    stdout_files = os.listdir(input_runner.get_input_dir())
     for ff in stdout_files:
         if 'stdout.processor' in ff:
-            os.remove(os.getcwd() + '/' + ff)
+            os.remove(input_runner.get_input_dir() + '/' + ff)
             
 def test_set_env_vars(runner):
     runner.set_env_vars()
@@ -119,7 +119,7 @@ def test_set_stdout(in_flag,expected,runner):
 def test_set_input_file(runner,input_file):
     runner.set_input_file(input_file)
 
-    assert runner._input_file == input_file
+    assert runner._input_file == os.path.split(input_file)[1]
     assert runner._input_dir == 'tests/moose/'
     assert runner._input_tag == 'moose-test'
 
@@ -148,11 +148,11 @@ def test_get_output_exodus_file(runner,input_runner):
 @pytest.mark.parametrize(
     ('opts','expected'),
     (
-        ((1,1,False), 'proteus-opt --n-threads=1 -i tests/moose/moose-test.i'),
-        ((1,2,False), 'proteus-opt --n-threads=2 -i tests/moose/moose-test.i'),
-        ((1,2,True), 'proteus-opt --n-threads=2 -i tests/moose/moose-test.i --redirect-stdout'),
-        ((2,2,False), 'mpirun -np 2 proteus-opt --n-threads=2 -i tests/moose/moose-test.i'),
-        ((2,2,True), 'mpirun -np 2 proteus-opt --n-threads=2 -i tests/moose/moose-test.i --redirect-stdout'),
+        ((1,1,False), 'proteus-opt --n-threads=1 -i moose-test.i'),
+        ((1,2,False), 'proteus-opt --n-threads=2 -i moose-test.i'),
+        ((1,2,True), 'proteus-opt --n-threads=2 -i moose-test.i --redirect-stdout'),
+        ((2,2,False), 'mpirun -np 2 proteus-opt --n-threads=2 -i moose-test.i'),
+        ((2,2,True), 'mpirun -np 2 proteus-opt --n-threads=2 -i moose-test.i --redirect-stdout'),
     )
 )
 def test_assemble_run_str(opts, expected, input_runner):
@@ -162,11 +162,11 @@ def test_assemble_run_str(opts, expected, input_runner):
 @pytest.mark.parametrize(
     ('opts','expected'),
     (
-        ((1,1,False), 'proteus-opt --n-threads=1 -i tests/moose/moose-test.i'),
-        ((1,2,False), 'proteus-opt --n-threads=2 -i tests/moose/moose-test.i'),
-        ((1,2,True), 'proteus-opt --n-threads=2 -i tests/moose/moose-test.i --redirect-stdout'),
-        ((2,2,False), 'mpirun -np 2 proteus-opt --n-threads=2 -i tests/moose/moose-test.i'),
-        ((2,2,True), 'mpirun -np 2 proteus-opt --n-threads=2 -i tests/moose/moose-test.i --redirect-stdout'),
+        ((1,1,False), 'proteus-opt --n-threads=1 -i moose-test.i'),
+        ((1,2,False), 'proteus-opt --n-threads=2 -i moose-test.i'),
+        ((1,2,True), 'proteus-opt --n-threads=2 -i moose-test.i --redirect-stdout'),
+        ((2,2,False), 'mpirun -np 2 proteus-opt --n-threads=2 -i moose-test.i'),
+        ((2,2,True), 'mpirun -np 2 proteus-opt --n-threads=2 -i moose-test.i --redirect-stdout'),
     )
 )
 def test_assemble_run_str_with_input(opts,expected,runner,input_file):
@@ -202,16 +202,16 @@ def test_run(opts,stdout_exist,input_runner):
     input_runner.run()
 
     assert os.path.isfile(input_runner.get_output_exodus_path()) == True, 'No exodus output.'
-    assert os.path.isfile(os.getcwd() + '/stdout.processor.0') == stdout_exist[0], 'stdout.processor.0 does not exist.'
-    assert os.path.isfile(os.getcwd() + '/stdout.processor.1') == stdout_exist[1], 'stdout.processor.1 does not exist.'
+    assert os.path.isfile(input_runner.get_input_dir() + 'stdout.processor.0') == stdout_exist[0], 'stdout.processor.0 does not exist.'
+    assert os.path.isfile(input_runner.get_input_dir() + 'stdout.processor.1') == stdout_exist[1], 'stdout.processor.1 does not exist.'
     if opts[2]: # If there is a stdout it can be read to check for convergence
-        assert check_solve_converged() == True, 'Solve has not converged.' 
+        check_path = input_runner.get_input_dir() + 'stdout.processor.0'
+        assert check_solve_converged(check_path) == True, 'Solve has not converged.' 
 
-def check_solve_converged() -> bool:
-    stdout_file = os.getcwd() + '/stdout.processor.0'
+def check_solve_converged(check_stdout: str) -> bool:
     solve_converged = False
-    if os.path.isfile(stdout_file):
-        with open(stdout_file,'r') as so:
+    if os.path.isfile(check_stdout):
+        with open(check_stdout,'r') as so:
             stdout_lines = so.readlines()
             for ll in stdout_lines:
                 if 'Solve Converged!' in ll:
@@ -222,7 +222,7 @@ def test_run_broken(runner,input_broken):
     runner.set_opts(1,4,True)
     runner.run(input_broken)
 
-    stdout_file = os.getcwd() + '/stdout.processor.0'
+    stdout_file = runner.get_input_dir() + 'stdout.processor.0'
 
     assert os.path.isfile(runner.get_output_exodus_path()) == False
     assert os.path.isfile(stdout_file) == True
@@ -237,7 +237,7 @@ def test_run_broken(runner,input_broken):
             break
 
     assert err_str_found == True, 'Error string not found in stdout'
-    assert check_solve_converged() == False, 'Solve converged when it should have errored'
+    assert check_solve_converged(stdout_file) == False, 'Solve converged when it should have errored'
 
 def test_run_noexist(runner,input_noexist):
     with pytest.raises(FileNotFoundError) as err_info:
@@ -247,12 +247,12 @@ def test_run_noexist(runner,input_noexist):
     assert msg == 'Input file does not exist.'
 
     assert os.path.isfile(runner.get_output_exodus_path()) == False, 'Exodus output exists but input should not.'
-    assert check_solve_converged() == False, 'Solve converged when input file should not exist.'
+    assert check_solve_converged(runner.get_input_dir() + 'stdout.processor.0') == False, 'Solve converged when input file should not exist.'
 
 def test_run_with_input(runner,input_file):
     runner.set_opts(1,4,True)
     runner.run(input_file)
 
     assert os.path.isfile(runner.get_output_exodus_path()) == True, 'Exodus output does not exist when solve should have run'
-    assert os.path.isfile(os.getcwd() + '/stdout.processor.0') == True, 'Stdout does not exist when it should.'
-    assert check_solve_converged() == True, 'Solve did not converge when it should have.'
+    assert os.path.isfile(runner.get_input_dir() + 'stdout.processor.0') == True, 'Stdout does not exist when it should.'
+    assert check_solve_converged(runner.get_input_dir() + 'stdout.processor.0') == True, 'Solve did not converge when it should have.'

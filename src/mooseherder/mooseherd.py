@@ -65,7 +65,7 @@ class MooseHerd:
         self._iter_start_time = -1.0
         self._iter_run_time = -1.0
 
-    def set_base_dir(self, base_dir: str) -> None:
+    def set_base_dir(self, base_dir: str, clear_dirs = False) -> None:
         """Changes the base directory in which the series of working 
         directories are will be created by the create_dirs function.
 
@@ -74,7 +74,11 @@ class MooseHerd:
 
         Raises:
             FileExistsError: the specified directory does not exist
-        """        
+        """
+        #TODO check if the sweep directories exist in previous base_dir - give option to clear them
+        if clear_dirs:
+            self.clear_dirs()
+
         if not(os.path.isdir(base_dir)):
             raise FileExistsError("Specified base directory does not exist.")
         else:
@@ -113,11 +117,11 @@ class MooseHerd:
         self._keep_all = keep_all
 
     #TODO
+    '''
     def run_dir_exists(self) -> bool:
         all_dirs = os.listdir(self._base_dir)
+    '''
         
-
-
     def create_dirs(self) -> None:
         """Create directories to store the MOOSE instance outputs.
         """
@@ -137,7 +141,7 @@ class MooseHerd:
         all_dirs = os.listdir(self._base_dir)            
         for dd in all_dirs:
             if os.path.isdir(self._base_dir+dd):
-                if  self._sub_dir in dd:
+                if self._sub_dir in dd:
                     shutil.rmtree(self._base_dir+dd)
 
     def para_opts(self, n_moose = 1, tasks_per_moose = 1, threads_per_moose = 1, redirect_out = False, create_dirs=True) -> None:
@@ -247,14 +251,15 @@ class MooseHerd:
 
         self._moose_runner.set_env_vars()
         self._moose_runner.run(moose_save)
-
+        
         self._iter_run_time = time.perf_counter() - self._iter_start_time
 
         return self._moose_runner.get_output_exodus_path()
     
     def _start_sweep(self):
         """_summary_
-        """        
+        """     
+           
         if not self._keep_all:
             self._sim_iter = 0
             self.clear_dirs()
@@ -491,6 +496,26 @@ class MooseHerd:
             for ff in self._output_files:
                 processes.append(pool.apply_async(
                     self.read_results_once, args=(ff,var_keys,elem_var_blocks))) 
+
+            self._sweep_results = [pp.get() for pp in processes]
+
+        return self._sweep_results
+    
+    def read_results_para_generic(self, reader) -> list:
+        """_summary_
+
+        Args:
+            reader (class) : class with a read() method that will read the exodus files 
+
+        Returns:
+            list: list of whatever reader.read() returns
+        """        
+        #self._start_read(sweep_iter)      
+
+        with Pool(self._n_moose) as pool:
+            processes = list()
+            for ff in self._output_files:
+                processes.append(pool.apply_async(reader.read, args=(ff,))) 
 
             self._sweep_results = [pp.get() for pp in processes]
 
