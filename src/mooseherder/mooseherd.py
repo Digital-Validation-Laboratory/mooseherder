@@ -238,13 +238,16 @@ class MooseHerd:
 
         # Save the moose file with the current iteration to not overwrite
         moose_save = run_dir+self._moose_input_name +'-'+run_num+'.i'
+        print(f"Run dir: {run_dir}")
+        print(f"Moose input name: {self._moose_input_name}")
+        print(f"Moose save: {moose_save}")
         self._moose_modifier.update_vars(moose_vars)
-
         self._moose_modifier.write_file(moose_save)
 
         self._moose_runner.set_env_vars()
-
+        
         self._moose_runner.run(moose_save,run_dir)
+        print(f"Run str: {self._moose_runner.get_run_str()}")
         
         self._iter_run_time = time.perf_counter() - self._iter_start_time
 
