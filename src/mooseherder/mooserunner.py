@@ -110,7 +110,7 @@ class MooseRunner:
         if not(os.path.isfile(input_file)):
             raise FileNotFoundError("Input file does not exist.")
         else:
-            self._input_file = input_file
+            self._input_file = os.path.split(input_file)[1]
             self._input_dir = os.path.split(input_file)[0]+'/'
             self._input_tag = str(os.path.split(input_file)[1]).split('.')[0]
             self.assemble_run_str()
@@ -218,6 +218,12 @@ class MooseRunner:
         if run_dir == '':
             run_dir = os.getcwd()
 
+<<<<<<< HEAD
         self.assemble_run_str()
         
         subprocess.run(self._run_str,shell=True,cwd=run_dir)
+=======
+
+        self.assemble_run_str()        
+        subprocess.run(self._run_str,shell=True,cwd=self._input_dir)
+>>>>>>> lf-dev

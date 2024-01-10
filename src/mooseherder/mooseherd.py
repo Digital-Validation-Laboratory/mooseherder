@@ -65,7 +65,7 @@ class MooseHerd:
         self._iter_start_time = -1.0
         self._iter_run_time = -1.0
 
-    def set_base_dir(self, base_dir: str) -> None:
+    def set_base_dir(self, base_dir: str, clear_dirs = False) -> None:
         """Changes the base directory in which the series of working 
         directories are will be created by the create_dirs function.
 
@@ -74,7 +74,11 @@ class MooseHerd:
 
         Raises:
             FileExistsError: the specified directory does not exist
-        """        
+        """
+        #TODO check if the sweep directories exist in previous base_dir - give option to clear them
+        if clear_dirs:
+            self.clear_dirs()
+
         if not(os.path.isdir(base_dir)):
             raise FileExistsError("Specified base directory does not exist.")
         else:
@@ -136,7 +140,7 @@ class MooseHerd:
             
         for dd in all_dirs:
             if os.path.isdir(self._base_dir+dd):
-                if dd[0:dd.rfind('-')] == self._sub_dir:
+                if self._sub_dir in dd:
                     shutil.rmtree(self._base_dir+dd)
 
     def para_opts(self, n_moose: int, tasks_per_moose=1, threads_per_moose=1, redirect_out=False, create_dirs=True) -> None:
@@ -245,9 +249,7 @@ class MooseHerd:
         self._moose_modifier.write_file(moose_save)
 
         self._moose_runner.set_env_vars()
-        
-        self._moose_runner.run(moose_save,run_dir)
-        print(f"Run str: {self._moose_runner.get_run_str()}")
+        self._moose_runner.run(moose_save)
         
         self._iter_run_time = time.perf_counter() - self._iter_start_time
 
