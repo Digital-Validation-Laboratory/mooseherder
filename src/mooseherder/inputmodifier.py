@@ -63,7 +63,6 @@ class InputModifier:
         """        
         # Strip all whitespace and comments to separate variable name, equals sign and value
         extract_var = var_line.strip()
-        #extract_var = extract_var.replace(' ','') 
         extract_var = extract_var.replace(self._end_char,'') 
         extract_var = extract_var.split(self._comment_char)[0]  # Remove trailing comments should they exist
         
