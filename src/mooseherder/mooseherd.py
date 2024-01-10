@@ -65,23 +65,23 @@ class MooseHerd:
         self._iter_start_time = -1.0
         self._iter_run_time = -1.0
 
-    def set_base_dir(self, base_dir: str, clear_dirs = False) -> None:
+    def set_base_dir(self, base_dir: str, clear_old_dirs = False) -> None:
         """Changes the base directory in which the series of working 
         directories are will be created by the create_dirs function.
 
         Args:
             base_dir (str): path string to the base directory
+            clear_old_dirs (bool, optional): _description_. Defaults to False.
 
         Raises:
             FileExistsError: the specified directory does not exist
-        """
-        #TODO check if the sweep directories exist in previous base_dir - give option to clear them
-        if clear_dirs:
-            self.clear_dirs()
-
+        """        
         if not(os.path.isdir(base_dir)):
             raise FileExistsError("Specified base directory does not exist.")
         else:
+            if clear_old_dirs:
+                self.clear_dirs()
+
             self._base_dir = base_dir
 
     def set_names(self, sub_dir = 'moose-workdir', moose_name = 'moose-sim', gmsh_name = 'gmsh-mesh') -> None:

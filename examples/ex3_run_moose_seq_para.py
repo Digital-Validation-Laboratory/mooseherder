@@ -36,7 +36,8 @@ def main():
                    redirect_out = True, create_dirs = False)
 
      # Send all the output to the examples directory and clear out old output
-    herd.set_base_dir('examples/', clear_dirs = True)
+    herd.set_base_dir('examples/', clear_old_dirs = True)
+    herd.clear_dirs()
     herd.create_dirs()
 
     # Create variables to sweep in a list of dictionaries, 8 combinations possible.
