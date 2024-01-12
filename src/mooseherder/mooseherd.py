@@ -413,7 +413,7 @@ class MooseHerd:
             output_files = output_files + self.read_output_key(kk+1)
 
         self._output_files = output_files
-        self._sweep_iter = len(self._output_files)
+        #self._sweep_iter = len(self._output_files)
 
         return self._output_files
 
