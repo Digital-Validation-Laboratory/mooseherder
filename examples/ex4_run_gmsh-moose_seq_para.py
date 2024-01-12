@@ -42,8 +42,8 @@ def main():
     herd = MooseHerd(moose_runner,moose_modifier,gmsh_runner,gmsh_modifier)
     # Don't have to clear directories on creation of the herd but we do so here
     # so that directory creation doesn't raise errors
-    herd.set_base_dir('examples/')
     herd.clear_dirs()
+    herd.set_base_dir('examples/')
     herd.create_dirs()
 
     # Create variables to sweep in a list of dictionaries for mesh parameters 

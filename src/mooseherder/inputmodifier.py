@@ -63,7 +63,6 @@ class InputModifier:
         """        
         # Strip all whitespace and comments to separate variable name, equals sign and value
         extract_var = var_line.strip()
-        extract_var = extract_var.replace(' ','') 
         extract_var = extract_var.replace(self._end_char,'') 
         extract_var = extract_var.split(self._comment_char)[0]  # Remove trailing comments should they exist
         
@@ -72,12 +71,14 @@ class InputModifier:
         var_val = ''
         if extract_var:
             if extract_var.find('=') >= 0:
+                var_str = extract_var.split('=', 1)[1]
+                var_str = var_str.strip()
                 try:
-                    var_val = float(extract_var.split('=', 1)[1])
+                    var_val = float(var_str)
                 except:
-                    var_val = extract_var.split('=', 1)[1]
+                    var_val = var_str
 
-                var_key = extract_var.split('=', 1)[0]
+                var_key = extract_var.split('=', 1)[0].strip()
 
         # Get the comment string 
         if len(var_line.split(self._comment_char)) > 1:

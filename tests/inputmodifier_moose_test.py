@@ -47,7 +47,7 @@ def test_moose_read_vars(moose_mod):
                                'e_type': 'QUAD4', 
                                'add_vars': 'true', 
                                'y_max': 1.0, 
-                               'x_max': '${fparse2*y_max}'}
+                               'x_max': '${fparse 2*y_max}'}
     
 def test_moose_get_vars(moose_mod):
     assert moose_mod.get_vars()  == {'n_elem_y': 10.0, 
@@ -56,7 +56,7 @@ def test_moose_get_vars(moose_mod):
                                     'e_type': 'QUAD4', 
                                     'add_vars': 'true', 
                                     'y_max': 1.0, 
-                                    'x_max': '${fparse2*y_max}'}
+                                    'x_max': '${fparse 2*y_max}'}
     
 def test_moose_update_vars(moose_mod):
     # Changes number of y elements, elastic modulus and element type
@@ -72,7 +72,7 @@ def test_moose_update_vars(moose_mod):
                                 'e_type': 'QUAD8', 
                                 'add_vars': 'true', 
                                 'y_max': 1.0, 
-                                'x_max': '${fparse2*y_max}'}
+                                'x_max': '${fparse 2*y_max}'}
     
 def test_moose_update_vars_error(moose_mod):
     new_vars = {'n_elem_y': 25, 
@@ -101,7 +101,7 @@ def test_moose_write_file(moose_mod):
                                     'e_type': 'QUAD8', 
                                     'add_vars': 'true', 
                                     'y_max': 1.0, 
-                                    'x_max': '${fparse2*y_max}'}
+                                    'x_max': '${fparse 2*y_max}'}
     
 def test_moose_get_var_keys(moose_mod):
     assert moose_mod.get_var_keys() == ['n_elem_y', 
@@ -119,12 +119,16 @@ def test_moose_get_input_file(moose_mod):
         ('input_str','expected'),
         (
             pytest.param('',('','',''),id='Degenerate blank case'),
+            pytest.param('\t    \n',('','',''),id='Degenerate whitespace case'),
             pytest.param('x1 = 1',('x1',1.0,''),id='Variable only, int case'),
             pytest.param('x2 = 100.0',('x2',100.0,''),id='Variable only, float case'),
             pytest.param('x3 = 1e3',('x3',1000.0,''),id='Variable only, exponential case'),
             pytest.param('order = SECOND',('order','SECOND',''),id='Variable only, string case'),
             pytest.param('x=10 # comment',('x',10.0,' comment'),id='Numeric variable and comment case'),
+            pytest.param('fun = $fparse{2*x}',('fun','$fparse{2*x}',''),id='String variable, no commentcase'),
             pytest.param('fun = $fparse{2*x} # comment',('fun','$fparse{2*x}',' comment'),id='String variable and comment case'),
+            pytest.param('fun = ${fparse 2*x}',('fun','${fparse 2*x}',''),id='String variable, no comment case, retain whitespace for fparse'),
+            pytest.param('fun = ${fparse 2*x} # comment',('fun','${fparse 2*x}',' comment'),id='String variable and comment case, retain whitespace for fparse'),
             pytest.param('# comment',('','',' comment'),id='Comment only case'),
         )
 )
