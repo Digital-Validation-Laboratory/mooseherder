@@ -14,7 +14,7 @@ from mooseherder import ExodusReader
 from mooseherder import GmshRunner
 from mooseherder import InputModifier
 from mooseherder import MooseHerd
-from mtgo.mooseutils.outputreaders import OutputExodusReader
+#from mtgo.mooseutils.outputreaders import OutputExodusReader
 
 if __name__ == '__main__':
     print('------------------------------------------')
@@ -43,7 +43,7 @@ if __name__ == '__main__':
     gmsh_modifier = InputModifier(gmsh_input,'//',';')
 
     # Output reader
-    output_reader = OutputExodusReader(True,0.2E-3,data_range='last')
+    #output_reader = OutputExodusReader(True,0.2E-3,data_range='last')
     
     # Start the herd and create working directories
     herd = MooseHerd(moose_runner,moose_modifier,gmsh_runner,gmsh_modifier)
@@ -82,16 +82,19 @@ if __name__ == '__main__':
     # Run all variable combinations across 4 MOOSE instances with two runs saved in
     # each moose-workdir
     herd.run_para(moose_vars,gmsh_vars)
+    herd.read_results_para(['disp_y'])
+    herd.run_para(moose_vars,gmsh_vars)
+    herd.read_results_para(['disp_y'])
     #herd.run_para(moose_vars,gmsh_vars) # Running para the second time starts looking for workdir-5 onwards as process names keep incrementing
     print('Run time (parallel) = '+'{:.3f}'.format(herd.get_sweep_time())+' seconds')
     print('------------------------------------------')
     print()
 
-    print('Reading in using the generic parallel reader.')
-    print('------------------------------------------')
+    #print('Reading in using the generic parallel reader.')
+    #print('------------------------------------------')
 
-    outputs = herd.read_results_para_generic(output_reader)
-    print(outputs[0].data_sets[0])
-    outputs[0].data_sets[-1].plot()
+    #outputs = herd.read_results_para_generic(output_reader)
+    #print(outputs[0].data_sets[0])
+    #outputs[0].data_sets[-1].plot()
 
 
