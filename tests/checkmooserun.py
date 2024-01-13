@@ -6,18 +6,22 @@ Authors: Lloyd Fletcher
 ==============================================================================
 '''
 
-
 import os
 
-def check_solve_converged(check_stdout: str) -> bool:
-    solve_converged = False
-    if os.path.isfile(check_stdout):
-        with open(check_stdout,'r') as so:
+def check_solve(check_file: str, check_str: str) -> int:
+    check_count = 0
+    if os.path.isfile(check_file):
+        with open(check_file,'r') as so:
             stdout_lines = so.readlines()
             for ll in stdout_lines:
-                if 'Solve Converged!' in ll:
-                    solve_converged = True
-    return solve_converged
+                if check_str in ll:
+                    check_count += 1
+    return check_count
 
-def check_exodus_exists():
-    pass
+
+def check_solve_converged(check_stdout: str) -> int:
+    return check_solve(check_stdout,'Solve Converged!')
+
+def check_solve_error(check_stdout: str) -> int:
+    return check_solve(check_stdout,'*** ERROR ***')
+

@@ -12,11 +12,11 @@ e_type = QUAD4
 add_vars = true
 y_max = 1 
 x_max = ${fparse 2*y_max}
-time_end = 3
 #** End Variable Block
 
 # Another variable outside the block to test
 spatial_dims = 2
+time_end = 2
 
 [GlobalParams]
     displacements = 'disp_x disp_y'
