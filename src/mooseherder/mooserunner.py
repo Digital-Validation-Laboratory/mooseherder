@@ -23,7 +23,7 @@ class MooseRunner:
         """        
         self._n_threads = 1
         self._n_tasks = 1
-        self._redirect_stdout = False; 
+        self._redirect_stdout = True; 
         self._moose_dir = moose_dir
         self._app_dir = app_dir
         self._app_name = app_name
@@ -83,7 +83,7 @@ class MooseRunner:
         """        
         self._redirect_stdout = redirect_flag
 
-    def set_opts(self, n_tasks=1, n_threads=1, redirect=False) -> None:
+    def set_opts(self, n_tasks=1, n_threads=1, redirect=True) -> None:
         """Sets all options for MOOSE run parallelisation and output.
 
         Args:

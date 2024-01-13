@@ -10,6 +10,7 @@ import pytest
 import os
 from pathlib import Path
 from mooseherder.mooserunner import MooseRunner
+from tests.checkmooserun import check_solve_converged
 
 def test_moose_dir_exists():
     path_parts = Path(os.getcwd()).parts
@@ -207,7 +208,7 @@ def test_run(opts,stdout_exist,input_runner):
     if opts[2]: # If there is a stdout it can be read to check for convergence
         check_path = input_runner.get_input_dir() + 'stdout.processor.0'
         assert check_solve_converged(check_path) == True, 'Solve has not converged.' 
-
+'''
 def check_solve_converged(check_stdout: str) -> bool:
     solve_converged = False
     if os.path.isfile(check_stdout):
@@ -217,7 +218,7 @@ def check_solve_converged(check_stdout: str) -> bool:
                 if 'Solve Converged!' in ll:
                     solve_converged = True
     return solve_converged
-
+'''
 def test_run_broken(runner,input_broken):
     runner.set_opts(1,4,True)
     runner.run(input_broken)

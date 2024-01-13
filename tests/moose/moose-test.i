@@ -12,7 +12,8 @@ e_type = QUAD4
 add_vars = true
 y_max = 1 
 x_max = ${fparse 2*y_max}
-#**
+time_end = 3
+#** End Variable Block
 
 # Another variable outside the block to test
 spatial_dims = 2
@@ -85,7 +86,7 @@ spatial_dims = 2
     # we chose a direct solver here
     petsc_options_iname = '-pc_type'
     petsc_options_value = 'lu'
-    end_time = 5
+    end_time = ${time_end}
     dt = 1
 []
 

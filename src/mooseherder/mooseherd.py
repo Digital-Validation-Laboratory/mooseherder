@@ -144,7 +144,7 @@ class MooseHerd:
                 if self._sub_dir in dd:
                     shutil.rmtree(self._base_dir+dd)
 
-    def para_opts(self, n_moose = 1, tasks_per_moose = 1, threads_per_moose = 1, redirect_out = False, create_dirs=True) -> None:
+    def para_opts(self, n_moose = 1, tasks_per_moose = 1, threads_per_moose = 1, redirect_out = True, create_dirs = True) -> None:
         """Set MOOSE parallelisation options.
 
         Args:
@@ -159,48 +159,18 @@ class MooseHerd:
                 directories. Defaults to True.
         """
         n_moose = int(n_moose)        
-        if n_moose < 0:
+        if n_moose <= 0:
             n_moose = 1
         elif n_moose > os.cpu_count():
             n_moose = os.cpu_count()
         
         if self._n_moose != n_moose:
             self._n_moose = n_moose
-            if create_dirs:
-                self.create_dirs()
+
+        if create_dirs:
+            self.create_dirs()
 
         self._moose_runner.set_opts(tasks_per_moose,threads_per_moose,redirect_out)
-
-    def get_sweep_time(self) -> float:
-        """Getter for performance timer of whole sweep.
-
-        Returns:
-            float: time to complete the whole variable sweep in seconds
-        """        
-        return self._sweep_run_time
-    
-    def get_iter_time(self) -> float:
-        """Getter for performance timer of single iteration.
-
-        Returns:
-            float: time to complete specific iteration.
-        """        
-        return self._iter_run_time
-        
-    def _get_process_num(self) -> str:
-        """Helper function to get the process number for directory naming.
-
-        Returns:
-            str: One character string with the process number. If this is the 
-                main process returns '1' 
-        """        
-        name = mp.current_process().name
-        # If we are calling this from main we need to set the process number
-        if name == 'MainProcess':
-            process_num = '1'
-        else:
-            process_num = name.split('-',1)[1]
-        return process_num
 
     def run_once(self, iter: int, moose_vars: dict, gmsh_vars = None) -> str:
         """Run a single simulation. Writes relevant moose and gmsh input decks 
@@ -256,18 +226,38 @@ class MooseHerd:
 
         return self._moose_runner.get_output_exodus_path()
     
+    def _get_process_num(self) -> str:
+        """Helper function to get the process number for directory naming.
+
+        Returns:
+            str: One character string with the process number. If this is the 
+                main process returns '1' 
+        """        
+        name = mp.current_process().name
+        # If we are calling this from main we need to set the process number
+        if name == 'MainProcess':
+            process_num = '1'
+        else:
+            process_num = name.split('-',1)[1]
+        return process_num
+
     def _start_sweep(self):
-        """_summary_
+        """Helper function run before a sequential or parallel sweep. Always 
+        starts a performance timer for the sweep and if keep_all is false it 
+        will clear old directories and contents befor recreating them for the
+        sweep.
         """     
-           
         if not self._keep_all:
             self._sim_iter = 0
             self.clear_dirs()
             self.create_dirs()
+
         self._sweep_start_time = time.perf_counter()
 
     def _end_sweep(self):
-        """_summary_
+        """Helper function run after a sequential or parallel sweep. Stops the
+        performance counter, increments the sweep iteration counter and writes
+        the ouput_key file for this call to run_*.
         """        
         self._sweep_run_time = time.perf_counter() - self._sweep_start_time
         self._sweep_iter += 1
@@ -350,6 +340,22 @@ class MooseHerd:
             self._output_files = [pp.get() for pp in processes]
 
         self._end_sweep()
+
+    def get_sweep_time(self) -> float:
+        """Getter for performance timer of whole sweep.
+
+        Returns:
+            float: time to complete the whole variable sweep in seconds
+        """        
+        return self._sweep_run_time
+    
+    def get_iter_time(self) -> float:
+        """Getter for performance timer of single iteration.
+
+        Returns:
+            float: time to complete specific iteration.
+        """        
+        return self._iter_run_time
 
     def get_output_key_file(self, sweep_iter = None) -> str:
         """_summary_
