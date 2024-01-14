@@ -14,7 +14,7 @@ p0 = 1.5E-3;
 p1 = 1E-3;  // Testing comments in the variable block
 // Another test comment
 p2 = 1.2E-3;
-filename = "mesh-test.msh"; // String variable
+filename = "gmsh-test.msh"; // String variable
 //**
 lc = 1E-4;
 

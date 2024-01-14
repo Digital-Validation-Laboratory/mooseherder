@@ -10,7 +10,7 @@ import pytest
 import os
 from pathlib import Path
 from mooseherder.mooserunner import MooseRunner
-import tests.checkmooserun as cmr
+import tests.herdchecktools as hct
 
 def test_moose_dir_exists():
     path_parts = Path(os.getcwd()).parts
@@ -207,7 +207,7 @@ def test_run(opts,stdout_exist,input_runner):
     assert os.path.isfile(input_runner.get_input_dir() + 'stdout.processor.1') == stdout_exist[1], 'stdout.processor.1 does not exist.'
     if opts[2]: # If there is a stdout it can be read to check for convergence
         check_path = input_runner.get_input_dir() + 'stdout.processor.0'
-        assert cmr.check_solve_converged(check_path) >= 1, 'Solve has not converged.' 
+        assert hct.check_solve_converged(check_path) >= 1, 'Solve has not converged.' 
 '''
 def check_solve_converged(check_stdout: str) -> bool:
     solve_converged = False
@@ -228,8 +228,8 @@ def test_run_broken(runner,input_broken):
     assert os.path.isfile(runner.get_output_exodus_path()) == False
     assert os.path.isfile(stdout_file) == True
 
-    assert cmr.check_solve_error(stdout_file) >= 1, 'Error string not found in stdout'
-    assert cmr.check_solve_converged(stdout_file) == 0, 'Solve converged when it should have errored'
+    assert hct.check_solve_error(stdout_file) >= 1, 'Error string not found in stdout'
+    assert hct.check_solve_converged(stdout_file) == 0, 'Solve converged when it should have errored'
 
 def test_run_noexist(runner,input_noexist):
     with pytest.raises(FileNotFoundError) as err_info:
@@ -239,7 +239,7 @@ def test_run_noexist(runner,input_noexist):
     assert msg == 'Input file does not exist.'
 
     assert os.path.isfile(runner.get_output_exodus_path()) == False, 'Exodus output exists but input should not.'
-    assert cmr.check_solve_converged(runner.get_input_dir() + 'stdout.processor.0') == 0, 'Solve converged when input file should not exist.'
+    assert hct.check_solve_converged(runner.get_input_dir() + 'stdout.processor.0') == 0, 'Solve converged when input file should not exist.'
 
 def test_run_with_input(runner,input_file):
     runner.set_opts(1,4,True)
@@ -247,4 +247,4 @@ def test_run_with_input(runner,input_file):
 
     assert os.path.isfile(runner.get_output_exodus_path()) == True, 'Exodus output does not exist when solve should have run'
     assert os.path.isfile(runner.get_input_dir() + 'stdout.processor.0') == True, 'Stdout does not exist when it should.'
-    assert cmr.check_solve_converged(runner.get_input_dir() + 'stdout.processor.0') >= 1, 'Solve did not converge when it should have.'
+    assert hct.check_solve_converged(runner.get_input_dir() + 'stdout.processor.0') >= 1, 'Solve did not converge when it should have.'

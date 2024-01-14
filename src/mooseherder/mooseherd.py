@@ -264,56 +264,41 @@ class MooseHerd:
             run_num = worker_num
 
         return run_num
-
    
-    def _run_gmsh(self, gmsh_vars: dict, run_dir: str, run_num: str) -> None:
+    def _run_gmsh(self, gmsh_vars: dict, run_dir: str, run_num: str) -> str:
         """_summary_
 
         Args:
             gmsh_vars (dict): _description_
             run_dir (str): _description_
             run_num (str): _description_
+
+        Returns:
+            str: _description_
         """        
         gmsh_save = run_dir+self._gmsh_input_name +'-'+run_num+'.geo'
         self._gmsh_modifier.update_vars(gmsh_vars)
         self._gmsh_modifier.write_file(gmsh_save)
         self._gmsh_runner.run(gmsh_save)
+        return gmsh_save
 
-    def _run_moose(self, moose_vars: dict, run_dir: str, run_num: str) -> None:
+    def _run_moose(self, moose_vars: dict, run_dir: str, run_num: str) -> str:
         """_summary_
 
         Args:
             moose_vars (dict): _description_
             run_dir (str): _description_
             run_num (str): _description_
+
+        Returns:
+            str: _description_
         """        
         moose_save = run_dir+self._moose_input_name +'-'+run_num+'.i'
         self._moose_modifier.update_vars(moose_vars)
         self._moose_modifier.write_file(moose_save)
         self._moose_runner.set_env_vars()
         self._moose_runner.run(moose_save)
-
-    def _start_sweep(self):
-        """Helper function run before a sequential or parallel sweep. Always 
-        starts a performance timer for the sweep and if keep_all is false it 
-        will clear old directories and contents befor recreating them for the
-        sweep.
-        """     
-        if not self._keep_all:
-            self._sim_iter = 0
-            self.clear_dirs()
-            self.create_dirs()
-
-        self._sweep_start_time = time.perf_counter()
-
-    def _end_sweep(self):
-        """Helper function run after a sequential or parallel sweep. Stops the
-        performance counter, increments the sweep iteration counter and writes
-        the ouput_key file for this call to run_*.
-        """        
-        self._sweep_run_time = time.perf_counter() - self._sweep_start_time
-        self._sweep_iter += 1
-        self._write_output_key()
+        return moose_save
 
     def run_sequential(self,moose_var_list: list(dict()), gmsh_var_list=None) -> None:
         """Runs MOOSE (and gmsh if specified) sequentially. Each item in the 
@@ -392,6 +377,28 @@ class MooseHerd:
             self._output_files = [pp.get() for pp in processes]
 
         self._end_sweep()
+
+    def _start_sweep(self):
+        """Helper function run before a sequential or parallel sweep. Always 
+        starts a performance timer for the sweep and if keep_all is false it 
+        will clear old directories and contents befor recreating them for the
+        sweep.
+        """     
+        if not self._keep_all:
+            self._sim_iter = 0
+            self.clear_dirs()
+            self.create_dirs()
+
+        self._sweep_start_time = time.perf_counter()
+
+    def _end_sweep(self):
+        """Helper function run after a sequential or parallel sweep. Stops the
+        performance counter, increments the sweep iteration counter and writes
+        the ouput_key file for this call to run_*.
+        """        
+        self._sweep_run_time = time.perf_counter() - self._sweep_start_time
+        self._sweep_iter += 1
+        self._write_output_key()
 
     def get_sweep_time(self) -> float:
         """Getter for performance timer of whole sweep.

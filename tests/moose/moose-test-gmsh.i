@@ -9,7 +9,7 @@ p_ratio = 0.3
 
 [Mesh]
     type = FileMesh
-    file = 'mesh_tens_spline_2d.msh'
+    file = 'gmsh-test.msh'
 []
 
 [Modules/TensorMechanics/Master]
