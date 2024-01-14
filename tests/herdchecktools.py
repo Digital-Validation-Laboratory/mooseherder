@@ -57,3 +57,12 @@ def check_solve_converged(check_stdout: str) -> int:
 def check_solve_error(check_stdout: str) -> int:
     return check_solve(check_stdout,'*** ERROR ***')
 
+def check_output_key_file_count(check_dir: str) -> int:
+    work_dir_files = os.listdir(check_dir)
+    
+    key_count = 0
+    for ff in work_dir_files:
+        if 'output-key' in ff:
+            key_count += 1
+
+    return key_count

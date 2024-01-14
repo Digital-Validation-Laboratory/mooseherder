@@ -307,47 +307,51 @@ def test_run_once_with_gmsh(sim_iter, worker_num, herd_gmsh, gmsh_vars, monkeypa
 
 def test_run_sequential_moose_only(herd,moose_vars):
     herd.para_opts(n_moose = 2)
+
     herd.run_sequential(moose_vars[:1])
-
-    for ff in herd._output_files:
-        assert os.path.isfile(ff), f"Simulation output {ff} does not exist."
-
-    assert herd._sweep_start_time >= 0, 'Sweep start time is less than 0.'
-    assert herd._sweep_run_time >= 0, 'Sweep run time is less than 0.'
-    assert herd._sweep_iter == 1, 'Sweep iteration for first call to run_seq should increment to 1.'
-    assert os.path.isfile(herd.get_output_key_file()), 'Output key file was not written.'
+    check_run_sweep(check_herd = herd, run_call = 1)
 
     herd.run_sequential(moose_vars[2:])
-
-    for ff in herd._output_files:
-        assert os.path.isfile(ff), f"Simulation output {ff} does not exist."
-
-    assert herd._sweep_start_time >= 0, 'Sweep start time is less than 0.'
-    assert herd._sweep_run_time >= 0, 'Sweep run time is less than 0.'
-    assert herd._sweep_iter == 2, 'Sweep iteration for second call to run_seq should increment to 2.'
-    assert os.path.isfile(herd.get_output_key_file()), 'Output key file was not written.'
+    check_run_sweep(check_herd = herd, run_call = 2)
 
 def test_run_sequential_with_gmsh(herd_gmsh,gmsh_vars):
     herd = herd_gmsh
 
     moose_vars = [herd._moose_modifier.get_vars()]
     herd.para_opts(n_moose = 2)
+
     herd.run_sequential(moose_vars,gmsh_vars[:1])
+    check_run_sweep(check_herd = herd, run_call = 1)
+    
+    herd.run_sequential(moose_vars,gmsh_vars[2:])
+    check_run_sweep(check_herd = herd, run_call = 2)
 
-    for ff in herd._output_files:
+def test_run_para_moose_only(herd,moose_vars):
+    herd.para_opts(n_moose = 4)
+
+    herd.run_para(moose_vars)
+    check_run_sweep(check_herd = herd, run_call = 1)
+ 
+    herd.run_para(moose_vars)
+    check_run_sweep(check_herd = herd, run_call = 2)
+
+def test_run_para_with_gmsh(herd_gmsh,gmsh_vars):
+    herd = herd_gmsh
+
+    moose_vars = [herd._moose_modifier.get_vars()]
+    herd.para_opts(n_moose = 4)
+
+    herd.run_para(moose_vars,gmsh_vars)
+    check_run_sweep(check_herd = herd, run_call = 1)
+ 
+    herd.run_para(moose_vars,gmsh_vars)
+    check_run_sweep(check_herd = herd, run_call = 2)
+
+def check_run_sweep(check_herd: MooseHerd, run_call: int):
+    for ff in check_herd._output_files:
         assert os.path.isfile(ff), f"Simulation output {ff} does not exist."
 
-    assert herd._sweep_start_time >= 0, 'Sweep start time is less than 0.'
-    assert herd._sweep_run_time >= 0, 'Sweep run time is less than 0.'
-    assert herd._sweep_iter == 1, 'Sweep iteration for first call to run_seq should increment to 1.'
-    assert os.path.isfile(herd.get_output_key_file()), 'Output key file was not written.'
-
-    herd.run_sequential(list(moose_vars),gmsh_vars[2:])
-
-    for ff in herd._output_files:
-        assert os.path.isfile(ff), f"Simulation output {ff} does not exist."
-
-    assert herd._sweep_start_time >= 0, 'Sweep start time is less than 0.'
-    assert herd._sweep_run_time >= 0, 'Sweep run time is less than 0.'
-    assert herd._sweep_iter == 2, 'Sweep iteration for second call to run_seq should increment to 2.'
-    assert os.path.isfile(herd.get_output_key_file()), 'Output key file was not written.'
+    assert check_herd._sweep_start_time >= 0, 'Sweep start time is less than 0.'
+    assert check_herd._sweep_run_time >= 0, 'Sweep run time is less than 0.'
+    assert os.path.isfile(check_herd.get_output_key_file()), 'Output key file was not written.'
+    assert hct.check_output_key_file_count(check_herd._run_dir + '-1/') == run_call
