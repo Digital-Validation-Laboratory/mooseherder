@@ -40,13 +40,14 @@ class MooseHerd:
         self._moose_modifier = moose_mod
         self._gmsh_runner = gmsh_runner
         self._gmsh_modifier = gmsh_mod
-        
+
         self._n_moose = 2
         self._sub_dir = 'moose-workdir'
         self._moose_input_name = 'moose-sim'
         self._gmsh_input_name = 'gmsh-mesh'
         self._base_dir = os.path.split(self._moose_modifier.get_input_file())[0]+'/'
         self._run_dir = self._base_dir + self._sub_dir
+        self._run_dirs = list()
 
         self._output_files = list()
         self._sweep_results = list()
@@ -54,8 +55,8 @@ class MooseHerd:
         self._one_dir = False
         self._keep_all = True
 
-        self._moose_vars = list()
-        self._gmsh_vars = list()
+        self._moose_var_list = list()
+        self._gmsh_var_list = None
 
         self._sweep_iter = 0
         self._sweep_start_time = -1.0
@@ -126,13 +127,17 @@ class MooseHerd:
         """Create directories to store the MOOSE instance outputs.
         """
         self._run_dir = self._base_dir + self._sub_dir
+        self._run_dirs = list()
         if self._one_dir:
             if not(os.path.isdir(self._run_dir+'-1')):
                 os.mkdir(self._run_dir+'-1')  
         else:
             for nn in range(self._n_moose):
-                if not(os.path.isdir(self._run_dir+'-'+str(nn+1))):
-                    os.mkdir(self._run_dir+'-'+str(nn+1))
+                run_sub_dir = self._run_dir+'-'+str(nn+1)
+                self._run_dirs.append(run_sub_dir)
+                if not(os.path.isdir(run_sub_dir)):
+                    os.mkdir(run_sub_dir)
+
  
     def clear_dirs(self) -> None:
         """Delete the existing working directories in the base_dir and their 
@@ -315,7 +320,7 @@ class MooseHerd:
                 variables names in the gmsh file. See the InputModifier class 
                 for help. Defaults to None.
         """        
-        self._start_sweep()
+        self._start_sweep(moose_var_list,gmsh_var_list)
 
         output_files = list()
         if gmsh_var_list == None:
@@ -354,7 +359,7 @@ class MooseHerd:
                 variables names in the gmsh file. See the InputModifier class 
                 for help. Defaults to None.
         """
-        self._start_sweep()
+        self._start_sweep(moose_var_list,gmsh_var_list)
 
         with Pool(self._n_moose) as pool:
             processes = list()
@@ -378,12 +383,15 @@ class MooseHerd:
 
         self._end_sweep()
 
-    def _start_sweep(self):
+    def _start_sweep(self,moose_var_list,gmsh_var_list):
         """Helper function run before a sequential or parallel sweep. Always 
         starts a performance timer for the sweep and if keep_all is false it 
         will clear old directories and contents befor recreating them for the
         sweep.
-        """     
+        """
+        self._moose_var_list = moose_var_list
+        self._gmsh_var_list = gmsh_var_list
+     
         if not self._keep_all:
             self._sim_iter = 0
             self.clear_dirs()
@@ -444,8 +452,6 @@ class MooseHerd:
         """   
         with open(self.get_output_key_file(sweep_iter)) as okf:
             output_files = json.load(okf)
-            if sweep_iter != None:
-                self._sweep_iter = sweep_iter
 
         return output_files
 

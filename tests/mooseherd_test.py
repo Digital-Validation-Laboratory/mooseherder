@@ -7,13 +7,8 @@ Authors: Lloyd Fletcher
 '''
 
 '''
-TODO: Run Once Cases:
-- Redirect on/off
-- Change number of threads/mpi tasks (check stdout)
-- Check iter timing
-- Keep all on/off
-
-
+TODO: Test create dirs
+- Include new run_dirs list
 '''
 
 import pytest
@@ -81,7 +76,7 @@ def moose_vars():
 
 @pytest.fixture()
 def gmsh_vars():
-    p0 = [1E-3,2E-3]
+    p0 = [1E-3,]
     p1 = [1.5E-3,2E-3]
 
     gmsh_vars = list()
@@ -305,53 +300,96 @@ def test_run_once_with_gmsh(sim_iter, worker_num, herd_gmsh, gmsh_vars, monkeypa
     assert herd_gmsh._iter_start_time >= 0, 'Iteration start time is less than 0'
     assert herd_gmsh._iter_run_time >= 0, 'Iteration run time is less than 0'
 
-def test_run_sequential_moose_only(herd,moose_vars):
-    herd.para_opts(n_moose = 2)
+@pytest.mark.parametrize(
+    ('keep_all', 'expected'),
+    (
+        (True, 2),
+        (False, 1),
+    )   
+)
+def test_run_sequential_moose_only(keep_all,expected,herd,moose_vars):
+    gmsh_vars = None
+    run_sequential(keep_all,expected,herd,moose_vars,gmsh_vars)
 
-    herd.run_sequential(moose_vars[:1])
-    check_run_sweep(check_herd = herd, run_call = 1)
+@pytest.mark.parametrize(
+    ('keep_all', 'expected'),
+    (
+        (True, 2),
+        (False, 1),
+    )   
+)
+def test_run_sequential_with_gmsh(keep_all,expected,herd_gmsh,gmsh_vars):
+    moose_vars = [herd_gmsh._moose_modifier.get_vars()]
+    run_sequential(keep_all,expected,herd_gmsh,moose_vars,gmsh_vars)
 
-    herd.run_sequential(moose_vars[2:])
-    check_run_sweep(check_herd = herd, run_call = 2)
+def run_sequential(keep_all,expected,run_herd,moose_vars,gmsh_vars):
+    run_herd.set_flags(one_dir = False, keep_all = keep_all)
+    run_herd.para_opts(n_moose = 2)
 
-def test_run_sequential_with_gmsh(herd_gmsh,gmsh_vars):
-    herd = herd_gmsh
-
-    moose_vars = [herd._moose_modifier.get_vars()]
-    herd.para_opts(n_moose = 2)
-
-    herd.run_sequential(moose_vars,gmsh_vars[:1])
-    check_run_sweep(check_herd = herd, run_call = 1)
+    run_herd.run_sequential(moose_vars,gmsh_vars)
+    check_run_sweep(check_herd = run_herd, run_call = 1)
     
-    herd.run_sequential(moose_vars,gmsh_vars[2:])
-    check_run_sweep(check_herd = herd, run_call = 2)
+    run_herd.run_sequential(moose_vars,gmsh_vars)
+    check_run_sweep(check_herd = run_herd, run_call = expected)
 
-def test_run_para_moose_only(herd,moose_vars):
-    herd.para_opts(n_moose = 4)
+@pytest.mark.parametrize(
+    ('keep_all', 'expected'),
+    (
+        (True, 2),
+        (False, 1),
+    )   
+)
+def test_run_para_moose_only(keep_all,expected,herd,moose_vars):
+    gmsh_vars = None
+    run_para(keep_all,expected,herd,moose_vars,gmsh_vars)
 
-    herd.run_para(moose_vars)
-    check_run_sweep(check_herd = herd, run_call = 1)
+@pytest.mark.parametrize(
+    ('keep_all', 'expected'),
+    (
+        (True, 2),
+        (False, 1),
+    )   
+)
+def test_run_para_with_gmsh(keep_all,expected,herd_gmsh,gmsh_vars):
+    moose_vars = [herd_gmsh._moose_modifier.get_vars()]
+    run_para(keep_all,expected,herd_gmsh,moose_vars,gmsh_vars)
+
+def run_para(keep_all,expected,run_herd,moose_vars,gmsh_vars):
+    run_herd.para_opts(n_moose = 4)
+    run_herd.set_flags(one_dir = False, keep_all = keep_all)
+
+    run_herd.run_para(moose_vars,gmsh_vars)
+    check_run_sweep(check_herd = run_herd, run_call = 1)
  
-    herd.run_para(moose_vars)
-    check_run_sweep(check_herd = herd, run_call = 2)
-
-def test_run_para_with_gmsh(herd_gmsh,gmsh_vars):
-    herd = herd_gmsh
-
-    moose_vars = [herd._moose_modifier.get_vars()]
-    herd.para_opts(n_moose = 4)
-
-    herd.run_para(moose_vars,gmsh_vars)
-    check_run_sweep(check_herd = herd, run_call = 1)
- 
-    herd.run_para(moose_vars,gmsh_vars)
-    check_run_sweep(check_herd = herd, run_call = 2)
+    run_herd.run_para(moose_vars,gmsh_vars)
+    check_run_sweep(check_herd = run_herd, run_call = expected)
 
 def check_run_sweep(check_herd: MooseHerd, run_call: int):
     for ff in check_herd._output_files:
         assert os.path.isfile(ff), f"Simulation output {ff} does not exist."
 
+    # Go through all work directories and count the inputs/exoduses
+    input_count = 0
+    output_count = 0
+    for rr in check_herd._run_dirs:
+        dir_files = os.listdir(rr)
+        for ff in dir_files:
+            if '_out.e' in ff: 
+                output_count += 1
+            elif '.i' in ff:
+                input_count += 1
+
+    num_gmsh_vars = 1
+    if check_herd._gmsh_var_list != None:
+        num_gmsh_vars = len(check_herd._gmsh_var_list)
+
+    num_sims = run_call*len(check_herd._moose_var_list)*num_gmsh_vars
+
+    assert input_count == num_sims
+    assert output_count == num_sims
     assert check_herd._sweep_start_time >= 0, 'Sweep start time is less than 0.'
     assert check_herd._sweep_run_time >= 0, 'Sweep run time is less than 0.'
     assert os.path.isfile(check_herd.get_output_key_file()), 'Output key file was not written.'
     assert hct.check_output_key_file_count(check_herd._run_dir + '-1/') == run_call
+
+    
