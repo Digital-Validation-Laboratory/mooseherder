@@ -6,12 +6,13 @@ Authors: Rory Spencer, Lloyd Fletcher
 ===============================================================================
 '''
 import os
+from mooseherder.simrunner import SimRunner
 
-class GmshRunner:
+class GmshRunner(SimRunner):
     """Used to call gmsh to create a mesh file to be used to run a finite 
     element simulation.
     """    
-    def __init__(self, gmsh_app=""):
+    def __init__(self, gmsh_app = ""):
         """Create a gmsh runner with path to gmsh app.
 
         Args:

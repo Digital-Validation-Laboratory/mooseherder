@@ -7,8 +7,9 @@ Authors: Lloyd Fletcher, Rory Spencer
 '''
 import os
 import subprocess
+from mooseherder.simrunner import SimRunner
 
-class MooseRunner:
+class MooseRunner(SimRunner):
     """Used to run MOOSE models (*.i) from python.
     """    
     def __init__(self, moose_dir: str, app_dir: str, app_name: str):

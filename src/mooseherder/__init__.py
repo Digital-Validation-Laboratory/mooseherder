@@ -3,10 +3,17 @@
 MOOSE Herder
 """
 
-from mooseherder.mooseherd import *
 from mooseherder.inputmodifier import *
+from mooseherder.simrunner import *
 from mooseherder.mooserunner import *
 from mooseherder.gmshrunner import *
 from mooseherder.exodusreader import *
+from mooseherder.mooseherd import *
 
-__all__ = ["mooseherd" "inputmodifier" "mooserunner" "gmshrunner" "exodusreader"]
+
+__all__ = ["inputmodifier", 
+            "simrunner",
+            "mooserunner",
+            "gmshrunner", 
+            "exodusreader",
+            "mooseherd"]
