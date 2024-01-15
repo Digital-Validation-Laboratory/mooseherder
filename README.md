@@ -34,5 +34,5 @@ The examples folder includes a sequence of examples using `mooseherder` to run t
 
 ## Contributors
 - Lloyd Fletcher, UK Atomic Energy Authority, (TheScepticalRabbit)  
-- Rory Spencer, UK Atomic Energy Authority, (CriticalThanker)  
+- Rory Spencer, UK Atomic Energy Authority, (fusmatrs)  
 - Luke Humphrey, UK Atomic Energy Authority, (lukethehuman)  
