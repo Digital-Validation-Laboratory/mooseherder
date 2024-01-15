@@ -154,6 +154,7 @@ def test_para_opts_no_dirs(n_moose,expected,herd):
     herd.para_opts(n_moose,1,1,True,False)
     assert herd._n_moose == expected
 
+
 @pytest.mark.parametrize(
     ('n_moose','expected'),
     (
@@ -183,6 +184,7 @@ def test_get_worker_num(process,expected,monkeypatch,herd) -> None:
     monkeypatch.setattr(MooseHerd,'_get_process_name',lambda _: process)
     worker_num = herd._get_worker_num()
     assert worker_num == expected
+
 
 @pytest.mark.parametrize(
     ('worker_num','one_dir','expected'),
@@ -217,6 +219,7 @@ def test_get_run_num(sim_iter,worker_num,keep_all,expected,herd):
     run_num = herd._get_run_num(sim_iter,worker_num)
     assert run_num == expected
 
+
 def test_run_gmsh(herd_gmsh,gmsh_vars):
     herd = herd_gmsh
     herd.para_opts(n_moose = 2)
@@ -234,6 +237,7 @@ def test_run_gmsh(herd_gmsh,gmsh_vars):
     assert os.path.isfile(gmsh_save)
     assert os.path.isfile(os.path.split(gmsh_save)[0]+'/gmsh-test.msh')
 
+
 def test_run_moose(herd,moose_vars):
     herd.para_opts(n_moose = 2)
     
@@ -249,6 +253,7 @@ def test_run_moose(herd,moose_vars):
     assert moose_vars[0]['p_ratio'] == herd._moose_modifier._vars['p_ratio']
     assert os.path.isfile(moose_save)
     assert os.path.isfile(os.path.split(moose_save)[0]+'/moose-sim-1_out.e')
+
 
 @pytest.mark.parametrize(
     ('sim_iter','worker_num'),
@@ -273,6 +278,7 @@ def test_run_once_moose_only(sim_iter,worker_num,herd,moose_vars,monkeypatch):
     assert hct.check_solve_converged(stdout_file), 'MOOSE run did not converge, check stdout file.'
     assert herd._iter_start_time >= 0, 'Iteration start time is less than 0'
     assert herd._iter_run_time >= 0, 'Iteration run time is less than 0'
+
 
 @pytest.mark.parametrize(
     ('sim_iter','worker_num'),
@@ -300,6 +306,7 @@ def test_run_once_with_gmsh(sim_iter, worker_num, herd_gmsh, gmsh_vars, monkeypa
     assert herd_gmsh._iter_start_time >= 0, 'Iteration start time is less than 0'
     assert herd_gmsh._iter_run_time >= 0, 'Iteration run time is less than 0'
 
+
 @pytest.mark.parametrize(
     ('keep_all', 'expected'),
     (
@@ -309,7 +316,8 @@ def test_run_once_with_gmsh(sim_iter, worker_num, herd_gmsh, gmsh_vars, monkeypa
 )
 def test_run_sequential_moose_only(keep_all,expected,herd,moose_vars):
     gmsh_vars = None
-    run_sequential(keep_all,expected,herd,moose_vars,gmsh_vars)
+    hct.run_check_sequential(keep_all,expected,herd,moose_vars,gmsh_vars)
+
 
 @pytest.mark.parametrize(
     ('keep_all', 'expected'),
@@ -320,17 +328,8 @@ def test_run_sequential_moose_only(keep_all,expected,herd,moose_vars):
 )
 def test_run_sequential_with_gmsh(keep_all,expected,herd_gmsh,gmsh_vars):
     moose_vars = [herd_gmsh._moose_modifier.get_vars()]
-    run_sequential(keep_all,expected,herd_gmsh,moose_vars,gmsh_vars)
+    hct.run_check_sequential(keep_all,expected,herd_gmsh,moose_vars,gmsh_vars)
 
-def run_sequential(keep_all,expected,run_herd,moose_vars,gmsh_vars):
-    run_herd.set_flags(one_dir = False, keep_all = keep_all)
-    run_herd.para_opts(n_moose = 2)
-
-    run_herd.run_sequential(moose_vars,gmsh_vars)
-    check_run_sweep(check_herd = run_herd, run_call = 1)
-    
-    run_herd.run_sequential(moose_vars,gmsh_vars)
-    check_run_sweep(check_herd = run_herd, run_call = expected)
 
 @pytest.mark.parametrize(
     ('keep_all', 'expected'),
@@ -341,7 +340,8 @@ def run_sequential(keep_all,expected,run_herd,moose_vars,gmsh_vars):
 )
 def test_run_para_moose_only(keep_all,expected,herd,moose_vars):
     gmsh_vars = None
-    run_para(keep_all,expected,herd,moose_vars,gmsh_vars)
+    hct.run_check_para(keep_all,expected,herd,moose_vars,gmsh_vars)
+
 
 @pytest.mark.parametrize(
     ('keep_all', 'expected'),
@@ -352,44 +352,6 @@ def test_run_para_moose_only(keep_all,expected,herd,moose_vars):
 )
 def test_run_para_with_gmsh(keep_all,expected,herd_gmsh,gmsh_vars):
     moose_vars = [herd_gmsh._moose_modifier.get_vars()]
-    run_para(keep_all,expected,herd_gmsh,moose_vars,gmsh_vars)
+    hct.run_check_para(keep_all,expected,herd_gmsh,moose_vars,gmsh_vars)
 
-def run_para(keep_all,expected,run_herd,moose_vars,gmsh_vars):
-    run_herd.para_opts(n_moose = 4)
-    run_herd.set_flags(one_dir = False, keep_all = keep_all)
 
-    run_herd.run_para(moose_vars,gmsh_vars)
-    check_run_sweep(check_herd = run_herd, run_call = 1)
- 
-    run_herd.run_para(moose_vars,gmsh_vars)
-    check_run_sweep(check_herd = run_herd, run_call = expected)
-
-def check_run_sweep(check_herd: MooseHerd, run_call: int):
-    for ff in check_herd._output_files:
-        assert os.path.isfile(ff), f"Simulation output {ff} does not exist."
-
-    # Go through all work directories and count the inputs/exoduses
-    input_count = 0
-    output_count = 0
-    for rr in check_herd._run_dirs:
-        dir_files = os.listdir(rr)
-        for ff in dir_files:
-            if '_out.e' in ff: 
-                output_count += 1
-            elif '.i' in ff:
-                input_count += 1
-
-    num_gmsh_vars = 1
-    if check_herd._gmsh_var_list != None:
-        num_gmsh_vars = len(check_herd._gmsh_var_list)
-
-    num_sims = run_call*len(check_herd._moose_var_list)*num_gmsh_vars
-
-    assert input_count == num_sims
-    assert output_count == num_sims
-    assert check_herd._sweep_start_time >= 0, 'Sweep start time is less than 0.'
-    assert check_herd._sweep_run_time >= 0, 'Sweep run time is less than 0.'
-    assert os.path.isfile(check_herd.get_output_key_file()), 'Output key file was not written.'
-    assert hct.check_output_key_file_count(check_herd._run_dir + '-1/') == run_call
-
-    
