@@ -36,13 +36,13 @@ def test_gmsh_read_vars(gmsh_mod):
     assert gmsh_mod._vars == {'p0': 0.0015, 
                                'p1': 0.001, 
                                'p2': 0.0012, 
-                               'filename': '"mesh-test.msh"'}
+                               'filename': '"gmsh-test.msh"'}
     
 def test_gmsh_get_vars(gmsh_mod):
     assert gmsh_mod.get_vars()  == {'p0': 0.0015, 
                                     'p1': 0.001, 
                                     'p2': 0.0012, 
-                                    'filename': '"mesh-test.msh"'}
+                                    'filename': '"gmsh-test.msh"'}
 
 def test_gmsh_update_vars(gmsh_mod):
     new_vars = {'p1': 0.0009, 
@@ -51,7 +51,7 @@ def test_gmsh_update_vars(gmsh_mod):
     assert gmsh_mod._vars == {'p0': 0.0015, 
                                 'p1': 0.0009, 
                                 'p2': 0.001, 
-                                'filename': '"mesh-test.msh"'}
+                                'filename': '"gmsh-test.msh"'}
 
     
 def test_gmsh_update_vars_error(gmsh_mod):
@@ -75,7 +75,7 @@ def test_gmsh_write_file(gmsh_mod):
     assert gmsh_mod_check._vars == {'p0': 0.0015, 
                                     'p1': 0.0009, 
                                     'p2': 0.001, 
-                                    'filename': '"mesh-test.msh"'}
+                                    'filename': '"gmsh-test.msh"'}
 
 @pytest.mark.parametrize(
         ('input_str','expected'),

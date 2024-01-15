@@ -40,13 +40,14 @@ class MooseHerd:
         self._moose_modifier = moose_mod
         self._gmsh_runner = gmsh_runner
         self._gmsh_modifier = gmsh_mod
-        
+
         self._n_moose = 2
         self._sub_dir = 'moose-workdir'
         self._moose_input_name = 'moose-sim'
         self._gmsh_input_name = 'gmsh-mesh'
         self._base_dir = os.path.split(self._moose_modifier.get_input_file())[0]+'/'
         self._run_dir = self._base_dir + self._sub_dir
+        self._run_dirs = list()
 
         self._output_files = list()
         self._sweep_results = list()
@@ -54,8 +55,8 @@ class MooseHerd:
         self._one_dir = False
         self._keep_all = True
 
-        self._moose_vars = list()
-        self._gmsh_vars = list()
+        self._moose_var_list = list()
+        self._gmsh_var_list = None
 
         self._sweep_iter = 0
         self._sweep_start_time = -1.0
@@ -126,13 +127,17 @@ class MooseHerd:
         """Create directories to store the MOOSE instance outputs.
         """
         self._run_dir = self._base_dir + self._sub_dir
+        self._run_dirs = list()
         if self._one_dir:
             if not(os.path.isdir(self._run_dir+'-1')):
                 os.mkdir(self._run_dir+'-1')  
         else:
             for nn in range(self._n_moose):
-                if not(os.path.isdir(self._run_dir+'-'+str(nn+1))):
-                    os.mkdir(self._run_dir+'-'+str(nn+1))
+                run_sub_dir = self._run_dir+'-'+str(nn+1)
+                self._run_dirs.append(run_sub_dir)
+                if not(os.path.isdir(run_sub_dir)):
+                    os.mkdir(run_sub_dir)
+
  
     def clear_dirs(self) -> None:
         """Delete the existing working directories in the base_dir and their 
@@ -144,7 +149,7 @@ class MooseHerd:
                 if self._sub_dir in dd:
                     shutil.rmtree(self._base_dir+dd)
 
-    def para_opts(self, n_moose = 1, tasks_per_moose = 1, threads_per_moose = 1, redirect_out = False, create_dirs=True) -> None:
+    def para_opts(self, n_moose = 1, tasks_per_moose = 1, threads_per_moose = 1, redirect_out = True, create_dirs = True) -> None:
         """Set MOOSE parallelisation options.
 
         Args:
@@ -159,50 +164,20 @@ class MooseHerd:
                 directories. Defaults to True.
         """
         n_moose = int(n_moose)        
-        if n_moose < 0:
+        if n_moose <= 0:
             n_moose = 1
         elif n_moose > os.cpu_count():
             n_moose = os.cpu_count()
         
         if self._n_moose != n_moose:
             self._n_moose = n_moose
-            if create_dirs:
-                self.create_dirs()
+
+        if create_dirs:
+            self.create_dirs()
 
         self._moose_runner.set_opts(tasks_per_moose,threads_per_moose,redirect_out)
 
-    def get_sweep_time(self) -> float:
-        """Getter for performance timer of whole sweep.
-
-        Returns:
-            float: time to complete the whole variable sweep in seconds
-        """        
-        return self._sweep_run_time
-    
-    def get_iter_time(self) -> float:
-        """Getter for performance timer of single iteration.
-
-        Returns:
-            float: time to complete specific iteration.
-        """        
-        return self._iter_run_time
-        
-    def _get_process_num(self) -> str:
-        """Helper function to get the process number for directory naming.
-
-        Returns:
-            str: One character string with the process number. If this is the 
-                main process returns '1' 
-        """        
-        name = mp.current_process().name
-        # If we are calling this from main we need to set the process number
-        if name == 'MainProcess':
-            process_num = '1'
-        else:
-            process_num = name.split('-',1)[1]
-        return process_num
-
-    def run_once(self, iter: int, moose_vars: dict, gmsh_vars = None) -> str:
+    def run_once(self, sim_iter: int, moose_vars: dict, gmsh_vars = None) -> str:
         """Run a single simulation. Writes relevant moose and gmsh input decks 
         to process working directory.
 
@@ -219,59 +194,116 @@ class MooseHerd:
         Returns:
             str: full path to the output exodus file.
         """        
-
         self._iter_start_time = time.perf_counter()
 
-        process_num = self._get_process_num()
-        if int(process_num) > self._n_moose:
-            process_num = str((int(process_num) % self._n_moose)+1)
+        worker_num = self._get_worker_num()
+        run_dir = self._get_run_dir(worker_num)
+        run_num = self._get_run_num(sim_iter,worker_num)
 
+        # Need to create the mesh first, if required
+        if (self._gmsh_modifier != None) or (gmsh_vars != None):
+            self._run_gmsh(gmsh_vars,run_dir,run_num)
+      
+        # Save the moose file with the current iteration to not overwrite
+        self._run_moose(moose_vars,run_dir,run_num)
+
+        self._iter_run_time = time.perf_counter() - self._iter_start_time
+        
+        return self._moose_runner.get_output_exodus_path()
+    
+    def _get_process_name(self) -> str:
+        return mp.current_process().name
+    
+    def _get_worker_num(self) -> str:
+        """Helper function to get the worker number for directory naming.
+
+        Returns:
+            str: One character string with the worker number. If this is the 
+                main process returns '1' 
+        """        
+        name = self._get_process_name()
+
+        # If we are calling this from main we need to set the process number
+        if name == 'MainProcess':
+            worker_num = '1'
+        else:
+            worker_num = name.split('-',1)[1]
+        
+        # Process number increase keeps increasing so need to update with
+        # multiple calls to run_para/seq
+        if int(worker_num) > self._n_moose:
+            worker_num = str((int(worker_num) % self._n_moose)+1)
+        
+        return worker_num
+   
+    def _get_run_dir(self,worker_num: str) -> str:
+        """_summary_
+
+        Args:
+            worker_num (str): _description_
+
+        Returns:
+            str: _description_
+        """        
         if self._one_dir:
             run_dir = self._run_dir+'-1/'
         else:
             # Each moose has it's own directory but multiple files can be save in this directory
-            run_dir = self._run_dir+'-'+process_num+'/'
+            run_dir = self._run_dir+'-'+ worker_num+'/'
         
+        return run_dir
+    
+    def _get_run_num(self, sim_iter: int, worker_num: str) -> str:
+        """_summary_
+
+        Args:
+            sim_iter (int): _description_
+            worker_num (str): _description_
+
+        Returns:
+            str: _description_
+        """        
         if self._keep_all:
-            run_num = str(iter+1)
+            run_num = str(sim_iter+1)
         else: # Set to overwrite based on working directory
-            run_num = process_num
+            run_num = worker_num
 
-        # Need to create the mesh first, if required
-        if (self._gmsh_modifier != None) or (gmsh_vars != None):
-            gmsh_save = run_dir+self._gmsh_input_name +'-'+run_num+'.geo'
-            self._gmsh_modifier.update_vars(gmsh_vars)
-            self._gmsh_modifier.write_file(gmsh_save)
-            self._gmsh_runner.run(gmsh_save)
+        return run_num
+   
+    def _run_gmsh(self, gmsh_vars: dict, run_dir: str, run_num: str) -> str:
+        """_summary_
 
-        # Save the moose file with the current iteration to not overwrite
+        Args:
+            gmsh_vars (dict): _description_
+            run_dir (str): _description_
+            run_num (str): _description_
+
+        Returns:
+            str: _description_
+        """        
+        gmsh_save = run_dir+self._gmsh_input_name +'-'+run_num+'.geo'
+        self._gmsh_modifier.update_vars(gmsh_vars)
+        self._gmsh_modifier.write_file(gmsh_save)
+        self._gmsh_runner.run(gmsh_save)
+        return gmsh_save
+
+    def _run_moose(self, moose_vars: dict, run_dir: str, run_num: str) -> str:
+        """_summary_
+
+        Args:
+            moose_vars (dict): _description_
+            run_dir (str): _description_
+            run_num (str): _description_
+
+        Returns:
+            str: _description_
+        """        
         moose_save = run_dir+self._moose_input_name +'-'+run_num+'.i'
         self._moose_modifier.update_vars(moose_vars)
         self._moose_modifier.write_file(moose_save)
-
         self._moose_runner.set_env_vars()
         self._moose_runner.run(moose_save)
-        
-        self._iter_run_time = time.perf_counter() - self._iter_start_time
-
-        return self._moose_runner.get_output_exodus_path()
-    
-    def _start_sweep(self):
-        """_summary_
-        """     
-           
-        if not self._keep_all:
-            self._sim_iter = 0
-            self.clear_dirs()
-            self.create_dirs()
-        self._sweep_start_time = time.perf_counter()
-
-    def _end_sweep(self):
-        """_summary_
-        """        
-        self._sweep_run_time = time.perf_counter() - self._sweep_start_time
-        self._sweep_iter += 1
-        self._write_output_key()
+        return moose_save
 
     def run_sequential(self,moose_var_list: list(dict()), gmsh_var_list=None) -> None:
         """Runs MOOSE (and gmsh if specified) sequentially. Each item in the 
@@ -288,7 +320,7 @@ class MooseHerd:
                 variables names in the gmsh file. See the InputModifier class 
                 for help. Defaults to None.
         """        
-        self._start_sweep()
+        self._start_sweep(moose_var_list,gmsh_var_list)
 
         output_files = list()
         if gmsh_var_list == None:
@@ -327,7 +359,7 @@ class MooseHerd:
                 variables names in the gmsh file. See the InputModifier class 
                 for help. Defaults to None.
         """
-        self._start_sweep()
+        self._start_sweep(moose_var_list,gmsh_var_list)
 
         with Pool(self._n_moose) as pool:
             processes = list()
@@ -350,6 +382,47 @@ class MooseHerd:
             self._output_files = [pp.get() for pp in processes]
 
         self._end_sweep()
+
+    def _start_sweep(self,moose_var_list,gmsh_var_list):
+        """Helper function run before a sequential or parallel sweep. Always 
+        starts a performance timer for the sweep and if keep_all is false it 
+        will clear old directories and contents befor recreating them for the
+        sweep.
+        """
+        self._moose_var_list = moose_var_list
+        self._gmsh_var_list = gmsh_var_list
+     
+        if not self._keep_all:
+            self._sim_iter = 0
+            self.clear_dirs()
+            self.create_dirs()
+
+        self._sweep_start_time = time.perf_counter()
+
+    def _end_sweep(self):
+        """Helper function run after a sequential or parallel sweep. Stops the
+        performance counter, increments the sweep iteration counter and writes
+        the ouput_key file for this call to run_*.
+        """        
+        self._sweep_run_time = time.perf_counter() - self._sweep_start_time
+        self._sweep_iter += 1
+        self._write_output_key()
+
+    def get_sweep_time(self) -> float:
+        """Getter for performance timer of whole sweep.
+
+        Returns:
+            float: time to complete the whole variable sweep in seconds
+        """        
+        return self._sweep_run_time
+    
+    def get_iter_time(self) -> float:
+        """Getter for performance timer of single iteration.
+
+        Returns:
+            float: time to complete specific iteration.
+        """        
+        return self._iter_run_time
 
     def get_output_key_file(self, sweep_iter = None) -> str:
         """_summary_
@@ -379,8 +452,6 @@ class MooseHerd:
         """   
         with open(self.get_output_key_file(sweep_iter)) as okf:
             output_files = json.load(okf)
-            if sweep_iter != None:
-                self._sweep_iter = sweep_iter
 
         return output_files
 

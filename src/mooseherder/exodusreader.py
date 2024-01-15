@@ -13,7 +13,7 @@ There are several different cases that lead to different MOOSE output formats.
     2.2) Element output is split by block if material_output_order = CONSTANT
 4) Sub-domains may or may not be present but see 2.1 above for exception
 
-Authors: Lloyd Fletcher
+Authors: Lloyd Fletcher, Rory Spencer
 ===============================================================================
 """
 
