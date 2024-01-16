@@ -16,9 +16,8 @@ def main():
     print('------------------------------------------')
     print('EXAMPLE 4: Herd Setup')
     print('------------------------------------------')
+    user_dir = Path.home()
 
-    path_parts = Path(os.getcwd()).parts
-    user_dir = os.path.join(path_parts[0],path_parts[1],path_parts[2])
 
     # Setup MOOSE
     moose_dir = os.path.join(user_dir,'moose')

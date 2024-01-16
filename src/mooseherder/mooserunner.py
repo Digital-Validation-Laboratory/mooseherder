@@ -7,12 +7,13 @@ Authors: Lloyd Fletcher, Rory Spencer
 '''
 import os
 import subprocess
+from pathlib import Path
 from mooseherder.simrunner import SimRunner
 
 class MooseRunner(SimRunner):
     """Used to run MOOSE models (*.i) from python.
     """    
-    def __init__(self, moose_dir: str, app_dir: str, app_name: str):
+    def __init__(self, moose_dir: Path, app_dir: Path, app_name: str):
         """Constructor for MOOSE runner taking all required paths to MOOSE app/
         Sets default parallelisation options to 1 MPI task and 1 thread. Sets 
         environment variables required for MPI setup.
@@ -29,10 +30,9 @@ class MooseRunner(SimRunner):
         self._app_dir = app_dir
         self._app_name = app_name
         self._run_str = ''
-        self._input_file = ''
-        self._input_dir = ''
-        self._input_tag = ''
-
+    
+        self._input_path = None
+        
         self.set_env_vars()
 
     def set_env_vars(self) -> None:
@@ -45,7 +45,8 @@ class MooseRunner(SimRunner):
         os.environ['F77'] = 'mpif77'
         os.environ['FC'] = 'mpif90'
         os.environ['MOOSE_DIR'] = self._moose_dir
-        os.environ["PATH"] = os.environ["PATH"] + ':' + self._app_dir
+        if not self._app_dir in os.environ["PATH"]:
+            os.environ["PATH"] = os.environ["PATH"] + ':' + self._app_dir
 
     def set_threads(self, n_threads: int) -> None:
         """Sets the number of threads asked of MOOSE on the command line.
@@ -99,7 +100,7 @@ class MooseRunner(SimRunner):
         self.set_tasks(n_tasks)
         self.set_stdout(redirect)
 
-    def set_input_file(self, input_file):
+    def set_input_file(self, input_path: Path) -> None:
         """Sets the path to the MOOSE input file and checks it exists.
 
         Args:
@@ -108,12 +109,10 @@ class MooseRunner(SimRunner):
         Raises:
             FileNotFoundError: the MOOSE input script doesn't exist
         """        
-        if not(os.path.isfile(input_file)):
+        if not input_path.is_file():
             raise FileNotFoundError("Input file does not exist.")
         else:
-            self._input_file = os.path.split(input_file)[1]
-            self._input_dir = os.path.split(input_file)[0]+'/'
-            self._input_tag = str(os.path.split(input_file)[1]).split('.')[0]
+            self._input_path = input_path
             self.assemble_run_str()
 
     def get_input_dir(self) -> str:
@@ -123,7 +122,7 @@ class MooseRunner(SimRunner):
             str: path to input file directory, if no input file is specified
                 returns an empty string.
         """        
-        return self._input_dir
+        return self._input_path.parent
     
     def get_input_tag(self) -> str:
         """Gets the input file name string without the path or the .i
@@ -132,9 +131,9 @@ class MooseRunner(SimRunner):
             str: input file string, if no input file is specified returns an
                 empty string.
         """        
-        return self._input_tag
+        return self._input_path.stem
 
-    def get_output_exodus_file(self) -> str:
+    def get_output_exodus_file(self) -> Path:
         """Gets the file name (without path) for the output exodus file based 
         on the specified input file. Includes '_out.e'.
 
@@ -142,10 +141,10 @@ class MooseRunner(SimRunner):
             str: output exodus file name without path, returns an empty string
                 if no input file is specified.
         """        
-        if self._input_tag != '':
-            return self._input_tag + '_out.e' 
+        if self._input_path != None:
+            return Path(self._input_path.stem + '_out.e') 
         else:
-            return ''
+            return None
         
     def get_output_exodus_path(self) -> str:
         """Gets the file and path for the output exodus file based 
@@ -216,7 +215,6 @@ class MooseRunner(SimRunner):
         """        
         if input_file != '':
             self.set_input_file(input_file)
-
 
         self.assemble_run_str()        
         subprocess.run(self._run_str,shell=True,cwd=self._input_dir)

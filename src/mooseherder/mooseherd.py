@@ -11,7 +11,6 @@ import json
 import numpy as np
 import multiprocessing as mp
 from multiprocessing.pool import Pool
-from multiprocessing.pool import ThreadPool 
 from mooseherder.inputmodifier import InputModifier
 from mooseherder.mooserunner import MooseRunner
 from mooseherder.gmshrunner import GmshRunner

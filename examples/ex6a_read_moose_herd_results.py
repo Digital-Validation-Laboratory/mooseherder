@@ -16,9 +16,7 @@ def main():
     print('-----------------------------------------------------------')
     print('EXAMPLE 6a: Parallel Herd Setup & Run')
     print('-----------------------------------------------------------')
-
-    path_parts = Path(os.getcwd()).parts
-    user_dir = os.path.join(path_parts[0],path_parts[1],path_parts[2])
+    user_dir = Path.home()
 
     moose_dir = os.path.join(user_dir,'moose')
     moose_app_dir = os.path.join(user_dir,'moose-workdir/proteus')

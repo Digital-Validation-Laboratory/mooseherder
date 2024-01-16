@@ -12,11 +12,10 @@ from pathlib import Path
 from mooseherder import MooseRunner
 
 #=======================================================================
-input_file = 'tests/moose/moose-vartest.i'
+input_file = 'scripts/moose/moose-mech-simple.i'
 #=======================================================================
 
-path_parts = Path(os.getcwd()).parts
-user_dir = os.path.join(path_parts[0],path_parts[1],path_parts[2])
+user_dir = Path.home()
 
 print('------------------------------------------')
 print('DEV: Run MOOSE once')
@@ -35,22 +34,6 @@ print()
 # Set input and parallelisation options
 moose_runner.set_opts(n_tasks=1,n_threads=4,redirect=True)
 moose_runner.set_input_file(input_file)
-
-print('Input Dir:')
-print(moose_runner.get_input_dir())
-print()
-print('Input Tag:')
-print(moose_runner.get_input_tag())
-print()
-print('Exodus file:')
-print(moose_runner.get_output_exodus_file())
-print()
-print('Exodus with path:')
-print(moose_runner.get_output_exodus_path())
-print()
-
-quit()
-
 # Run the MOOSE!
 print('Running moose with:')
 print(moose_runner.get_run_str())
@@ -62,5 +45,8 @@ end_time = time.perf_counter()
 print()
 print('MOOSE run time = '+'{:.3f}'.format(end_time-start_time)+' seconds')
 print('------------------------------------------')
+print()
+
+print(moose_runner.input_file)
 print()
 
