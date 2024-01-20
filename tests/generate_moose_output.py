@@ -36,7 +36,7 @@ input_files = [ 'scripts/moose-mech-simple.i', \
 for ii in input_files:
     start_time = time.perf_counter()
 
-    moose_runner.set_input_file(ii)
+    moose_runner.set_input_path(ii)
     print('Running moose test case with:')
     print(moose_runner.get_run_str())
 

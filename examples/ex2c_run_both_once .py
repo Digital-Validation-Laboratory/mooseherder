@@ -48,7 +48,7 @@ def main():
     # Set input and parallelisation options
     moose_runner.set_opts(n_tasks=1,n_threads=4,redirect=True)
     input_file = 'scripts/moose/moose-mech-gmsh.i'
-    moose_runner.set_input_file(input_file)
+    moose_runner.set_input_path(input_file)
 
     # Copy mesh file into the directory
     moose_mesh_file = os.path.split(input_file)[0]+'/mesh_tens_spline_2d.msh'

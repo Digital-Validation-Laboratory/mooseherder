@@ -51,7 +51,7 @@ def input_runner(input_file):
     moose_app_dir = os.path.join(user_dir,'moose-workdir/proteus')
     moose_app_name = 'proteus-opt'
     runner = MooseRunner(moose_dir,moose_app_dir,moose_app_name)
-    runner.set_input_file(input_file)
+    runner.set_input_path(input_file)
     return runner
 
 @pytest.fixture(autouse=True)
