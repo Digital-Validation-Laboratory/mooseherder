@@ -6,7 +6,6 @@ Author: Lloyd Fletcher
 ==============================================================================
 """
 import time
-import os
 from pathlib import Path
 from mooseherder import MooseRunner
 

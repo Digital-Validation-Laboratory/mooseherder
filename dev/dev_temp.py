@@ -25,7 +25,5 @@ print(my_path.with_stem('change-moose'))
 
 print(my_path.parent / (str(my_path.stem) +'_out.e'))
 
-my_path = Path()
-
-
-
+print(my_path.is_file())
+print(my_path.is_dir())
