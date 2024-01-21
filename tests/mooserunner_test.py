@@ -10,12 +10,11 @@ import os
 from pathlib import Path
 import pytest
 from mooseherder.mooserunner import MooseRunner
-import tests.herdchecktools as hct
+import tests.herdchecker as hc
 
 USER_DIR = Path.home()
 
 def test_moose_dir_exists() -> None:
-
     moose_dir = USER_DIR / 'moose'
     assert moose_dir.is_dir() is True
 
@@ -218,7 +217,7 @@ def test_run(opts: tuple[int,int,bool],
     assert os.path.isfile(input_runner.get_input_dir() / 'stdout.processor.1') == stdout_exist[1], 'stdout.processor.1 does not exist.' # type: ignore
     if opts[2]: # If there is a stdout it can be read to check for convergence
         check_path = input_runner.get_input_dir() / 'stdout.processor.0' # type: ignore
-        assert hct.check_solve_converged(check_path) >= 1, 'Solve has not converged.'
+        assert hc.check_solve_converged(check_path) >= 1, 'Solve has not converged.'
 
 
 def test_run_broken(runner: MooseRunner, input_broken: Path) -> None:
@@ -230,8 +229,8 @@ def test_run_broken(runner: MooseRunner, input_broken: Path) -> None:
     assert os.path.isfile(runner.get_output_exodus_path()) is False # type: ignore
     assert os.path.isfile(stdout_file) is True # type: ignore
 
-    assert hct.check_solve_error(stdout_file) >= 1, 'Error string not found in stdout'
-    assert hct.check_solve_converged(stdout_file) == 0, 'Solve converged when it should have errored'
+    assert hc.check_solve_error(stdout_file) >= 1, 'Error string not found in stdout'
+    assert hc.check_solve_converged(stdout_file) == 0, 'Solve converged when it should have errored'
 
 def test_run_noexist(runner: MooseRunner, input_noexist: Path) -> None:
     with pytest.raises(FileNotFoundError) as err_info:
@@ -241,7 +240,7 @@ def test_run_noexist(runner: MooseRunner, input_noexist: Path) -> None:
     assert msg == 'Input file does not exist.'
 
     assert os.path.isfile(runner.get_output_exodus_path()) is False, 'Exodus output exists but input should not.' # type: ignore
-    assert hct.check_solve_converged(runner.get_input_dir() / 'stdout.processor.0') == 0, 'Solve converged when input file should not exist.' # type: ignore
+    assert hc.check_solve_converged(runner.get_input_dir() / 'stdout.processor.0') == 0, 'Solve converged when input file should not exist.' # type: ignore
 
 def test_run_with_input(runner: MooseRunner, input_path: Path) -> None:
     runner.set_opts(1,4,True)
@@ -249,4 +248,4 @@ def test_run_with_input(runner: MooseRunner, input_path: Path) -> None:
 
     assert os.path.isfile(runner.get_output_exodus_path()) is True, 'Exodus output does not exist when solve should have run' # type: ignore
     assert os.path.isfile(runner.get_input_dir() / 'stdout.processor.0') is True, 'Stdout does not exist when it should.' # type: ignore
-    assert hct.check_solve_converged(runner.get_input_dir() / 'stdout.processor.0') >= 1, 'Solve did not converge when it should have.' # type: ignore
+    assert hc.check_solve_converged(runner.get_input_dir() / 'stdout.processor.0') >= 1, 'Solve did not converge when it should have.' # type: ignore

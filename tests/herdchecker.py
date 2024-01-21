@@ -13,10 +13,11 @@ from mooseherder.mooserunner import MooseRunner
 from mooseherder.gmshrunner import GmshRunner
 from mooseherder.mooseherd import MooseHerd
 
-def create_moose_objs(input_file: str) -> (InputModifier,MooseRunner):
-    user_dir = get_user_dir()
-    moose_dir = os.path.join(user_dir,'moose')
-    moose_app_dir = os.path.join(user_dir,'moose-workdir/proteus')
+USER_DIR = Path.home()
+
+def create_moose_objs(input_file: Path) -> tuple[MooseRunner,InputModifier]:
+    moose_dir = USER_DIR / 'moose'
+    moose_app_dir = USER_DIR / 'moose-workdir/proteus'
     moose_app_name = 'proteus-opt'
     moose_input = input_file
 
@@ -25,9 +26,9 @@ def create_moose_objs(input_file: str) -> (InputModifier,MooseRunner):
 
     return (moose_runner,moose_modifier)
 
-def create_gmsh_objs(input_file: str) -> (InputModifier,GmshRunner):
-    user_dir = get_user_dir()
-    gmsh_path = os.path.join(user_dir,'moose-workdir/gmsh/bin/gmsh')
+
+def create_gmsh_objs(input_file: Path) -> tuple[GmshRunner,InputModifier]:
+    gmsh_path = USER_DIR / 'moose-workdir/gmsh/bin/gmsh'
     gmsh_input = input_file
 
     gmsh_modifier = InputModifier(gmsh_input,'//',';')
@@ -35,11 +36,6 @@ def create_gmsh_objs(input_file: str) -> (InputModifier,GmshRunner):
     gmsh_runner.set_input_file(gmsh_input)
 
     return (gmsh_runner,gmsh_modifier)
-
-def get_user_dir() -> str:
-    path_parts = Path(os.getcwd()).parts
-    user_dir = os.path.join(path_parts[0],path_parts[1],path_parts[2])
-    return user_dir
 
 def check_solve(check_file: str, check_str: str) -> int:
     check_count = 0
@@ -60,7 +56,7 @@ def check_solve_error(check_stdout: str) -> int:
 
 def check_output_key_file_count(check_dir: str) -> int:
     work_dir_files = os.listdir(check_dir)
-    
+
     key_count = 0
     for ff in work_dir_files:
         if 'output-key' in ff:
@@ -81,7 +77,7 @@ def check_run_sweep(check_herd: MooseHerd, run_call: int):
 
 def check_input_output_count_sequential(check_herd: MooseHerd, run_call: int):
     (input_count, output_count) = get_input_output_count(check_herd._run_dirs)
-    
+
     if not check_herd._keep_all:
         num_sims = 1
     else:
@@ -93,22 +89,22 @@ def check_input_output_count_sequential(check_herd: MooseHerd, run_call: int):
 
 def check_input_output_count_para(check_herd: MooseHerd, run_call: int):
     (input_count, output_count) = get_input_output_count(check_herd._run_dirs)
-    
+
     num_sims = get_num_sims(check_herd._moose_var_list, check_herd._gmsh_var_list, run_call)
 
     assert input_count == num_sims
     assert output_count == num_sims
 
 
-def get_input_output_count(run_dirs: list[str]) -> (int,int):
+def get_input_output_count(run_dirs: list[str]) -> tuple[int,int]:
     # Go through all work directories and count the inputs/exoduses
     input_count = 0
     output_count = 0
-    
+
     for rr in run_dirs:
         dir_files = os.listdir(rr)
         for ff in dir_files:
-            if '_out.e' in ff: 
+            if '_out.e' in ff:
                 output_count += 1
             elif '.i' in ff:
                 input_count += 1
@@ -120,7 +116,7 @@ def get_num_sims(moose_var_list: list[dict], gmsh_var_list: list[dict], run_call
     num_gmsh_vars = 1
     if gmsh_var_list != None:
         num_gmsh_vars = len(gmsh_var_list)
-    
+
     return run_call*len(moose_var_list)*num_gmsh_vars
 
 

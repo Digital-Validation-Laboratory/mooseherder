@@ -10,50 +10,52 @@ import os
 from pathlib import Path
 from mooseherder import GmshRunner
 
+USER_DIR = Path.home()
+
 def main():
     user_dir = Path.home()
 
     print('------------------------------------------')
     print('EXAMPLE 2b: Run Gmsh 2D once')
     print('------------------------------------------')
-    gmsh_path = os.path.join(user_dir,'moose-workdir/gmsh/bin/gmsh')
+    gmsh_path = USER_DIR / 'moose-workdir/gmsh/bin/gmsh'
     gmsh_runner = GmshRunner(gmsh_path)
 
-    gmsh_input = 'scripts/gmsh/gmsh_tens_spline_2d.geo'
+    gmsh_input = Path('scripts/gmsh/gmsh_tens_spline_2d.geo')
     gmsh_runner.set_input_file(gmsh_input)
 
-    print('Gmsh path:' + gmsh_path)
-    print('Gmsh input:' + gmsh_runner._input_file)
+    print('Gmsh path:' + str(gmsh_path))
+    print('Gmsh input:' + str(gmsh_input))
 
     print('Running gmsh...')
     start_time = time.perf_counter()
     gmsh_runner.run()
-    end_time = time.perf_counter()
+    run_time = time.perf_counter() - start_time
 
     print()
-    print('Gmsh 2D run time = '+'{:.3f}'.format(end_time-start_time)+' seconds')
+    print(f'Gmsh 2D run time = {run_time :.3f} seconds')
     print('------------------------------------------')
     print()
 
     print('------------------------------------------')
     print('EXAMPLE 2b: Run Gmsh 3D once')
     print('------------------------------------------')
-    gmsh_path = os.path.join(user_dir,'moose-workdir/gmsh/bin/gmsh')
+    gmsh_path = USER_DIR / 'moose-workdir/gmsh/bin/gmsh'
     gmsh_runner = GmshRunner(gmsh_path)
 
-    gmsh_input = 'scripts/gmsh/gmsh_tens_spline_3d.geo'
+    gmsh_input = Path('scripts/gmsh/gmsh_tens_spline_3d.geo')
     gmsh_runner.set_input_file(gmsh_input)
 
-    print('Gmsh path:' + gmsh_path)
-    print('Gmsh input:' + gmsh_runner._input_file)
+    print('Gmsh path:' + str(gmsh_path))
+    print('Gmsh input:' + str(gmsh_input))
 
     print('Running gmsh...')
     start_time = time.perf_counter()
     gmsh_runner.run()
-    end_time = time.perf_counter()
+    run_time = time.perf_counter() - start_time
 
     print()
-    print('Gmsh 3D run time = '+'{:.3f}'.format(end_time-start_time)+' seconds')
+    print(f'Gmsh 3D run time = {run_time :.3f} seconds')
     print('------------------------------------------')
     print()
 

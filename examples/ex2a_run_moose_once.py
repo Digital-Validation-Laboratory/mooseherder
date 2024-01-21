@@ -11,7 +11,6 @@ from mooseherder import MooseRunner
 
 USER_DIR = Path.home()
 
-
 def main() -> None:
 
     print('------------------------------------------')

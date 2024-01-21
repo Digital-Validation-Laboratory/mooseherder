@@ -17,10 +17,6 @@ TODO: Runner has
 
 
 class SimRunner(ABC):
-    @property
-    def input_file(self):
-        return self._input_file
-
     @abstractmethod
     def run(self, input_file=None) -> None:
         pass
