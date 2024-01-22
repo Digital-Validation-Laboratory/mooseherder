@@ -12,6 +12,8 @@ MOOSE_INPUT = Path("scripts/moose/moose-mech-simple.i")
 
 
 def main() -> None:
+    """main: modify moose input script and write modified file.
+    """
     print("------------------------------------------")
     print("EXAMPLE 1a: Modify MOOSE input script")
     print("------------------------------------------")

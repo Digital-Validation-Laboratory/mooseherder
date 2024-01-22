@@ -12,6 +12,8 @@ GMSH_INPUT = Path("scripts/gmsh/gmsh_tens_spline_2d.geo")
 
 
 def main() -> None:
+    """main: modify gmsh input and save to file
+    """
     print("------------------------------------------")
     print("EXAMPLE 1b: Modify gmsh input script")
     print("------------------------------------------")
@@ -28,7 +30,7 @@ def main() -> None:
     print(gmsh_mod.get_vars())
     print()
 
-    gmsh_save = "scripts/gmsh_tens_spline_2d-mod_vars.geo"
+    gmsh_save = Path("scripts/gmsh_tens_spline_2d-mod_vars.geo")
     gmsh_mod.write_file(gmsh_save)
 
     print("Modified input script written to:")

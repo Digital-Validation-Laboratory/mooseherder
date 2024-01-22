@@ -37,10 +37,10 @@ def create_gmsh_objs(input_file: Path) -> tuple[GmshRunner,InputModifier]:
 
     return (gmsh_runner,gmsh_modifier)
 
-def check_solve(check_file: str, check_str: str) -> int:
+def check_solve(check_file: Path, check_str: str) -> int:
     check_count = 0
     if os.path.isfile(check_file):
-        with open(check_file,'r') as so:
+        with open(check_file,'r', encoding="utf-8") as so:
             stdout_lines = so.readlines()
             for ll in stdout_lines:
                 if check_str in ll:
@@ -48,13 +48,13 @@ def check_solve(check_file: str, check_str: str) -> int:
     return check_count
 
 
-def check_solve_converged(check_stdout: str) -> int:
+def check_solve_converged(check_stdout: Path) -> int:
     return check_solve(check_stdout,'Solve Converged!')
 
-def check_solve_error(check_stdout: str) -> int:
+def check_solve_error(check_stdout: Path) -> int:
     return check_solve(check_stdout,'*** ERROR ***')
 
-def check_output_key_file_count(check_dir: str) -> int:
+def check_output_key_file_count(check_dir: Path) -> int:
     work_dir_files = os.listdir(check_dir)
 
     key_count = 0
@@ -65,14 +65,14 @@ def check_output_key_file_count(check_dir: str) -> int:
     return key_count
 
 
-def check_run_sweep(check_herd: MooseHerd, run_call: int):
+def check_run_sweep(check_herd: MooseHerd, run_call: int) -> None:
     for ff in check_herd._output_files:
         assert os.path.isfile(ff), f"Simulation output {ff} does not exist."
 
     assert check_herd._sweep_start_time >= 0, 'Sweep start time is less than 0.'
     assert check_herd._sweep_run_time >= 0, 'Sweep run time is less than 0.'
     assert os.path.isfile(check_herd.get_output_key_file()), 'Output key file was not written.'
-    assert check_output_key_file_count(check_herd._run_dir + '-1/') == run_call
+    assert check_output_key_file_count(Path(str(check_herd._run_dir + '-1/'))) == run_call
 
 
 def check_input_output_count_sequential(check_herd: MooseHerd, run_call: int):
@@ -112,15 +112,21 @@ def get_input_output_count(run_dirs: list[str]) -> tuple[int,int]:
     return (input_count, output_count)
 
 
-def get_num_sims(moose_var_list: list[dict], gmsh_var_list: list[dict], run_call: int) -> int:
+def get_num_sims(moose_var_list: list[dict],
+                 gmsh_var_list: list[dict] | None,
+                 run_call: int) -> int:
     num_gmsh_vars = 1
-    if gmsh_var_list != None:
+    if gmsh_var_list is not None:
         num_gmsh_vars = len(gmsh_var_list)
 
     return run_call*len(moose_var_list)*num_gmsh_vars
 
 
-def run_check_sequential(keep_all,expected,run_herd,moose_vars,gmsh_vars):
+def run_check_sequential(keep_all: bool,
+                         expected: int,
+                         run_herd: MooseHerd,
+                         moose_vars: list[dict],
+                         gmsh_vars: list[dict] | None):
     run_herd.set_flags(one_dir = False, keep_all = keep_all)
     run_herd.para_opts(n_moose = 2)
 
@@ -133,7 +139,11 @@ def run_check_sequential(keep_all,expected,run_herd,moose_vars,gmsh_vars):
     check_input_output_count_sequential(check_herd = run_herd, run_call = expected)
 
 
-def run_check_para(keep_all,expected,run_herd,moose_vars,gmsh_vars):
+def run_check_para(keep_all: bool,
+                   expected: int,
+                   run_herd: MooseHerd,
+                   moose_vars: list[dict],
+                   gmsh_vars: list[dict] | None):
     run_herd.para_opts(n_moose = 4)
     run_herd.set_flags(one_dir = False, keep_all = keep_all)
 
