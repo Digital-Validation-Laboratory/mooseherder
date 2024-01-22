@@ -24,7 +24,7 @@ class GmshRunner(SimRunner):
         else:
             self.set_gmsh_app(gmsh_app)
 
-        self._input_file = None
+        self._input_path = None
         self._run_str = ""
 
     def set_gmsh_app(self, gmsh_app: Path) -> None: # type: ignore
@@ -41,7 +41,17 @@ class GmshRunner(SimRunner):
 
         self._gmsh_app = gmsh_app
 
-    def set_input_file(self, input_file: Path) -> None:
+
+    def get_input_path(self) -> Path | None:
+        """get_input_path _summary_
+
+        Returns:
+            Path | None: _description_
+        """
+        return self._input_path
+
+
+    def set_input_path(self, input_file: Path) -> None:
         """Sets the input geo file for gmsh.
 
         Args:
@@ -57,7 +67,7 @@ class GmshRunner(SimRunner):
         if not input_file.exists():
             raise FileNotFoundError('Specified gmsh geo file does not exist.')
 
-        self._input_file = input_file
+        self._input_path = input_file
 
     def run(self, input_file: Path | None = None) -> None:
         """Run the geo file to create the mesh.
@@ -74,14 +84,14 @@ class GmshRunner(SimRunner):
                 first.
         """
         if input_file is not None:
-            self.set_input_file(input_file)
+            self.set_input_path(input_file)
 
         if self._gmsh_app is None:
             raise RuntimeError("Specify the full path to the gmsh app before calling run.")
 
-        if self._input_file is None:
+        if self._input_path is None:
             raise RuntimeError("Specify input *.geo file before running gmsh.")
 
-        self._run_str = f'{self._gmsh_app} {self._input_file}'
+        self._run_str = f'{self._gmsh_app} {self._input_path}'
         os.system(self._run_str)
 

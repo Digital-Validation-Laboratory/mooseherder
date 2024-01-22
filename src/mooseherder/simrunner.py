@@ -6,17 +6,25 @@ Authors: Lloyd Fletcher, Rory Spencer
 ===============================================================================
 """
 from abc import ABC, abstractmethod
-
-"""
-TODO: Runner has
-- An app path - must exist!
-- An input file and path - must exist!
-- A funcion to assemble the command string
-- A run function
-"""
-
+from pathlib import Path
 
 class SimRunner(ABC):
+    """SimRunner: Abstract Base Class for
+    """
     @abstractmethod
-    def run(self, input_file=None) -> None:
+    def get_input_path(self) -> Path | None:
+        """get_input_path
+
+        Returns:
+            Path: _description_
+        """
+        pass
+
+    @abstractmethod
+    def run(self, input_file: Path | None = None) -> None:
+        """run _summary_
+
+        Args:
+            input_file (Path or None, optional): _description_. Defaults to None.
+        """
         pass

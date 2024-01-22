@@ -1,5 +1,6 @@
 # This is a simple MOOSE tensor mechanics input script for testing the herder
-n_elem_z = 20 # Putting this variable outside the block to test
+# n_elem_z = 20 # Putting this variable outside the block to test
+spatial_dims = 2
 
 #_* Variables Block
 n_elem_x = 20 # putting an equals sign here to test
@@ -15,7 +16,6 @@ x_max = ${fparse 2*y_max}
 #** End Variable Block
 
 # Another variable outside the block to test
-spatial_dims = 2
 time_end = 2
 
 [GlobalParams]

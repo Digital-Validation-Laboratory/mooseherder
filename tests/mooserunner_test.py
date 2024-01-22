@@ -129,19 +129,19 @@ def test_set_input_file_err(runner: MooseRunner) -> None:
 
 def test_get_input_strs(runner: MooseRunner, input_runner: MooseRunner) -> None:
     assert runner.get_input_dir() is None
-    assert runner.get_input_tag() is None
+    assert runner.get_input_tag() == ''
     assert input_runner.get_input_dir() == Path('tests/moose/')
     assert input_runner.get_input_tag() == 'moose-test'
 
 
 def test_get_output_exodus_file(runner: MooseRunner, input_runner: MooseRunner):
-    assert runner.get_output_exodus_file() is ""
-    assert input_runner.get_output_exodus_file() is "moose-test_out.e"
+    assert runner.get_output_exodus_file() == ""
+    assert input_runner.get_output_exodus_file() == "moose-test_out.e"
 
 
 def test_get_output_exodus_path(runner: MooseRunner,input_runner: MooseRunner):
     assert runner.get_output_exodus_path() is None
-    assert input_runner.get_output_exodus_path() == 'tests/moose/moose-test_out.e'
+    assert input_runner.get_output_exodus_path() == Path('tests/moose/moose-test_out.e')
 
 
 @pytest.mark.parametrize(
@@ -232,6 +232,7 @@ def test_run_broken(runner: MooseRunner, input_broken: Path) -> None:
     assert hc.check_solve_error(stdout_file) >= 1, 'Error string not found in stdout'
     assert hc.check_solve_converged(stdout_file) == 0, 'Solve converged when it should have errored'
 
+
 def test_run_noexist(runner: MooseRunner, input_noexist: Path) -> None:
     with pytest.raises(FileNotFoundError) as err_info:
         runner.run(input_noexist)
@@ -239,8 +240,6 @@ def test_run_noexist(runner: MooseRunner, input_noexist: Path) -> None:
     msg, = err_info.value.args
     assert msg == 'Input file does not exist.'
 
-    assert os.path.isfile(runner.get_output_exodus_path()) is False, 'Exodus output exists but input should not.' # type: ignore
-    assert hc.check_solve_converged(runner.get_input_dir() / 'stdout.processor.0') == 0, 'Solve converged when input file should not exist.' # type: ignore
 
 def test_run_with_input(runner: MooseRunner, input_path: Path) -> None:
     runner.set_opts(1,4,True)

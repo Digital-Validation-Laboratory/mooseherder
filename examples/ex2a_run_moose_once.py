@@ -12,7 +12,8 @@ from mooseherder import MooseRunner
 USER_DIR = Path.home()
 
 def main() -> None:
-
+    """main: run moose once with runner class
+    """
     print('------------------------------------------')
     print('EXAMPLE 2a: Run MOOSE once')
     print('------------------------------------------')
@@ -20,7 +21,7 @@ def main() -> None:
     moose_dir = USER_DIR / 'moose'
     moose_app_dir = USER_DIR / 'moose-workdir/proteus'
     moose_app_name = 'proteus-opt'
-    moose_runner = MooseRunner(moose_dir,moose_app_dir,moose_app_name)
+    moose_runner = MooseRunner(moose_dir,moose_app_dir,moose_app_name) # type: ignore
 
     print(f'MOOSE directory: {str(moose_dir)}')
     print(f'MOOSE app directory: {str(moose_app_dir)}')
