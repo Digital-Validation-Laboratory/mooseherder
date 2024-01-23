@@ -8,9 +8,9 @@ Authors: Lloyd Fletcher, Rory Spencer
 import os
 import subprocess
 from pathlib import Path
-from mooseherder.simrunner import SimRunner
+#from mooseherder.simrunner import SimRunner
 
-class MooseRunner(SimRunner):
+class MooseRunner():
     """Used to run MOOSE models (*.i) from python.
     """
     def __init__(self, moose_path: Path, app_path: Path, app_name: str):
@@ -103,7 +103,17 @@ class MooseRunner(SimRunner):
         self.set_tasks(n_tasks)
         self.set_stdout(redirect)
 
-    def set_input_path(self, input_path: Path) -> None:
+
+    def get_input_file(self) -> Path | None:
+        """get_input_file _summary_
+
+        Returns:
+            Path | None: _description_
+        """
+        return self._input_path
+
+
+    def set_input_file(self, input_path: Path) -> None:
         """Sets the path to the MOOSE input file and checks it exists.
 
         Args:
@@ -192,7 +202,7 @@ class MooseRunner(SimRunner):
                 is called.
         """
         if input_file is not None:
-            self.set_input_path(input_file)
+            self.set_input_file(input_file)
 
         if self._input_path is None:
             raise RuntimeError('No input file specified, set one using set_input_file or by passing on into this function.')
@@ -226,7 +236,7 @@ class MooseRunner(SimRunner):
                 empty updates the input file. Defaults to None.
         """
         if input_file is not None:
-            self.set_input_path(input_file)
+            self.set_input_file(input_file)
 
         if self._input_path is None:
             raise RuntimeError("Set input path before calling run.")

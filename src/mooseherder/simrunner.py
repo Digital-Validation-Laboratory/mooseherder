@@ -12,19 +12,19 @@ class SimRunner(ABC):
     """SimRunner: Abstract Base Class for
     """
     @abstractmethod
-    def get_input_path(self) -> Path | None:
+    def get_input_file(self) -> Path | None:
         """get_input_path
-
-        Returns:
-            Path: _description_
         """
-        pass
+
+
+    @abstractmethod
+    def set_input_file(self, input_path: Path) -> None:
+        """set_input_file
+        """
+
 
     @abstractmethod
     def run(self, input_file: Path | None = None) -> None:
         """run _summary_
-
-        Args:
-            input_file (Path or None, optional): _description_. Defaults to None.
         """
-        pass
+

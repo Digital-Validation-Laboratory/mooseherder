@@ -7,7 +7,7 @@ Author: Lloyd Fletcher
 """
 import time
 from pathlib import Path
-from mooseherder import GmshRunner
+from mooseherder.gmshrunner import GmshRunner
 
 USER_DIR = Path.home()
 
@@ -18,7 +18,7 @@ def main():
     print('EXAMPLE 2b: Run Gmsh 2D once')
     print('------------------------------------------')
     gmsh_path = USER_DIR / 'moose-workdir/gmsh/bin/gmsh'
-    gmsh_runner = GmshRunner(gmsh_path) # type: ignore
+    gmsh_runner = GmshRunner(gmsh_path)
 
     gmsh_input = Path('scripts/gmsh/gmsh_tens_spline_2d.geo')
     gmsh_runner.set_input_file(gmsh_input)
@@ -43,7 +43,7 @@ def main():
     gmsh_runner = GmshRunner(gmsh_path)
 
     gmsh_input = Path('scripts/gmsh/gmsh_tens_spline_3d.geo')
-    gmsh_runner.set_input_path(gmsh_input)
+    gmsh_runner.set_input_file(gmsh_input)
 
     print('Gmsh path:' + str(gmsh_path))
     print('Gmsh input:' + str(gmsh_input))

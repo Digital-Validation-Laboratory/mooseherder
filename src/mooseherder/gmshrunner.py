@@ -7,9 +7,9 @@ Authors: Rory Spencer, Lloyd Fletcher
 '''
 import os
 from pathlib import Path
-from mooseherder.simrunner import SimRunner
+#from mooseherder.simrunner import SimRunner
 
-class GmshRunner(SimRunner):
+class GmshRunner():
     """Used to call gmsh to create a mesh file to be used to run a finite
     element simulation.
     """
@@ -42,7 +42,7 @@ class GmshRunner(SimRunner):
         self._gmsh_app = gmsh_app
 
 
-    def get_input_path(self) -> Path | None:
+    def get_input_file(self) -> Path | None:
         """get_input_path _summary_
 
         Returns:
@@ -51,7 +51,7 @@ class GmshRunner(SimRunner):
         return self._input_path
 
 
-    def set_input_path(self, input_file: Path) -> None:
+    def set_input_file(self, input_file: Path) -> None:
         """Sets the input geo file for gmsh.
 
         Args:
@@ -84,7 +84,7 @@ class GmshRunner(SimRunner):
                 first.
         """
         if input_file is not None:
-            self.set_input_path(input_file)
+            self.set_input_file(input_file)
 
         if self._gmsh_app is None:
             raise RuntimeError("Specify the full path to the gmsh app before calling run.")
