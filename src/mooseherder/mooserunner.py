@@ -8,9 +8,9 @@ Authors: Lloyd Fletcher, Rory Spencer
 import os
 import subprocess
 from pathlib import Path
-#from mooseherder.simrunner import SimRunner
+from mooseherder.simrunner import SimRunner
 
-class MooseRunner():
+class MooseRunner(SimRunner):
     """Used to run MOOSE models (*.i) from python.
     """
     def __init__(self, moose_path: Path, app_path: Path, app_name: str):
@@ -33,7 +33,6 @@ class MooseRunner():
 
         self._input_path = None
 
-        self.set_env_vars()
 
     def set_env_vars(self) -> None:
         """Sets environment variables for calling MOOSE with MPI.
@@ -79,7 +78,7 @@ class MooseRunner():
 
         self._n_tasks = int(n_tasks)
 
-    def set_stdout(self, redirect_flag=True) -> None:
+    def set_stdout(self, redirect_flag: bool = True) -> None:
         """Sets MOOSE to redirect output (True) to file instead of console (False).
 
         Args:
@@ -88,7 +87,9 @@ class MooseRunner():
         """
         self._redirect_stdout = redirect_flag
 
-    def set_opts(self, n_tasks=1, n_threads=1, redirect=True) -> None:
+    def set_opts(self, n_tasks: int = 1,
+                 n_threads: int = 1,
+                 redirect_out: bool = True) -> None:
         """Sets all options for MOOSE run parallelisation and output.
 
         Args:
@@ -101,7 +102,7 @@ class MooseRunner():
         """
         self.set_threads(n_threads)
         self.set_tasks(n_tasks)
-        self.set_stdout(redirect)
+        self.set_stdout(redirect_out)
 
 
     def get_input_file(self) -> Path | None:
@@ -152,8 +153,8 @@ class MooseRunner():
 
         return self._input_path.stem # type: ignore
 
-
-    def get_output_exodus_file(self) -> str:
+    '''
+    def get_output_file(self) -> str:
         """Gets the file name (without path) for the output exodus file based
         on the specified input file. Includes '_out.e'.
 
@@ -165,9 +166,9 @@ class MooseRunner():
             return ""
 
         return self._input_path.stem + '_out.e'
+    '''
 
-
-    def get_output_exodus_path(self) -> Path | None:
+    def get_output_path(self) -> Path | None:
         """Gets the file and path for the output exodus file based
         on the specified input file. Includes '_out.e'.
 
@@ -178,7 +179,7 @@ class MooseRunner():
         if self._input_path is None:
             return None
 
-        return self._input_path.parent / (str(self._input_path.stem)+'_out.e')
+        return self._input_path.parent / (self._input_path.stem +'_out.e')
 
 
     def get_run_str(self) -> str:
@@ -240,6 +241,8 @@ class MooseRunner():
 
         if self._input_path is None:
             raise RuntimeError("Set input path before calling run.")
+
+        self.set_env_vars()
 
         self.assemble_run_str()
         subprocess.run(self._run_str,

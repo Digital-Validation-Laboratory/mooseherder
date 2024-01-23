@@ -14,8 +14,6 @@ from pathlib import Path
 from multiprocessing.pool import Pool
 from mooseherder.simrunner import SimRunner
 from mooseherder.inputmodifier import InputModifier
-from mooseherder.mooserunner import MooseRunner
-from mooseherder.gmshrunner import GmshRunner
 from mooseherder.exodusreader import ExodusReader
 
 class MooseHerd:
@@ -23,7 +21,7 @@ class MooseHerd:
     Manages folders, running and reading.
     """
     def __init__(self, sim_runners: list[SimRunner],
-                 input_mods: list[InputModifier]):
+                 input_mods: list[InputModifier]) -> None:
         """Creates the herd. Number of moose instances defaults to 2. Sets the
         default strings for the working directories and names of input files
         (MOOSE and gmsh) when they are copied to the working directories to
@@ -33,23 +31,20 @@ class MooseHerd:
         self._modifiers = input_mods
 
         self._n_moose = 2
-        self._sub_dir = 'moose-workdir'
 
-        self._moose_input_name = 'moose-sim'
-        self._gmsh_input_name = 'gmsh-mesh'
+        self._input_name = 'sim'
 
-        self._base_dir = self._runners[0].get_input_file().parent
-        self._run_dir = self._base_dir / self._sub_dir
-        self._run_dirs = list()
+        self._sub_dir = 'sim-workdir'
+        self._base_dir = Path().cwd()
+        self._run_dirs = list([])
 
-        self._output_files = list()
-        self._sweep_results = list()
+        self._output_files = list([])
+        self._sweep_results = list([])
 
         self._one_dir = False
         self._keep_all = True
 
-        self._moose_var_list = list()
-        self._gmsh_var_list = None
+        self._var_list = list([])
 
         self._sweep_iter = 0
         self._sweep_start_time = -1.0
@@ -79,24 +74,21 @@ class MooseHerd:
         self._base_dir = base_dir
 
     def set_names(self,
-                  sub_dir = 'moose-workdir',
-                  moose_name = 'moose-sim',
-                  gmsh_name = 'gmsh-mesh') -> None:
+                  sub_dir = 'workdir',
+                  input_name = 'sim') -> None:
         """Sets the names of the working directories for each MOOSE instance
-        and the default names for the MOOSE and gmsh inputs that will be
-        copied to those directories.
+        and the default names for the input scripts that will be copied to
+        those directories.
 
         Args:
             sub_dir (str, optional): name of directories that will be created
                 in the base_dir. Defaults to 'moose-workdir'.
-            moose_name (str, optional): name of the created/modified MOOSE
-                input files. Defaults to 'moose-sim'.
-            gmsh_name (str, optional): name of the created/modified gmsh input
-                files. Defaults to 'gmsh-mesh'.
+            input_name (str, optional): name of the created/modified
+                input files. Defaults to 'sim'.
         """
         self._sub_dir = sub_dir
-        self._moose_input_name = moose_name
-        self._gmsh_input_name = gmsh_name
+        self._input_name = input_name
+
 
     def set_flags(self, one_dir = False, keep_all = True) -> None:
         """Set boolean flags to control working directory and output file
@@ -117,17 +109,19 @@ class MooseHerd:
     def create_dirs(self) -> None:
         """Create directories to store the MOOSE instance outputs.
         """
-        self._run_dir = self._base_dir + self._sub_dir
-        self._run_dirs = list()
+        self._run_dirs = list([])
+
         if self._one_dir:
-            if not(os.path.isdir(self._run_dir+'-1')):
-                os.mkdir(self._run_dir+'-1')
+            first_dir = self._base_dir / (self._sub_dir+'-1')
+            self._run_dirs.append(first_dir)
+            if not first_dir.is_dir():
+                first_dir.mkdir()
         else:
-            for nn in range(self._n_moose):
-                run_sub_dir = self._run_dir+'-'+str(nn+1)
+            for nn in range(self._n_moose): # type: ignore
+                run_sub_dir = self._base_dir / (self._sub_dir + '-' + str(nn+1))
                 self._run_dirs.append(run_sub_dir)
-                if not(os.path.isdir(run_sub_dir)):
-                    os.mkdir(run_sub_dir)
+                if not run_sub_dir.is_dir():
+                    run_sub_dir.mkdir()
 
 
     def clear_dirs(self) -> None:
@@ -136,19 +130,16 @@ class MooseHerd:
         """
         all_dirs = os.listdir(self._base_dir)
         for dd in all_dirs:
-            if os.path.isdir(self._base_dir+dd):
+            if os.path.isdir(self._base_dir / dd):
                 if self._sub_dir in dd:
-                    shutil.rmtree(self._base_dir+dd)
+                    shutil.rmtree(self._base_dir / dd)
 
-    def para_opts(self, n_moose = 1, tasks_per_moose = 1, threads_per_moose = 1, redirect_out = True, create_dirs = True) -> None:
-        """Set MOOSE parallelisation options.
+    def set_opts(self, n_moose: int = 1,
+                  create_dirs: bool = True) -> None:
+        """Set simulation parallelisation options.
 
         Args:
             n_moose (int): Number of MOOSE instances running in parallel.
-            tasks_per_moose (int, optional): Number of MPI tasks per MOOSE
-                instance. Defaults to 1.
-            threads_per_moose (int, optional): Number of threads per MOOSE
-                instance. Defaults to 1.
             redirect_out (bool, optional): Redirect MOOSE console output to
                 file stdout. Defaults to False.
             create_dirs (bool, optional): If n_moose changes then create new
@@ -157,8 +148,8 @@ class MooseHerd:
         n_moose = int(n_moose)
         if n_moose <= 0:
             n_moose = 1
-        elif n_moose > os.cpu_count():
-            n_moose = os.cpu_count()
+        elif n_moose > os.cpu_count(): # type: ignore
+            n_moose = os.cpu_count() # type: ignore
 
         if self._n_moose != n_moose:
             self._n_moose = n_moose
@@ -166,21 +157,15 @@ class MooseHerd:
         if create_dirs:
             self.create_dirs()
 
-        self._moose_runner.set_opts(tasks_per_moose,threads_per_moose,redirect_out)
 
-    def run_once(self, sim_iter: int, moose_vars: dict, gmsh_vars = None) -> str:
+    def run_once(self, sim_iter: int, var_list: list[dict]) -> str:
         """Run a single simulation. Writes relevant moose and gmsh input decks
         to process working directory.
 
         Args:
-            iter (int): iteration number used to label the input files
-                (MOOSE and gmsh), ensures multiple runs in the same directory
+            iter (int): iteration number used to label the input files, ensures
+                multiple runs in the same directory
                 do not overwrite. Not used if keep_all = False.
-            moose_vars (dict): keys are variable names and variable values are
-                associated to the keys. Used by InputModifier to create a new
-                MOOSE input file to run in the
-            gmsh_vars (dict, optional): same as moose_vars but applies to gmsh
-                input file. Defaults to None.
 
         Returns:
             str: full path to the output exodus file.
@@ -190,6 +175,10 @@ class MooseHerd:
         worker_num = self._get_worker_num()
         run_dir = self._get_run_dir(worker_num)
         run_num = self._get_run_num(sim_iter,worker_num)
+
+        for mm in self._modifiers:
+            ext = mm.get_input_file().suffix
+
 
         # Need to create the mesh first, if required
         if (self._gmsh_modifier != None) or (gmsh_vars != None):
@@ -261,39 +250,22 @@ class MooseHerd:
 
         return run_num
 
-    def _run_gmsh(self, gmsh_vars: dict, run_dir: str, run_num: str) -> str:
-        """_summary_
+    def _mod_input(self,
+                   modifier: InputModifier,
+                   mod_vars: dict,
+                   run_dir: Path,
+                   run_num: str) -> Path:
 
-        Args:
-            gmsh_vars (dict): _description_
-            run_dir (str): _description_
-            run_num (str): _description_
+        save_file = run_dir / (self._input_name +'-'+run_num+'.i')
+        modifier.update_vars(mod_vars)
+        modifier.write_file(save_file)
+        return save_file
 
-        Returns:
-            str: _description_
-        """
-        gmsh_save = run_dir+self._gmsh_input_name +'-'+run_num+'.geo'
-        self._gmsh_modifier.update_vars(gmsh_vars)
-        self._gmsh_modifier.write_file(gmsh_save)
-        self._gmsh_runner.run(gmsh_save)
-        return gmsh_save
 
-    def _run_moose(self, moose_vars: dict, run_dir: str, run_num: str) -> str:
-        """_summary_
+    def _run(self, runner: SimRunner, run_file: Path) -> Path:
+        Runner.set_env_vars()
+        runner.run(run_file)
 
-        Args:
-            moose_vars (dict): _description_
-            run_dir (str): _description_
-            run_num (str): _description_
-
-        Returns:
-            str: _description_
-        """
-        moose_save = run_dir+self._moose_input_name +'-'+run_num+'.i'
-        self._moose_modifier.update_vars(moose_vars)
-        self._moose_modifier.write_file(moose_save)
-        self._moose_runner.set_env_vars()
-        self._moose_runner.run(moose_save)
         return moose_save
 
     def run_sequential(self,moose_var_list: list(dict()), gmsh_var_list=None) -> None:

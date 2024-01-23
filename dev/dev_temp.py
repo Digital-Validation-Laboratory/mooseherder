@@ -31,7 +31,7 @@ def main() -> None:
     # Set input and parallelisation options
     moose_runner.set_opts(n_tasks=2,n_threads=4,redirect=True)
     input_file = Path('tests/moose/moose-test.i')
-    moose_runner.set_input_path(input_file)
+    moose_runner.set_input_file(input_file)
 
     # Run the MOOSE!
     print('Running moose with:')

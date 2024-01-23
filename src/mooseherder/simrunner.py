@@ -28,3 +28,8 @@ class SimRunner(ABC):
         """run _summary_
         """
 
+    @abstractmethod
+    def get_output_path(self) -> Path | None:
+        """get_output_path _summary_
+        """
+
