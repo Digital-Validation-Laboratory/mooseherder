@@ -30,16 +30,16 @@ def main():
     moose_runner = MooseRunner(moose_dir,moose_app_dir,moose_app_name)
     moose_runner.set_opts(n_tasks = 1,
                           n_threads = 2,
-                          redirect_out = False)
+                          redirect_out = True)
 
-    dir_manager = DirectoryManager(n_dirs= 2)
+    dir_manager = DirectoryManager(n_dirs=4)
 
     # Start the herd and create working directories
     herd = MooseHerd([moose_runner],[moose_modifier],dir_manager)
 
     # Set the parallelisation options, we have 8 combinations of variables and
     # 4 MOOSE intances running, so 2 runs will be saved in each working directory
-    herd.set_opts(n_moose = 4)
+    herd.set_num_para_sims(n_para=4)
 
      # Send all the output to the examples directory and clear out old output
     dir_manager.set_base_dir(Path('examples/'))
@@ -79,12 +79,11 @@ def main():
     print('------------------------------------------')
 
     # Run all variable combinations (8) sequentially in moose-workdir-1
-    #herd.run_sequential(moose_vars)
+    herd.run_sequential(moose_vars)
 
     print(f'Run time (seq) = {herd.get_sweep_time():.3f} seconds')
     print('------------------------------------------')
     print()
-
 
     print('------------------------------------------')
     print('EXAMPLE 3c: Run MOOSE in parallel')
@@ -97,6 +96,7 @@ def main():
     print(f'Run time (para) = {herd.get_sweep_time():.3f} seconds')
     print('------------------------------------------')
     print()
+
 
 if __name__ == '__main__':
     main()

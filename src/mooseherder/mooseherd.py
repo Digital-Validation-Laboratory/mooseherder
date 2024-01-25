@@ -7,7 +7,6 @@ Authors: Lloyd Fletcher, Rory Spencer
 '''
 import os
 import time
-import json
 import multiprocessing as mp
 from pathlib import Path
 from multiprocessing.pool import Pool
@@ -204,17 +203,17 @@ class MooseHerd:
         """
         start_sweep_time = self._start_sweep(var_sweep)
 
-        self._output_files = list([])
+        output_files = list([])
 
         ii = self._sim_iter
         for vv in var_sweep:
-            self._output_files.append(self.run_once(ii,vv))
+            output_files.append(self.run_once(ii,vv))
             ii += 1
 
-        self._sim_iter += len(var_sweep)
-        self._end_sweep(start_sweep_time)
 
-        return self._output_files
+        self._end_sweep(start_sweep_time,output_files)
+
+        return output_files
 
 
     def run_para(self, var_sweep: list[list[dict | None]]) -> list[list[Path | None]]:
@@ -236,12 +235,11 @@ class MooseHerd:
                 processes.append(pool.apply_async(self.run_once, args=(ii,vv)))
                 ii += 1
 
-            self._output_files = [pp.get() for pp in processes]
+            output_files = [pp.get() for pp in processes]
 
-        self._sim_iter += len(var_sweep)
-        self._end_sweep(sweep_start_time)
+        self._end_sweep(sweep_start_time, output_files)
 
-        return self._output_files
+        return output_files
 
 
     def _start_sweep(self, var_sweep: list[list[dict | None]]) -> float:
@@ -263,15 +261,20 @@ class MooseHerd:
         return time.perf_counter()
 
 
-    def _end_sweep(self, start_sweep_time: float) -> None:
+    def _end_sweep(self, start_sweep_time: float,
+                   output_files: list[list[Path]]) -> None:
         """_end_sweep _summary_
 
         Args:
             start_sweep_time (float): _description_
         """
         self._sweep_run_time = time.perf_counter() - start_sweep_time
+
         self._sweep_iter += 1
-        self._dir_manager.write_output_key()
+        self._sim_iter += len(self._var_sweep)
+
+        self._dir_manager.set_output_paths(output_files)
+        self._dir_manager.write_output_key(self._sweep_iter)
 
 
     def get_sweep_time(self) -> float:
@@ -291,9 +294,3 @@ class MooseHerd:
         """
         return self._iter_run_time
 
-'''
-    def get_output_files(self) -> list[list[Path]]:
-
-
-        return self._output_files
-'''

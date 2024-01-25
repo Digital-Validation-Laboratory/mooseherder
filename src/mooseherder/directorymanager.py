@@ -24,6 +24,7 @@ class DirectoryManager:
         self._sub_dir = 'sim-workdir'
         self._base_dir = Path().cwd()
         self._run_dirs = list([])
+        self._output_paths = list([])
 
 
     def set_sub_dir_name(self, sub_dir_name: str) -> None:
@@ -106,21 +107,46 @@ class DirectoryManager:
 
         return self._run_dirs[dir_num]
 
+    def set_output_paths(self, output_paths: list[list[Path]]) -> None:
+        """set_output_paths _summary_
+
+        Args:
+            output_paths (list[list[Path]]): _description_
+        """
+        self._output_paths = output_paths
 
     def get_output_key_file(self, sweep_iter: int) -> Path:
+        """get_output_key_file _summary_
+
+        Args:
+            sweep_iter (int): _description_
+
+        Returns:
+            Path: _description_
+        """
         return self._run_dirs[0] / f'output-key-{sweep_iter:d}.json'
 
 
-    def write_output_key(self) -> None:
+    def write_output_key(self, sweep_iter: int) -> None:
+        """write_output_key _summary_
 
-        str_output = self.output_paths_to_str()
+        Args:
+            sweep_iter (int): _description_
+        """
+        str_output = self.output_paths_to_str(self._output_paths)
 
-        with open(self.get_output_key_file(), 'w', encoding='utf-8') as okf:
+        with open(self.get_output_key_file(sweep_iter), "w", encoding='utf-8') as okf:
             json.dump(str_output, okf, indent=4)
 
-
     def output_paths_to_str(self, output_files: list[list[Path]]) -> list[list[str]]:
+        """output_paths_to_str _summary_
 
+        Args:
+            output_files (list[list[Path]]): _description_
+
+        Returns:
+            list[list[str]]: _description_
+        """
         str_output = list([])
         for sim_iter in output_files:
             iter_output = list([])
