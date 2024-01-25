@@ -29,7 +29,7 @@ def main() -> None:
     print()
 
     # Set input and parallelisation options
-    moose_runner.set_opts(n_tasks=2,n_threads=4,redirect=True)
+    moose_runner.set_opts(n_tasks = 2, n_threads = 4,redirect_out = True)
     input_file = Path('scripts/moose/moose-mech-simple.i')
     moose_runner.set_input_file(input_file)
 

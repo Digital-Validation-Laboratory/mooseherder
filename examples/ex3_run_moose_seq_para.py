@@ -5,11 +5,11 @@ EXAMPLE 3: Run MOOSE in sequential then parallel mode with mooseherder
 Author: Lloyd Fletcher, Rory Spencer
 ==============================================================================
 '''
-import os
 from pathlib import Path
 from mooseherder import MooseHerd
 from mooseherder import MooseRunner
 from mooseherder import InputModifier
+from mooseherder import DirectoryManager
 
 
 USER_DIR = Path.home()
@@ -28,19 +28,23 @@ def main():
 
     moose_modifier = InputModifier(moose_input,'#','')
     moose_runner = MooseRunner(moose_dir,moose_app_dir,moose_app_name)
-    moose_runner.set_opts(n_tasks = 1, n_threads = 2, redirect_out = True)
+    moose_runner.set_opts(n_tasks = 1,
+                          n_threads = 2,
+                          redirect_out = False)
+
+    dir_manager = DirectoryManager(n_dirs= 2)
 
     # Start the herd and create working directories
-    herd = MooseHerd([moose_runner],[moose_modifier])
+    herd = MooseHerd([moose_runner],[moose_modifier],dir_manager)
 
     # Set the parallelisation options, we have 8 combinations of variables and
     # 4 MOOSE intances running, so 2 runs will be saved in each working directory
-    herd.set_opts(n_moose = 4, create_dirs = False)
+    herd.set_opts(n_moose = 4)
 
      # Send all the output to the examples directory and clear out old output
-    herd.set_base_dir(Path('examples/'), clear_old_dirs = True)
-    herd.clear_dirs()
-    herd.create_dirs()
+    dir_manager.set_base_dir(Path('examples/'))
+    dir_manager.clear_dirs()
+    dir_manager.create_dirs()
 
     # Create variables to sweep in a list of dictionaries, 8 combinations possible.
     n_elem_y = [10,20]
@@ -50,7 +54,9 @@ def main():
     for nn in n_elem_y:
         for ee in e_mod:
             for pp in p_rat:
-                moose_vars.append({'n_elem_y':nn,'e_modulus':ee,'p_ratio':pp})
+                # Needs to be list[list[dict]] - outer list is simulation iteration,
+                # inner list is what is passed to each runner/inputmodifier
+                moose_vars.append([{'n_elem_y':nn,'e_modulus':ee,'p_ratio':pp}])
 
     print('Herd sweep variables:')
     for vv in moose_vars:
@@ -64,7 +70,7 @@ def main():
     # Single run saved in moose-workdir-1
     herd.run_once(0,moose_vars[0])
 
-    print('Run time (once) = '+'{:.3f}'.format(herd.get_iter_time())+' seconds')
+    print(f'Run time (once) = {herd.get_iter_time():.3f} seconds')
     print('------------------------------------------')
     print()
 
@@ -73,11 +79,13 @@ def main():
     print('------------------------------------------')
 
     # Run all variable combinations (8) sequentially in moose-workdir-1
-    herd.run_sequential(moose_vars)
+    #herd.run_sequential(moose_vars)
 
-    print('Run time (sequential) = '+'{:.3f}'.format(herd.get_sweep_time())+' seconds')
+    print(f'Run time (seq) = {herd.get_sweep_time():.3f} seconds')
     print('------------------------------------------')
     print()
+
+
     print('------------------------------------------')
     print('EXAMPLE 3c: Run MOOSE in parallel')
     print('------------------------------------------')
@@ -86,7 +94,7 @@ def main():
     # each moose-workdir
     herd.run_para(moose_vars)
 
-    print('Run time (parallel) = '+'{:.3f}'.format(herd.get_sweep_time())+' seconds')
+    print(f'Run time (para) = {herd.get_sweep_time():.3f} seconds')
     print('------------------------------------------')
     print()
 

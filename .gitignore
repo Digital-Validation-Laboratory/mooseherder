@@ -1,8 +1,8 @@
 # MOOSE output files
 *.e
-examples/moose-workdir-*
+examples/sim-workdir-*
 examples/*.csv
-scripts/moose-workdir-*
+scripts/sim-workdir-*
 scripts/*.csv
 *.processor.*
 

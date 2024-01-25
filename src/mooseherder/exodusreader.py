@@ -48,10 +48,6 @@ class ExodusReader:
             key = 'vals_glo_var'
             self._global_data[nn] = np.array(self._data.variables[key][:,ii])
 
-    def __del__(self):
-        """Safely close the exodus file.
-        """
-        self._data.close()
 
     def _get_names(self, key: str) -> npt.NDArray:
         """Helper function for extracting the nodal/element variable names that

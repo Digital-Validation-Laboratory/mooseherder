@@ -41,7 +41,7 @@ class InputModifier:
             var_end (str): character sequence used to specify the end of the
                 variabled block to edit.
         """
-        self._vars = dict()
+        self._vars = dict({})
         self._input_file = input_file
 
         with open(self._input_file, "r", encoding="utf-8") as in_file:
@@ -74,9 +74,7 @@ class InputModifier:
         # Strip all whitespace and comments to separate variable name, equals sign and value
         extract_var = var_line.strip()
         extract_var = extract_var.replace(self._end_char, "")
-        extract_var = extract_var.split(self._comment_char)[
-            0
-        ]  # Remove trailing comments should they exist
+        extract_var = extract_var.split(self._comment_char)[0]  # Remove trailing comments should they exist
 
         # Split the variable key and value based on the equals sign return an empty string if not
         var_key = ""
@@ -109,6 +107,7 @@ class InputModifier:
             if len(var_key) != 0:
                 self._vars[var_key] = var_val
 
+
     def find_vars(self) -> None:
         """Find what lines the variables are defined on."""
 
@@ -129,6 +128,7 @@ class InputModifier:
                 self._var_end_ind = ii
                 break
 
+
     def update_vars(self, new_vars: dict) -> None:
         """Updates the variable dictionary that will be written to the input
         file.
@@ -147,6 +147,7 @@ class InputModifier:
                     f"Key {kk} does not exist in the variables found in the input file. "
                     + "Check input file to make sure the variable exists."
                 )
+
 
     def write_file(self, input_write_file: Path) -> None:
         """Write the input file using the current variable dictionary.
@@ -170,6 +171,7 @@ class InputModifier:
         with open(input_write_file, "w", encoding="utf-8") as out_file:
             out_file.writelines(self._input_lines)
 
+
     def get_vars(self) -> dict:
         """Gets the variables found in the file.
 
@@ -178,6 +180,7 @@ class InputModifier:
         """
         return self._vars
 
+
     def get_var_keys(self) -> list[str]:
         """Gets a list of variable names found in the input file.
 
@@ -185,6 +188,7 @@ class InputModifier:
             list[str]: list of variables name as strings
         """
         return list(self._vars.keys())
+
 
     def get_input_file(self) -> Path:
         """Gets the path and input file name.

@@ -9,6 +9,7 @@ from mooseherder.mooserunner import MooseRunner
 from mooseherder.gmshrunner import GmshRunner
 from mooseherder.exodusreader import ExodusReader
 from mooseherder.mooseherd import MooseHerd
+from mooseherder.directorymanager import DirectoryManager
 
 
 __all__ = ["inputmodifier",
@@ -16,4 +17,5 @@ __all__ = ["inputmodifier",
             "mooserunner",
             "gmshrunner",
             "exodusreader",
-            "mooseherd"]
+            "mooseherd",
+            "directorymanager"]

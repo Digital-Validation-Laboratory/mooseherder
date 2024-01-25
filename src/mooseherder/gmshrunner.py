@@ -7,9 +7,9 @@ Authors: Rory Spencer, Lloyd Fletcher
 '''
 import os
 from pathlib import Path
-#from mooseherder.simrunner import SimRunner
+from mooseherder.simrunner import SimRunner
 
-class GmshRunner():
+class GmshRunner(SimRunner):
     """Used to call gmsh to create a mesh file to be used to run a finite
     element simulation.
     """
@@ -94,4 +94,7 @@ class GmshRunner():
 
         self._run_str = f'{self._gmsh_app} {self._input_path}'
         os.system(self._run_str)
+
+    def get_output_path(self) -> Path | None:
+        return None
 
