@@ -5,7 +5,6 @@ EXAMPLE 4: Run parallel gmsh+MOOSE simulation editing the gmsh parameters only
 Author: Lloyd Fletcher, Rory Spencer
 ==============================================================================
 '''
-import os
 from pathlib import Path
 from mooseherder import MooseHerd
 from mooseherder import MooseRunner
@@ -22,8 +21,6 @@ def main():
     print('------------------------------------------')
     print('EXAMPLE 4: Herd Setup')
     print('------------------------------------------')
-    user_dir = Path.home()
-
 
     # Setup MOOSE
     moose_dir = USER_DIR / 'moose'

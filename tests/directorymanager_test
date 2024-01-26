@@ -1,0 +1,63 @@
+import pytest
+from mooseherder.mooseherd import  MooseHerd
+
+def test_set_base_dir(herd_blank,base_dir):
+    herd_blank.set_base_dir(base_dir)
+    assert herd_blank._base_dir == base_dir
+
+def test_set_base_dir_clear_old(herd_blank,base_dir):
+    prev_dir = herd_blank._run_dir
+    herd_blank.create_dirs()
+    herd_blank.set_base_dir(base_dir, clear_old_dirs = True)
+    assert herd_blank._base_dir == base_dir
+    assert os.path.isdir(prev_dir+'-1') == False
+
+def test_set_base_dir_err(herd_blank):
+    base_dir = 'no_exist/'
+    with pytest.raises(FileExistsError) as errinfo:
+        herd_blank.set_base_dir(base_dir)
+    msg, = errinfo.value.args
+    assert msg == "Specified base directory does not exist."
+
+def test_set_names(herd):
+    herd.set_names('sim-dir','sim','mesh')
+    assert herd._sub_dir == 'sim-dir'
+    assert herd._moose_input_name == 'sim'
+    assert herd._gmsh_input_name == 'mesh'
+
+    herd.set_names()
+    assert herd._sub_dir == 'moose-workdir'
+    assert herd._moose_input_name == 'moose-sim'
+    assert herd._gmsh_input_name == 'gmsh-mesh'
+
+def test_create_dirs_one_dir(herd):
+    herd.set_flags(one_dir = True)
+    herd.create_dirs()
+    assert os.path.isdir(herd._run_dir+'-1')
+
+def test_create_dirs_multi_dir(herd):
+    herd.set_flags(one_dir = False)
+    herd.create_dirs()
+    assert os.path.isdir(herd._run_dir+'-1')
+    assert os.path.isdir(herd._run_dir+'-2')
+
+def test_clear_dirs(herd):
+    herd.create_dirs()
+    herd.clear_dirs()
+    assert os.path.isdir(herd._run_dir+'-1') == False
+    assert os.path.isdir(herd._run_dir+'-2') == False
+
+@pytest.mark.parametrize(
+    ('worker_num','one_dir','expected'),
+    (
+        ('4',False, '-4/'),
+        ('1',True, '-1/'),
+        ('2',True, '-1/'),
+        ('4',True, '-1/'),
+    )
+)
+def test_get_run_dir(worker_num,one_dir,expected,herd):
+    herd.para_opts(n_moose = 2)
+    herd.set_flags(one_dir = one_dir)
+    run_dir = herd._get_run_dir(worker_num)
+    assert run_dir == herd._run_dir+expected

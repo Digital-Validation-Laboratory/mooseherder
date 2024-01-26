@@ -13,7 +13,14 @@ from mooseherder.mooserunner import MooseRunner
 from mooseherder.gmshrunner import GmshRunner
 from mooseherder.mooseherd import MooseHerd
 
+
 USER_DIR = Path.home()
+NUM_DIRS = 4
+NUM_PARA = 4
+BASE_DIR = Path('tests/')
+MOOSE_INPUT = Path('tests/moose/moose-test.i')
+GMSH_INPUT = Path('tests/gmsh/gmsh-test.geo')
+
 
 def create_moose_objs(input_file: Path) -> tuple[MooseRunner,InputModifier]:
     moose_dir = USER_DIR / 'moose'
