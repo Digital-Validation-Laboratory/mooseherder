@@ -29,13 +29,13 @@ def main():
     moose_dir = USER_DIR / 'moose'
     moose_app_dir = USER_DIR / 'moose-workdir/proteus'
     moose_app_name = 'proteus-opt'
-    moose_input = Path('scripts/moose/moose-mech-simple.i')
+    moose_input = Path('scripts/moose/moose-mech-gmsh.i')
 
     moose_modifier = InputModifier(moose_input,'#','')
     moose_runner = MooseRunner(moose_dir,moose_app_dir,moose_app_name)
     moose_runner.set_opts(n_tasks = 1,
                           n_threads = 2,
-                          redirect_out = True)
+                          redirect_out = False)
 
     # Setup Gmsh
     gmsh_path = USER_DIR / 'moose-workdir/gmsh/bin/gmsh'
@@ -81,19 +81,18 @@ def main():
     # Single run saved in moose-workdir-1
     herd.run_once(0,var_sweep[0])
 
-    print('Run time (once) = '+'{:.3f}'.format(herd.get_iter_time())+' seconds')
+    print(f'Run time (once) = {herd.get_iter_time():.3f}) seconds')
     print('------------------------------------------')
     print()
 
-    return
     print('------------------------------------------')
     print('EXAMPLE 4b: Run MOOSE sequentially, modify gmsh only')
     print('------------------------------------------')
 
     # Run all variable combinations (8) sequentially in moose-workdir-1
-    herd.run_sequential(moose_vars,gmsh_vars)
+    herd.run_sequential(var_sweep)
 
-    print('Run time (sequential) = '+'{:.3f}'.format(herd.get_sweep_time())+' seconds')
+    print(f'Run time (sequential) = {herd.get_sweep_time():.3f} seconds')
     print('------------------------------------------')
     print()
     print('------------------------------------------')
@@ -102,9 +101,9 @@ def main():
 
     # Run all variable combinations across 4 MOOSE instances with two runs saved in
     # each moose-workdir
-    herd.run_para(moose_vars,gmsh_vars)
+    herd.run_para(var_sweep)
 
-    print('Run time (parallel) = '+'{:.3f}'.format(herd.get_sweep_time())+' seconds')
+    print(f'Run time (parallel) = {herd.get_sweep_time():.3f} seconds')
     print('------------------------------------------')
     print()
 

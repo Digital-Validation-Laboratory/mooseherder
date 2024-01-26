@@ -8,7 +8,6 @@ Author: Lloyd Fletcher
 import time
 import os
 from pathlib import Path
-from pprint import pprint
 from mooseherder import MooseRunner
 from mooseherder import ExodusReader
 

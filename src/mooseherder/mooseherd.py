@@ -37,8 +37,6 @@ class MooseHerd:
 
         self._input_name = 'sim'
 
-        self._output_files = list([])
-
         self._keep_all = True
 
         self._var_sweep = list([])
@@ -82,6 +80,10 @@ class MooseHerd:
 
         if self._n_para_sims != n_para:
             self._n_para_sims = n_para
+
+    def reset_iter_counts(self) -> None:
+        self._sim_iter = 0
+        self._sweep_iter = 0
 
 
     def run_once(self, sim_iter: int, var_list: list[dict | None]) -> list[Path | None]:
@@ -254,7 +256,7 @@ class MooseHerd:
         self._var_sweep = var_sweep
 
         if not self._keep_all:
-            self._sim_iter = 0
+            self.reset_iter_counts()
             self._dir_manager.clear_dirs()
             self._dir_manager.create_dirs()
 
