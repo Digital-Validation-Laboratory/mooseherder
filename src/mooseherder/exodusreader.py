@@ -32,7 +32,20 @@ class ExodusReader:
         Args:
             exodus_file (str): exodus file and path to read.
         """
-        self._data = nc.Dataset(exodus_file) # type: ignore
+        self._exodus_path = exodus_file
+        self._data = None
+
+        self._node_var_names = self._get_names('name_nod_var')
+        self._elem_var_names = self._get_names('name_elem_var')
+        self._global_var_names = self._get_names('name_glo_var')
+        self._side_set_names = self._get_names('ss_names')
+
+        self._node_data = self._get_vars_from_names(self._node_var_names,'vals_nod_var')
+        self._side_set_nodes = self._get_vars_from_names(self._side_set_names,'node_ns')
+
+
+    def read_data(self) -> None:
+        self._data = nc.Dataset(str(self._exodus_path)) # type: ignore
 
         self._node_var_names = self._get_names('name_nod_var')
         self._elem_var_names = self._get_names('name_elem_var')

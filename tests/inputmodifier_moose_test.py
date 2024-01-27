@@ -1,6 +1,6 @@
 """
 ==============================================================================
-TEST: Input Modifier with MOOSE
+TEST: InputModifier with MOOSE
 
 Authors: Lloyd Fletcher
 ==============================================================================
@@ -103,7 +103,7 @@ def test_moose_write_file(moose_mod: InputModifier) -> None:
 
     moose_mod_check = InputModifier(mod_file, "#", "")
     assert moose_mod_check._vars == {
-        "n_elem_x": 20,    
+        "n_elem_x": 20,
         "n_elem_y": 25,
         "e_modulus": 2e9,
         "p_ratio": 0.3,

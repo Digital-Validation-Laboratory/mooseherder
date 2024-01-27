@@ -1,17 +1,13 @@
 '''
 ==============================================================================
-TEST: MOOSE Herd Tests
+TEST: MooseHerd Tests
 
 Authors: Lloyd Fletcher
 ==============================================================================
 '''
 import os
-from pathlib import Path
-import multiprocessing as mp
 import pytest
 from pytest import MonkeyPatch
-from mooseherder.inputmodifier import InputModifier
-from mooseherder.mooserunner import MooseRunner
 from mooseherder.mooseherd import MooseHerd
 from mooseherder.directorymanager import DirectoryManager
 import tests.herdchecker as hct

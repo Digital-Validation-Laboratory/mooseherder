@@ -1,6 +1,6 @@
 '''
 ==============================================================================
-Herd Check Tools: Helper functions for testing MooseHerder
+HerdChecker: Helper functions for testing MooseHerder
 
 Authors: Lloyd Fletcher
 ==============================================================================
@@ -22,7 +22,7 @@ NUM_CALLS = 3
 BASE_DIR = Path('tests/')
 MOOSE_INPUT = Path('tests/moose/moose-test.i')
 GMSH_INPUT = Path('tests/gmsh/gmsh-test.geo')
-
+OUTPUT_PATH = Path('tests/output/')
 
 def create_moose_objs(input_file: Path) -> tuple[MooseRunner,InputModifier]:
     moose_dir = USER_DIR / 'moose'

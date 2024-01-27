@@ -168,11 +168,10 @@ def main() -> None:
     print(list(read_all[0].keys()))
     print()
     print('-----------------------------------------------------------')
-    print(f'Read time sequential = {read_time_seq} seconds')
-    print(f'Read time parallel   = {read_time_para} seconds')
+    print(f'Read time sequential = {read_time_seq:.6f} seconds')
+    print(f'Read time parallel   = {read_time_para:.6f} seconds')
     print('-----------------------------------------------------------')
     print()
-
 
 
 if __name__ == '__main__':
