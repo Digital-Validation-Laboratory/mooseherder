@@ -12,11 +12,13 @@ from mooseherder.inputmodifier import InputModifier
 from mooseherder.mooserunner import MooseRunner
 from mooseherder.gmshrunner import GmshRunner
 from mooseherder.mooseherd import MooseHerd
+from mooseherder.directorymanager import DirectoryManager
 
 
 USER_DIR = Path.home()
 NUM_DIRS = 4
 NUM_PARA = 4
+NUM_CALLS = 3
 BASE_DIR = Path('tests/')
 MOOSE_INPUT = Path('tests/moose/moose-test.i')
 GMSH_INPUT = Path('tests/gmsh/gmsh-test.geo')
@@ -46,7 +48,7 @@ def create_gmsh_objs(input_file: Path) -> tuple[GmshRunner,InputModifier]:
 
 def check_solve(check_file: Path, check_str: str) -> int:
     check_count = 0
-    if os.path.isfile(check_file):
+    if check_file.is_file():
         with open(check_file,'r', encoding="utf-8") as so:
             stdout_lines = so.readlines()
             for ll in stdout_lines:
@@ -58,8 +60,10 @@ def check_solve(check_file: Path, check_str: str) -> int:
 def check_solve_converged(check_stdout: Path) -> int:
     return check_solve(check_stdout,'Solve Converged!')
 
+
 def check_solve_error(check_stdout: Path) -> int:
     return check_solve(check_stdout,'*** ERROR ***')
+
 
 def check_output_key_file_count(check_dir: Path) -> int:
     work_dir_files = os.listdir(check_dir)
@@ -72,38 +76,59 @@ def check_output_key_file_count(check_dir: Path) -> int:
     return key_count
 
 
-def check_run_sweep(check_herd: MooseHerd, run_call: int) -> None:
-    for ff in check_herd._output_files:
-        assert os.path.isfile(ff), f"Simulation output {ff} does not exist."
+def check_run_sweep(check_herd: MooseHerd,
+                    dir_manager: DirectoryManager,
+                    run_call: int) -> None:
+    for ll in dir_manager.get_output_paths():
+        for ff in ll:
+            if ff is not None:
+                assert ff.is_file(), \
+                    f"Simulation output {ff} does not exist."
 
-    assert check_herd._sweep_start_time >= 0, 'Sweep start time is less than 0.'
-    assert check_herd._sweep_run_time >= 0, 'Sweep run time is less than 0.'
-    assert os.path.isfile(check_herd.get_output_key_file()), 'Output key file was not written.'
-    assert check_output_key_file_count(Path(str(check_herd._run_dir + '-1/'))) == run_call
+    assert check_herd.get_sweep_time() >= 0, \
+        'Sweep run time is less than 0.'
+    assert dir_manager.get_output_key_file(check_herd.get_sweep_iter()), \
+        'Output key file was not written.'
+
+    output_key_count = check_output_key_file_count(
+        dir_manager.get_output_key_file(
+            check_herd.get_sweep_iter()).parent)
+    assert output_key_count == run_call
 
 
-def check_input_output_count_sequential(check_herd: MooseHerd, run_call: int):
-    (input_count, output_count) = get_input_output_count(check_herd._run_dirs)
+def check_input_output_count_sequential(check_herd: MooseHerd,
+                                        dir_manager: DirectoryManager,
+                                        run_call: int) -> None:
+    (input_count, output_count) = get_input_output_count(
+        dir_manager.get_all_run_dirs(),'.i','_out.e')
 
     if not check_herd._keep_all:
         num_sims = 1
     else:
-        num_sims = get_num_sims(check_herd._moose_var_list, check_herd._gmsh_var_list, run_call)
+        num_sims = run_call*len(check_herd._var_sweep)
 
     assert input_count == num_sims
     assert output_count == num_sims
 
 
-def check_input_output_count_para(check_herd: MooseHerd, run_call: int):
-    (input_count, output_count) = get_input_output_count(check_herd._run_dirs)
+def check_input_output_count_para(check_herd: MooseHerd,
+                                  dir_manager: DirectoryManager,
+                                  run_call: int) -> None:
+    (input_count, output_count) = get_input_output_count(
+        dir_manager.get_all_run_dirs(),'.i','_out.e')
 
-    num_sims = get_num_sims(check_herd._moose_var_list, check_herd._gmsh_var_list, run_call)
+    if not check_herd._keep_all:
+        num_sims = len(check_herd._var_sweep)
+    else:
+        num_sims = run_call*len(check_herd._var_sweep)
 
     assert input_count == num_sims
     assert output_count == num_sims
 
 
-def get_input_output_count(run_dirs: list[str]) -> tuple[int,int]:
+def get_input_output_count(run_dirs: list[Path],
+                           in_suffix: str,
+                           out_suffix: str) -> tuple[int,int]:
     # Go through all work directories and count the inputs/exoduses
     input_count = 0
     output_count = 0
@@ -111,53 +136,45 @@ def get_input_output_count(run_dirs: list[str]) -> tuple[int,int]:
     for rr in run_dirs:
         dir_files = os.listdir(rr)
         for ff in dir_files:
-            if '_out.e' in ff:
+            if out_suffix in ff:
                 output_count += 1
-            elif '.i' in ff:
+            elif in_suffix in ff:
                 input_count += 1
 
     return (input_count, output_count)
 
 
-def get_num_sims(moose_var_list: list[dict],
-                 gmsh_var_list: list[dict] | None,
-                 run_call: int) -> int:
-    num_gmsh_vars = 1
-    if gmsh_var_list is not None:
-        num_gmsh_vars = len(gmsh_var_list)
+def run_check_seq(keep_all: bool,
+                  expected: int,
+                  herd: MooseHerd,
+                  dir_manager: DirectoryManager,
+                  sweep_vars: list[list[dict | None]]) -> None:
 
-    return run_call*len(moose_var_list)*num_gmsh_vars
+    herd.set_keep_flag(keep_all)
+    herd.set_num_para_sims(NUM_PARA)
 
+    herd.run_sequential(sweep_vars)
+    check_run_sweep(herd, dir_manager, run_call = 1)
+    check_input_output_count_sequential(herd, dir_manager, run_call = 1)
 
-def run_check_sequential(keep_all: bool,
-                         expected: int,
-                         run_herd: MooseHerd,
-                         moose_vars: list[dict],
-                         gmsh_vars: list[dict] | None):
-    run_herd.set_flags(one_dir = False, keep_all = keep_all)
-    run_herd.para_opts(n_moose = 2)
-
-    run_herd.run_sequential(moose_vars,gmsh_vars)
-    check_run_sweep(check_herd = run_herd, run_call = 1)
-    check_input_output_count_sequential(check_herd = run_herd, run_call = 1)
-
-    run_herd.run_sequential(moose_vars,gmsh_vars)
-    check_run_sweep(check_herd = run_herd, run_call = expected)
-    check_input_output_count_sequential(check_herd = run_herd, run_call = expected)
+    herd.run_sequential(sweep_vars)
+    check_run_sweep(herd, dir_manager, run_call = expected)
+    check_input_output_count_sequential(herd, dir_manager, run_call = expected)
 
 
 def run_check_para(keep_all: bool,
-                   expected: int,
-                   run_herd: MooseHerd,
-                   moose_vars: list[dict],
-                   gmsh_vars: list[dict] | None):
-    run_herd.para_opts(n_moose = 4)
-    run_herd.set_flags(one_dir = False, keep_all = keep_all)
+                   herd: MooseHerd,
+                   dir_manager: DirectoryManager,
+                   sweep_vars: list[list[dict | None]]) -> None:
+    herd.set_keep_flag(keep_all)
+    herd.set_num_para_sims(NUM_PARA)
 
-    run_herd.run_para(moose_vars,gmsh_vars)
-    check_run_sweep(check_herd = run_herd, run_call = 1)
-    check_input_output_count_para(check_herd = run_herd, run_call = 1)
+    for rr in range(NUM_CALLS):
+        if keep_all:
+            run_check = rr+1
+        else:
+            run_check = 1
 
-    run_herd.run_para(moose_vars,gmsh_vars)
-    check_run_sweep(check_herd = run_herd, run_call = expected)
-    check_input_output_count_para(check_herd = run_herd, run_call = expected)
+        herd.run_para(sweep_vars)
+        check_run_sweep(herd, dir_manager, run_check)
+        check_input_output_count_para(herd, dir_manager, run_check)

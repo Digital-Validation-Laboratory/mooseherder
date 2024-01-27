@@ -103,7 +103,7 @@ class DirectoryManager:
             Path: _description_
         """
         if dir_num >= self._n_dirs:
-            dir_num = dir_num % 2
+            dir_num = dir_num % self._n_dirs
 
         return self._run_dirs[dir_num]
 
@@ -114,6 +114,14 @@ class DirectoryManager:
             output_paths (list[list[Path]]): _description_
         """
         self._output_paths = output_paths
+
+    def get_output_paths(self) -> list[list[Path]]:
+        """get_output_paths _summary_
+
+        Returns:
+            list[list[Path]]: _description_
+        """
+        return self._output_paths
 
     def get_output_key_file(self, sweep_iter: int) -> Path:
         """get_output_key_file _summary_

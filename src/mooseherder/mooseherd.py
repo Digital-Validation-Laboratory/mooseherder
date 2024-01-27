@@ -81,42 +81,30 @@ class MooseHerd:
         if self._n_para_sims != n_para:
             self._n_para_sims = n_para
 
-    def reset_iter_counts(self) -> None:
-        self._sim_iter = 0
-        self._sweep_iter = 0
 
-
-    def run_once(self, sim_iter: int, var_list: list[dict | None]) -> list[Path | None]:
-        """run_once _summary_
-
-        Args:
-            sim_iter (int): _description_
-            var_list (list[dict  |  None]): _description_
+    def get_sim_iter(self) -> int:
+        """get_sim_iter _summary_
 
         Returns:
-            list[Path | None]: _description_
+            int: _description_
         """
-        iter_start_time = time.perf_counter()
+        return self._sim_iter
 
-        worker_num = self._get_worker_num()
-        run_dir = self._dir_manager.get_run_dir(int(worker_num)-1)
-        run_num = self._get_run_num(sim_iter,worker_num)
 
-        # Run all input modifiers and create scripts to run
-        run_files = list([])
-        for ii,mm in enumerate(self._modifiers):
-            ext = mm.get_input_file().suffix
-            run_files.append(run_dir / (self._input_name +'-'+run_num+ext))
-            self._mod_input(mm,var_list[ii],run_files[ii])
+    def get_sweep_iter(self) -> int:
+        """get_sweep_iter _summary_
 
-        # Run all runners in order
-        output_list = list([])
-        for ii,rr in enumerate(self._runners):
-            output_list.append(self._run(rr,run_files[ii]))
+        Returns:
+            int: _description_
+        """
+        return self._sweep_iter
 
-        self._iter_run_time = time.perf_counter() - iter_start_time
 
-        return output_list
+    def reset_iter_counts(self) -> None:
+        """reset_iter_counts _summary_
+        """
+        self._sim_iter = 0
+        self._sweep_iter = 0
 
 
     def _get_process_name(self) -> str:
@@ -194,6 +182,74 @@ class MooseHerd:
         return runner.get_output_path()
 
 
+    def run_once(self, sim_iter: int, var_list: list[dict | None]) -> list[Path | None]:
+        """run_once _summary_
+
+        Args:
+            sim_iter (int): _description_
+            var_list (list[dict  |  None]): _description_
+
+        Returns:
+            list[Path | None]: _description_
+        """
+        iter_start_time = time.perf_counter()
+
+        worker_num = self._get_worker_num()
+        run_dir = self._dir_manager.get_run_dir(int(worker_num)-1)
+        run_num = self._get_run_num(sim_iter,worker_num)
+
+        # Run all input modifiers and create scripts to run
+        run_files = list([])
+        for ii,mm in enumerate(self._modifiers):
+            ext = mm.get_input_file().suffix
+            run_files.append(run_dir / (self._input_name +'-'+run_num+ext))
+            self._mod_input(mm,var_list[ii],run_files[ii])
+
+        # Run all runners in order
+        output_list = list([])
+        for ii,rr in enumerate(self._runners):
+            output_list.append(self._run(rr,run_files[ii]))
+
+        self._iter_run_time = time.perf_counter() - iter_start_time
+
+        return output_list
+
+
+    def _start_sweep(self, var_sweep: list[list[dict | None]]) -> float:
+        """_start_sweep _summary_
+
+        Args:
+            var_sweep (list[list[dict  |  None]]): _description_
+
+        Returns:
+            float: _description_
+        """
+        self._var_sweep = var_sweep
+
+        if not self._keep_all:
+            self.reset_iter_counts()
+            self._dir_manager.clear_dirs()
+            self._dir_manager.create_dirs()
+
+        return time.perf_counter()
+
+
+    def _end_sweep(self, start_sweep_time: float,
+                   output_files: list[list[Path]]) -> None:
+        """_end_sweep _summary_
+
+        Args:
+            start_sweep_time (float): _description_
+        """
+        self._sweep_run_time = time.perf_counter() - start_sweep_time
+
+        self._sweep_iter += 1
+        self._sim_iter += len(self._var_sweep)
+
+        self._dir_manager.set_output_paths(output_files)
+        self._dir_manager.write_output_key(self._sweep_iter)
+
+
     def run_sequential(self, var_sweep: list[list[dict | None]]) -> list[list[Path | None]]:
         """run_sequential _summary_
 
@@ -242,41 +298,6 @@ class MooseHerd:
         self._end_sweep(sweep_start_time, output_files)
 
         return output_files
-
-
-    def _start_sweep(self, var_sweep: list[list[dict | None]]) -> float:
-        """_start_sweep _summary_
-
-        Args:
-            var_sweep (list[list[dict  |  None]]): _description_
-
-        Returns:
-            float: _description_
-        """
-        self._var_sweep = var_sweep
-
-        if not self._keep_all:
-            self.reset_iter_counts()
-            self._dir_manager.clear_dirs()
-            self._dir_manager.create_dirs()
-
-        return time.perf_counter()
-
-
-    def _end_sweep(self, start_sweep_time: float,
-                   output_files: list[list[Path]]) -> None:
-        """_end_sweep _summary_
-
-        Args:
-            start_sweep_time (float): _description_
-        """
-        self._sweep_run_time = time.perf_counter() - start_sweep_time
-
-        self._sweep_iter += 1
-        self._sim_iter += len(self._var_sweep)
-
-        self._dir_manager.set_output_paths(output_files)
-        self._dir_manager.write_output_key(self._sweep_iter)
 
 
     def get_sweep_time(self) -> float:

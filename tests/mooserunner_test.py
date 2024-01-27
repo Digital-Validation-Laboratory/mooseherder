@@ -46,7 +46,7 @@ def input_runner(input_path: Path) -> MooseRunner:
     moose_app_dir = USER_DIR / 'moose-workdir/proteus'
     moose_app_name = 'proteus-opt'
     my_runner = MooseRunner(moose_dir,moose_app_dir,moose_app_name)
-    my_runner.set_input_path(input_path)
+    my_runner.set_input_file(input_path)
     return my_runner
 
 @pytest.fixture(autouse=True)
@@ -113,7 +113,7 @@ def test_set_stdout(in_flag: bool, expected: bool, runner: MooseRunner):
 
 
 def test_set_input_file(runner: MooseRunner, input_path: Path) -> None:
-    runner.set_input_path(input_path)
+    runner.set_input_file(input_path)
 
     assert runner._input_path == input_path
 
@@ -121,7 +121,7 @@ def test_set_input_file(runner: MooseRunner, input_path: Path) -> None:
 def test_set_input_file_err(runner: MooseRunner) -> None:
     with pytest.raises(FileNotFoundError) as err_info:
         new_input = Path('tests/moose/moose-test-noexist.i')
-        runner.set_input_path(new_input)
+        runner.set_input_file(new_input)
 
     msg, = err_info.value.args
     assert msg == 'Input file does not exist.'
@@ -134,14 +134,9 @@ def test_get_input_strs(runner: MooseRunner, input_runner: MooseRunner) -> None:
     assert input_runner.get_input_tag() == 'moose-test'
 
 
-def test_get_output_exodus_file(runner: MooseRunner, input_runner: MooseRunner):
-    assert runner.get_output_exodus_file() == ""
-    assert input_runner.get_output_exodus_file() == "moose-test_out.e"
-
-
-def test_get_output_exodus_path(runner: MooseRunner,input_runner: MooseRunner):
-    assert runner.get_output_exodus_path() is None
-    assert input_runner.get_output_exodus_path() == Path('tests/moose/moose-test_out.e')
+def test_get_output_path(runner: MooseRunner,input_runner: MooseRunner):
+    assert runner.get_output_path() is None
+    assert input_runner.get_output_path() == Path('tests/moose/moose-test_out.e')
 
 
 @pytest.mark.parametrize(
@@ -212,7 +207,7 @@ def test_run(opts: tuple[int,int,bool],
     input_runner.set_opts(opts[0],opts[1],opts[2])
     input_runner.run()
 
-    assert os.path.isfile(input_runner.get_output_exodus_path()) is True, 'No exodus output.' # type: ignore
+    assert os.path.isfile(input_runner.get_output_path()) is True, 'No exodus output.' # type: ignore
     assert os.path.isfile(input_runner.get_input_dir() / 'stdout.processor.0') == stdout_exist[0], 'stdout.processor.0 does not exist.' # type: ignore
     assert os.path.isfile(input_runner.get_input_dir() / 'stdout.processor.1') == stdout_exist[1], 'stdout.processor.1 does not exist.' # type: ignore
     if opts[2]: # If there is a stdout it can be read to check for convergence
@@ -226,7 +221,7 @@ def test_run_broken(runner: MooseRunner, input_broken: Path) -> None:
 
     stdout_file = runner.get_input_dir() / 'stdout.processor.0' # type: ignore
 
-    assert os.path.isfile(runner.get_output_exodus_path()) is False # type: ignore
+    assert os.path.isfile(runner.get_output_path()) is False # type: ignore
     assert os.path.isfile(stdout_file) is True # type: ignore
 
     assert hc.check_solve_error(stdout_file) >= 1, 'Error string not found in stdout'
@@ -245,6 +240,6 @@ def test_run_with_input(runner: MooseRunner, input_path: Path) -> None:
     runner.set_opts(1,4,True)
     runner.run(input_path)
 
-    assert os.path.isfile(runner.get_output_exodus_path()) is True, 'Exodus output does not exist when solve should have run' # type: ignore
+    assert os.path.isfile(runner.get_output_path()) is True, 'Exodus output does not exist when solve should have run' # type: ignore
     assert os.path.isfile(runner.get_input_dir() / 'stdout.processor.0') is True, 'Stdout does not exist when it should.' # type: ignore
     assert hc.check_solve_converged(runner.get_input_dir() / 'stdout.processor.0') >= 1, 'Solve did not converge when it should have.' # type: ignore

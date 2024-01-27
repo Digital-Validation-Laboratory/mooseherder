@@ -73,7 +73,7 @@ def test_set_gmsh_app_err() -> None:
 
 def test_set_input_file(runner: GmshRunner, input_file: Path) -> None:
     runner.set_input_file(input_file)
-    assert runner._input_file == input_file
+    assert runner.get_input_file() == input_file
 
 
 def test_set_input_err_geo(runner: GmshRunner) -> None:

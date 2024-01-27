@@ -153,20 +153,6 @@ class MooseRunner(SimRunner):
 
         return self._input_path.stem # type: ignore
 
-    '''
-    def get_output_file(self) -> str:
-        """Gets the file name (without path) for the output exodus file based
-        on the specified input file. Includes '_out.e'.
-
-        Returns:
-            str: output exodus file name without path, returns an empty string
-                if no input file is specified.
-        """
-        if self._input_path is None:
-            return ""
-
-        return self._input_path.stem + '_out.e'
-    '''
 
     def get_output_path(self) -> Path | None:
         """Gets the file and path for the output exodus file based

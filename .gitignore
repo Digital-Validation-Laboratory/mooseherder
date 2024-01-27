@@ -4,6 +4,7 @@ examples/sim-workdir-*
 examples/*.csv
 scripts/sim-workdir-*
 scripts/*.csv
+tests/sim-workdir-*
 *.processor.*
 
 # Gmsh output files
