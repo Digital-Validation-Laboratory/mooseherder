@@ -63,7 +63,7 @@ class ExodusReader:
                 an empty numpy array if the key does not exist.
         """
         if key in self._data.variables:
-            return nc.chartostring(np.array(self._data.variables[key]))
+            return nc.chartostring(np.array(self._data.variables[key])) # type: ignore
         else:
             return np.array([])
 

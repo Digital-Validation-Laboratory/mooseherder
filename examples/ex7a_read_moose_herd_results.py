@@ -1,54 +1,63 @@
 '''
 ==============================================================================
-EXAMPLE 6a: Run MOOSE in sequential then parallel mode then read sweep results
+EXAMPLE 7a: Run MOOSE in sequential then parallel mode then read sweep results
 
 Author: Lloyd Fletcher, Rory Spencer
 ==============================================================================
 '''
-import os
 from pathlib import Path
 from pprint import pprint
 from mooseherder import MooseHerd
 from mooseherder import MooseRunner
 from mooseherder import InputModifier
+from mooseherder import DirectoryManager
+from mooseherder import SweepReader
 
-def main():
-    print('-----------------------------------------------------------')
-    print('EXAMPLE 6a: Parallel Herd Setup & Run')
-    print('-----------------------------------------------------------')
-    user_dir = Path.home()
+USER_DIR = Path.home()
 
-    moose_dir = os.path.join(user_dir,'moose')
-    moose_app_dir = os.path.join(user_dir,'moose-workdir/proteus')
+def main() -> None:
+    """main: parallel herd run once and read
+    """
+    print('-----------------------------------------------------------')
+    print('EXAMPLE 7a: Parallel Herd Setup & Run')
+    print('-----------------------------------------------------------')
+    moose_dir = USER_DIR / 'moose'
+    moose_app_dir = USER_DIR / 'moose-workdir/proteus'
     moose_app_name = 'proteus-opt'
-    moose_input = 'scripts/moose/moose-mech-simple.i'
+    moose_input = Path('scripts/moose/moose-mech-simple.i')
 
     moose_modifier = InputModifier(moose_input,'#','')
     moose_runner = MooseRunner(moose_dir,moose_app_dir,moose_app_name)
-    
+    moose_runner.set_opts(n_tasks = 1,
+                          n_threads = 2,
+                          redirect_out = True)
+
+    dir_manager = DirectoryManager(n_dirs=4)
+
     # Start the herd and create working directories
-    herd = MooseHerd(moose_runner,moose_modifier)
+    herd = MooseHerd([moose_runner],[moose_modifier],dir_manager)
 
     # Set the parallelisation options, we have 8 combinations of variables and
     # 4 MOOSE intances running, so 2 runs will be saved in each working directory
-    herd.para_opts(n_moose = 4, tasks_per_moose = 1, threads_per_moose = 2,
-                   redirect_out = True, create_dirs = False)
+    herd.set_num_para_sims(n_para=4)
 
      # Send all the output to the examples directory and clear out old output
-    herd.set_base_dir('examples/', clear_old_dirs = True)
-    herd.clear_dirs()
-    herd.create_dirs()
+    dir_manager.set_base_dir(Path('examples/'))
+    dir_manager.clear_dirs()
+    dir_manager.create_dirs()
 
     # Create variables to sweep in a list of dictionaries, 8 combinations possible.
-    n_elem_y = [25,50]
+    n_elem_y = [10,20]
     e_mod = [1e9,2e9]
     p_rat = [0.3,0.35]
-    moose_vars = list()
+    moose_vars = list([])
     for nn in n_elem_y:
         for ee in e_mod:
             for pp in p_rat:
-                moose_vars.append({'n_elem_y':nn,'e_modulus':ee,'p_ratio':pp})
-        
+                # Needs to be list[list[dict]] - outer list is simulation iteration,
+                # inner list is what is passed to each runner/inputmodifier
+                moose_vars.append([{'n_elem_y':nn,'e_modulus':ee,'p_ratio':pp}])
+
     print('Herd sweep variables:')
     pprint(moose_vars)
 
@@ -56,14 +65,16 @@ def main():
     print('Running MOOSE in parallel.')
     herd.run_para(moose_vars)
 
-    print('Run time (parallel) = '+'{:.3f}'.format(herd.get_sweep_time())+' seconds')
+    print(f'Run time (parallel) = {herd.get_sweep_time():.3f} seconds')
     print('-----------------------------------------------------------')
     print()
 
     print('-----------------------------------------------------------')
-    print('EXAMPLE 6a: Read Herd Output')
+    print('EXAMPLE 7a: Read Herd Output')
     print('-----------------------------------------------------------')
-    output_files = herd.get_output_files()
+    sweep_reader = SweepReader(dir_manager)
+    output_files = sweep_reader.read_all_output_keys()
+
     print('Herd output files (from output_keys.json):')
     pprint(output_files)
     print()
@@ -82,7 +93,8 @@ def main():
     print('-----------------------------------------------------------')
     print('Reading the first output file, no element blocks specified.')
     print('Variables returned as dict.')
-    read_vars = herd.read_results_once(output_files[0],vars_to_read)
+    read_vars = sweep_reader.read_results_once(output_files[0][0],
+                                               vars_to_read)
     print()
 
     print('Variables read from file, time and coords are always read:')
@@ -116,7 +128,9 @@ def main():
 
     print('-----------------------------------------------------------')
     print('Reading the first output file, element blocks specified.')
-    read_vars = herd.read_results_once(output_files[0],vars_to_read,elem_blocks)
+    read_vars = sweep_reader.read_results_once(output_files[0][0],
+                                       vars_to_read,
+                                       elem_blocks)
 
     print('Variable = strain_xx, : ', end='')
     print(type(read_vars['strain_xx']))
@@ -126,9 +140,11 @@ def main():
     print('-----------------------------------------------------------')
     print('Reading all output files sequentially as a list(dict).')
     print()
-    read_all = herd.read_results_sequential(vars_to_read,None,elem_blocks)
-    
-    print('Number of simulations outputs: {:d}'.format(len(read_all)))
+    read_all = sweep_reader.read_results_sequential(vars_to_read,
+                                                    None,
+                                                    elem_blocks)
+
+    print(f'Number of simulations outputs: {len(read_all):d}')
     print('Variable keys for simulation output:')
     print(list(read_all[0].keys()))
     print()
@@ -136,14 +152,17 @@ def main():
     print('-----------------------------------------------------------')
     print('Reading all output files in parallel as list(dict).')
     print()
-    read_all = herd.read_results_para(vars_to_read,None,elem_blocks)
+    read_all = sweep_reader.read_results_para(vars_to_read,
+                                              None,
+                                              elem_blocks)
 
-    print('Number of simulations outputs: {:d}'.format(len(read_all)))
+    print(f'Number of simulations outputs: {len(read_all):d}')
     print('Variable keys for simulation output:')
     print(list(read_all[0].keys()))
     print()
 
     print('-----------------------------------------------------------')
+
 
 if __name__ == '__main__':
     main()

@@ -6,7 +6,6 @@ Author: Lloyd Fletcher
 ==============================================================================
 """
 import time
-import os
 from pathlib import Path
 from mooseherder import MooseRunner
 from mooseherder import ExodusReader
@@ -14,6 +13,8 @@ from mooseherder import ExodusReader
 USER_DIR = Path.home()
 
 def main() -> None:
+    """main: run moose once and read the exodus output
+    """
     print('------------------------------------------')
     print('EXMAPLE 6: Run MOOSE once, read exodus.')
     print('------------------------------------------')

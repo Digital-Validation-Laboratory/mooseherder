@@ -107,6 +107,7 @@ class DirectoryManager:
 
         return self._run_dirs[dir_num]
 
+
     def set_output_paths(self, output_paths: list[list[Path]]) -> None:
         """set_output_paths _summary_
 
@@ -115,6 +116,7 @@ class DirectoryManager:
         """
         self._output_paths = output_paths
 
+
     def get_output_paths(self) -> list[list[Path]]:
         """get_output_paths _summary_
 
@@ -122,6 +124,7 @@ class DirectoryManager:
             list[list[Path]]: _description_
         """
         return self._output_paths
+
 
     def get_output_key_file(self, sweep_iter: int) -> Path:
         """get_output_key_file _summary_
@@ -141,26 +144,49 @@ class DirectoryManager:
         Args:
             sweep_iter (int): _description_
         """
-        str_output = self.output_paths_to_str(self._output_paths)
+        str_output = output_paths_to_str(self._output_paths)
 
         with open(self.get_output_key_file(sweep_iter), "w", encoding='utf-8') as okf:
             json.dump(str_output, okf, indent=4)
 
-    def output_paths_to_str(self, output_files: list[list[Path]]) -> list[list[str]]:
-        """output_paths_to_str _summary_
 
-        Args:
-            output_files (list[list[Path]]): _description_
 
-        Returns:
-            list[list[str]]: _description_
-        """
-        str_output = list([])
-        for sim_iter in output_files:
-            iter_output = list([])
-            for output_path in sim_iter:
-                iter_output.append(str(output_path))
 
-            str_output.append(iter_output)
+def output_paths_to_str(output_files: list[list[Path]]) -> list[list[str]]:
+    """output_paths_to_str _summary_
 
-        return str_output
+    Args:
+        output_files (list[list[Path]]): _description_
+
+    Returns:
+        list[list[str]]: _description_
+    """
+    str_output = list([])
+    for sim_iter in output_files:
+        iter_output = list([])
+        for output_path in sim_iter:
+            iter_output.append(str(output_path))
+
+        str_output.append(iter_output)
+
+    return str_output
+
+
+def output_str_to_paths(output_files: list[list[str]]) -> list[list[Path]]:
+    """output_str_to_paths _summary_
+
+    Args:
+        output_files (list[list[str]]): _description_
+
+    Returns:
+        list[list[Path]]: _description_
+    """
+    str_output = list([])
+    for sim_iter in output_files:
+        iter_output = list([])
+        for output_path in sim_iter:
+            iter_output.append(Path(output_path))
+
+        str_output.append(iter_output)
+
+    return str_output
