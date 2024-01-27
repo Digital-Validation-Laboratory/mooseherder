@@ -1,6 +1,6 @@
 '''
 ==============================================================================
-EXAMPLE 3: Run MOOSE in sequential then parallel mode with mooseherder
+EXMAPLE 5: Run MOOSE in sequential then parallel mode with mooseherder
 
 Author: Lloyd Fletcher, Rory Spencer
 ==============================================================================
@@ -11,14 +11,14 @@ from mooseherder import MooseRunner
 from mooseherder import InputModifier
 from mooseherder import DirectoryManager
 
-
+NUM_PARA_RUNS = 3
 USER_DIR = Path.home()
 
 def main():
     """main: run moose once, sequential then parallel.
     """
     print('------------------------------------------')
-    print('EXAMPLE 3: Herd Setup')
+    print('EXMAPLE 5: Herd Setup')
     print('------------------------------------------')
 
     moose_dir = USER_DIR / 'moose'
@@ -63,19 +63,20 @@ def main():
         print(vv)
 
 
-
+    print()
     print('------------------------------------------')
-    print('EXAMPLE 3d: Run MOOSE in parallel x3')
+    print('EXMAPLE 5: Run MOOSE in parallel x3')
     print('------------------------------------------')
 
     # Run all variable combinations across 4 MOOSE instances with two runs saved in
     # each moose-workdir
-    for _ in range(3):
+    for rr in range(NUM_PARA_RUNS):
         herd.run_para(moose_vars)
 
-        print(f'Run time (para) = {herd.get_sweep_time():.3f} seconds')
+        print(f'Run time (para {rr+1}) = {herd.get_sweep_time():.3f} seconds')
         print('------------------------------------------')
-        print()
+
+    print()
 
 
 if __name__ == '__main__':

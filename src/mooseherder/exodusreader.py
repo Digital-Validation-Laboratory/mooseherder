@@ -32,7 +32,7 @@ class ExodusReader:
         Args:
             exodus_file (str): exodus file and path to read.
         """
-        self._data = nc.Dataset(exodus_file)
+        self._data = nc.Dataset(exodus_file) # type: ignore
 
         self._node_var_names = self._get_names('name_nod_var')
         self._elem_var_names = self._get_names('name_elem_var')

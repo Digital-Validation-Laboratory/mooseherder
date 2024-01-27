@@ -1,6 +1,6 @@
 """
 ==============================================================================
-EXAMPLE 5: Run MOOSE once with mooseherder and read the exodus output
+EXMAPLE 6: Run MOOSE once with mooseherder and read the exodus output
 
 Author: Lloyd Fletcher
 ==============================================================================
@@ -11,22 +11,23 @@ from pathlib import Path
 from mooseherder import MooseRunner
 from mooseherder import ExodusReader
 
-def main():
-    user_dir = Path.home()
+USER_DIR = Path.home()
 
+def main() -> None:
     print('------------------------------------------')
-    print('EXAMPLE 5: Run MOOSE once, read exodus.')
+    print('EXMAPLE 6: Run MOOSE once, read exodus.')
     print('------------------------------------------')
+
     # Create the moose runner with correct paths to moose and apps
-    moose_dir = os.path.join(user_dir,'moose')
-    moose_app_dir = os.path.join(user_dir,'moose-workdir/proteus')
+    moose_dir = USER_DIR / 'moose'
+    moose_app_dir = USER_DIR / 'moose-workdir/proteus'
     moose_app_name = 'proteus-opt'
-    moose_runner = MooseRunner(moose_dir,moose_app_dir,moose_app_name)
+    moose_runner = MooseRunner(moose_dir,moose_app_dir,moose_app_name) # type: ignore
 
     # Set input and parallelisation options
-    moose_runner.set_opts(n_tasks=1, n_threads=4, redirect=True)
-    input_file = 'scripts/moose/moose-mech-simple.i'
-    moose_runner.set_input_path(input_file)
+    moose_runner.set_opts(n_tasks = 2, n_threads = 4,redirect_out = True)
+    input_file = Path('scripts/moose/moose-mech-simple.i')
+    moose_runner.set_input_file(input_file)
 
     # Run the MOOSE!
     print('Running moose with:')
@@ -34,14 +35,14 @@ def main():
 
     start_time = time.perf_counter()
     moose_runner.run()
-    end_time = time.perf_counter()
+    run_time = time.perf_counter() - start_time
 
     print()
-    print('MOOSE run time = '+'{:.3f}'.format(end_time-start_time)+' seconds')
-    print()
+    print(f'MOOSE run time = {run_time:.3f} seconds')
     print('------------------------------------------')
+    print()
 
-    output_file = 'scripts/moose/moose-mech-simple_out.e'
+    output_file = Path('scripts/moose/moose-mech-simple_out.e')
     print('Reading exodus file:')
     print(output_file)
     print()
