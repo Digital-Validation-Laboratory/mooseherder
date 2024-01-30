@@ -201,7 +201,7 @@ class SweepReader:
         return self._sweep_results
 
 
-    def _start_read(self,sweep_iter):
+    def _start_read(self, sweep_iter: int | None):
         """_start_read _summary_
 
         Args:

@@ -1,8 +1,8 @@
 """
 ===============================================================================
-Sim Runner Abstract Base Class
+SimRunner Abstract Base Class
 
-Authors: Lloyd Fletcher, Rory Spencer
+Authors: Lloyd Fletcher
 ===============================================================================
 """
 from abc import ABC, abstractmethod

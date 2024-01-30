@@ -16,13 +16,28 @@ There are several different cases that lead to different MOOSE output formats.
 Authors: Lloyd Fletcher, Rory Spencer
 ===============================================================================
 """
+from dataclasses import dataclass
 from pathlib import Path
 import netCDF4 as nc
 import numpy as np
 import numpy.typing as npt
 
+
+@dataclass
+class SimData:
+    """ _summary_
+    """
+    time: npt.NDArray | None = None
+    coords: npt.NDArray | None = None
+    connect: dict[str,npt.NDArray] | None = None
+    side_sets: dict[str,npt.NDArray] | None = None
+    node_vars: dict[str,npt.NDArray] | None = None
+    elem_vars: dict[tuple[str,int],npt.NDArray] | None = None
+    glob_vars: dict[str,npt.NDArray] | None = None
+
+
 class ExodusReader:
-    """Class to read exodus files output by MOOSE using netCDF package.
+    """Class to read exodus files output by MOOSE using the netCDF package.
     """
     def __init__(self, exodus_file: Path):
         """Construct class by reading the exodus file using the netCDF package.
@@ -30,119 +45,140 @@ class ExodusReader:
         variables.
 
         Args:
-            exodus_file (str): exodus file and path to read.
+            exodus_file (Path): path to exodus file to be read.
         """
+        if not exodus_file.is_file() and exodus_file.suffix != '.e':
+            raise FileNotFoundError('Exodus file not found at specified path')
+
         self._exodus_path = exodus_file
-        self._data = None
-
-        self._node_var_names = self._get_names('name_nod_var')
-        self._elem_var_names = self._get_names('name_elem_var')
-        self._global_var_names = self._get_names('name_glo_var')
-        self._side_set_names = self._get_names('ss_names')
-
-        self._node_data = self._get_vars_from_names(self._node_var_names,'vals_nod_var')
-        self._side_set_nodes = self._get_vars_from_names(self._side_set_names,'node_ns')
-
-
-    def read_data(self) -> None:
         self._data = nc.Dataset(str(self._exodus_path)) # type: ignore
 
-        self._node_var_names = self._get_names('name_nod_var')
-        self._elem_var_names = self._get_names('name_elem_var')
-        self._global_var_names = self._get_names('name_glo_var')
-        self._side_set_names = self._get_names('ss_names')
 
-        self._node_data = self._get_vars_from_names(self._node_var_names,'vals_nod_var')
-        self._side_set_nodes = self._get_vars_from_names(self._side_set_names,'node_ns')
+    def get_names(self, key: str | None) -> npt.NDArray | None:
 
-        # Global variables and element variables behave differently
-        self._global_data = dict()
-        for ii,nn in enumerate(self._global_var_names):
-            key = 'vals_glo_var'
-            self._global_data[nn] = np.array(self._data.variables[key][:,ii])
+        if key not in self._data.variables or key is None:
+            return None
+
+        return nc.chartostring(np.array(self._data.variables[key]))
 
 
-    def _get_names(self, key: str) -> npt.NDArray:
-        """Helper function for extracting the nodal/element variable names that
-            are used as keys to get the associated data. For example: 'disp_x'
-            and 'disp_y' for a 2D tensor mechanics problem.
+    def get_var(self, key: str) -> npt.NDArray:
 
-        Args:
-            key (str): identifier for the variable containing the variable
-                names.
-
-        Returns:
-            npt.NDArray: numpy array of strings with the variable names returns
-                an empty numpy array if the key does not exist.
-        """
-        if key in self._data.variables:
-            return nc.chartostring(np.array(self._data.variables[key])) # type: ignore
-        else:
+        if key not in self._data.variables:
             return np.array([])
 
-    def _get_vars_from_names(self,names: npt.NDArray, key_tag: str) -> dict:
-        """_summary_
+        return np.array(self._data.variables[key]).T
 
-        Args:
-            names (npt.NDArray): _description_
-            key_tag (str): _description_
 
-        Returns:
-            dict: _description_
-        """
-        vars = dict()
-        for ii,nn in enumerate(names):
-            key = key_tag+'{:d}'.format(ii+1)
-            vars[nn] = np.array(self._data.variables[key]).T
+    def get_connectivity_names(self) -> npt.NDArray:
+
+        names = np.array([])
+        for bb in range(self.get_num_elem_blocks()):
+            key = f'connect{bb+1:d}'
+            if key in self._data.variables:
+                names = np.append(names,key)
+
+        return names
+
+
+    def get_connectivity(self) -> dict[str,npt.NDArray]:
+
+        vars = dict({})
+        for key in self.get_connectivity_names():
+            vars[key] = self.get_var(key)
+
         return vars
 
-    def get_all_var_names(self) -> list[str]:
 
-        return list(self._data.variables)
+    def get_sideset_names(self) -> npt.NDArray | None:
 
-    def get_node_var_names(self) -> list[str]:
+        return self.get_names('ss_names')
 
-        return list(self._node_var_names)
 
-    def get_elem_var_names(self) -> list[str]:
+    def get_all_sidesets(self) -> dict[str, npt.NDArray] | None:
 
-        return list(self._elem_var_names)
+        key_tag = 'node_ns'
 
-    def get_var(self,key: str) -> npt.NDArray:
-        """Gets a variable from the exodus file. If the variable does not exist
-        returns an empty numpy array.
+        vars = dict({})
+        for ii,nn in enumerate(self.get_sideset_names()): # type: ignore
+            key = key_tag+'{:d}'.format(ii+1)
+            vars[nn] = self.get_var(key)
 
-        Args:
-            key (str): identifier for the variable
+        return vars
 
-        Returns:
-            npt.NDArray: value(s) of the variable as an array
-        """
-        if key in self._data.variables:
-            return np.array(self._data.variables[key])
-        else:
-            return np.array([])
 
-    def get_node_data(self, key: str) -> npt.NDArray:
-        """Gets the simulation data at nodes for the variable requested with
-        'key'.
+    def get_node_var_names(self) -> npt.NDArray | None:
 
-        Args:
-            key (str): string identifier for the nodal variable. For example
-                'disp_x' for a tensor mechanics problem. Note that MOOSE might
-                interpolate element variable to nodes for tensor mechanics
-                with material_output_order != CONSTANT.
+        return self.get_names('name_nod_var')
 
-        Returns:
-            np.array: returns an array with shape (T,N) where T is the number
-                of time steps and N is the number of nodes in the simulation.
-        """
-        if key in self._node_data:
-            return self._node_data[key]
-        else:
-            return np.array([])
 
-    def get_elem_data(self,key: str, block: int) -> npt.NDArray:
+    def get_node_vars(self, names: npt.NDArray | None) -> dict[str,npt.NDArray] | None:
+
+        if names is None:
+            return None
+
+        key_tag = 'vals_nod_var'
+        vars = dict({})
+
+        for ii,nn in enumerate(names): # type: ignore
+            key = f'{key_tag}{ii+1:d}'
+            vars[nn] = self.get_var(key)
+
+        return vars
+
+
+    def get_all_node_vars(self) -> dict[str, npt.NDArray] | None:
+
+        return self.get_node_vars(self.get_node_var_names())
+
+
+    def get_elem_var_names(self) -> npt.NDArray | None:
+
+        return self.get_names('name_elem_var')
+
+
+    def get_num_elem_blocks(self) -> int:
+
+        return self.get_names('eb_names').shape[0] # type: ignore
+
+
+    def get_elem_vars(self, names: npt.NDArray | None,
+                      blocks: list[int]) -> dict[tuple[str,int],npt.NDArray] | None:
+
+        if self.get_elem_var_names() is None or names is None:
+            return None
+
+        key_tag = 'vals_elem_var'
+
+        vars = dict({})
+        for ii,nn in enumerate(names):
+            for bb in blocks:
+                key = f'{key_tag}{ii+1:d}eb{bb:d}'
+                vars[(nn,bb)] = self.get_var(key)
+
+        return vars
+
+
+    def get_all_elem_vars(self) -> dict[tuple[str,int], npt.NDArray] | None:
+
+        blocks = [ii+1 for ii in range(self.get_num_elem_blocks())]
+        return self.get_elem_vars(self.get_elem_var_names(),blocks)
+
+
+    def get_all_glob_vars(self) -> dict[str, npt.NDArray]:
+
+        name_key = 'name_glo_var'
+        key = 'vals_glo_var'
+
+        vars = dict({})
+        for ii,nn in enumerate(self.get_names(name_key)): # type: ignore
+            vars[nn] = np.array(self._data.variables[key][:,ii])
+
+        return vars
+
+
+    '''
+    def get_elem_data(self, key: str, block: int) -> npt.NDArray:
         """Gets the simulation data at elements for the variable requested with
         'key'. Note that for tensor mechanics with material_output_order !=
         CONSTANT the element data will be interpolated to nodes
@@ -165,41 +201,15 @@ class ExodusReader:
 
         if name in self._data.variables:
             return np.array(self._data.variables[name]).T
-        else:
-            return np.array([])
 
-    def get_global_data(self,key) -> npt.NDArray:
-        """_summary_
-
-        Args:
-            key (_type_): _description_
-
-        Returns:
-            np.array: _description_
-        """
-        if key in self._global_data:
-            return self._global_data[key]
-        else:
-            return np.array([])
-
-    def get_sideset_nodes(self, key: str) -> npt.NDArray:
-        """_summary_
-
-        Args:
-            key (_type_): _description_
-
-        Returns:
-            np.array: _description_
-        """
-        if key in self._side_set_nodes:
-            return self._side_set_nodes[key]
-        else:
-            return np.array([])
-
+        return np.array([])
+    '''
 
     def get_coords(self) -> npt.NDArray:
         """Gets the nodal coordinates in each spatial dimension setting any
         undefined dimensions to zeros.
+
+        return np.array([])
 
         Raises:
             RuntimeError: no spatial dimensions found.
@@ -228,6 +238,7 @@ class ExodusReader:
 
         return self.coords
 
+
     def _expand_coord(self,coord: npt.NDArray, dim: int) -> npt.NDArray:
         """Helper function to create an array of zeros to pad any spatial
         dimensions that are not defined for the simulation.
@@ -243,8 +254,9 @@ class ExodusReader:
         """
         if coord.shape[0] == 0:
             return np.zeros([dim,])
-        else:
-            return coord
+
+        return coord
+
 
     def get_time(self) -> npt.NDArray:
         """Get a vector of simulation time steps.
@@ -256,11 +268,27 @@ class ExodusReader:
         """
         if 'time_whole' in self._data.variables:
             return np.array(self._data.variables['time_whole'])
-        else:
-            return np.array([])
+
+        return np.array([])
+
 
     def print_vars(self) -> None:
         """Prints all variable strings in the exodus file to console.
         """
         for vv in self._data.variables:
             print(vv)
+
+
+    def read_sim_data(self) -> SimData:
+
+        data = SimData()
+
+        data.time = self.get_time()
+        data.coords = self.get_coords()
+        data.connect = self.get_connectivity()
+        data.side_sets = self.get_all_sidesets()
+        data.node_vars = self.get_all_node_vars()
+        data.elem_vars = self.get_all_elem_vars()
+        data.glob_vars = self.get_all_glob_vars()
+
+        return data

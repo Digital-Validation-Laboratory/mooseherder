@@ -6,6 +6,9 @@ scripts/sim-workdir-*
 scripts/*.csv
 tests/sim-workdir-*
 *.processor.*
+# Keep MOOSE output files used for pytest
+!tests/output/*.e
+!tests/output/sim-workdir-*/*.e
 
 # Gmsh output files
 *.msh

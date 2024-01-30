@@ -62,6 +62,7 @@ def main() -> None:
 
     print('Herd sweep variables:')
     pprint(moose_vars)
+    print()
 
     # Run all variable combinations across 4 MOOSE instances with two runs saved in
     # each moose-workdir
