@@ -20,7 +20,7 @@ from pathlib import Path
 import netCDF4 as nc
 import numpy as np
 import numpy.typing as npt
-from mooseherder.simdata import SimData
+from mooseherder.simdata import SimData, SimReadConfig
 
 
 class ExodusReader:
@@ -191,17 +191,39 @@ class ExodusReader:
         return self.get_names('name_elem_var')
 
 
-    def get_num_elem_blocks(self) -> int:
+    def get_elem_var_names_and_blocks(self) -> list[tuple[str,int]] | None:
+        """get_elem_var_names_and_blocks _summary_
+
+        Returns:
+            list[tuple[str,int]] | None: _description_
+        """
+        if self.get_elem_var_names is None or self.get_num_elem_blocks() is None:
+            return None
+
+        blocks = [ii+1 for ii in range(self.get_num_elem_blocks())] # type: ignore
+        names_blocks = list([])
+
+        for nn in self.get_elem_var_names(): # type: ignore
+            for bb in blocks:
+                names_blocks.append((str(nn),bb))
+
+        return names_blocks
+
+
+    def get_num_elem_blocks(self) -> int | None:
         """get_num_elem_blocks _summary_
 
         Returns:
             int: _description_
         """
+        if 'eb_names' not in self._data.variables:
+            return None
+
         return self.get_names('eb_names').shape[0] # type: ignore
 
 
-    def get_elem_vars(self, names: npt.NDArray | None,
-                      blocks: list[int]) -> dict[tuple[str,int],npt.NDArray] | None:
+    def get_elem_vars(self, names_blocks: list[tuple[str,int]] | None
+                      ) -> dict[tuple[str,int],npt.NDArray] | None:
         """get_elem_vars _summary_
 
         Args:
@@ -211,16 +233,15 @@ class ExodusReader:
         Returns:
             dict[tuple[str,int],npt.NDArray] | None: _description_
         """
-        if self.get_elem_var_names() is None or names is None:
+        if self.get_elem_var_names() is None or names_blocks is None:
             return None
 
         key_tag = 'vals_elem_var'
 
         vars = dict({})
-        for ii,nn in enumerate(names):
-            for bb in blocks:
-                key = f'{key_tag}{ii+1:d}eb{bb:d}'
-                vars[(nn,bb)] = self.get_var(key)
+        for ii,nn in enumerate(names_blocks):
+            key = f'{key_tag}{ii+1:d}eb{nn[1]:d}'
+            vars[(nn,nn[1])] = self.get_var(key)
 
         return vars
 
@@ -231,8 +252,8 @@ class ExodusReader:
         Returns:
             dict[tuple[str,int], npt.NDArray] | None: _description_
         """
-        blocks = [ii+1 for ii in range(self.get_num_elem_blocks())]
-        return self.get_elem_vars(self.get_elem_var_names(),blocks)
+
+        return self.get_elem_vars(self.get_elem_var_names_and_blocks())
 
 
     def get_glob_var_names(self) -> npt.NDArray | None:
@@ -242,6 +263,7 @@ class ExodusReader:
             npt.NDArray | None: _description_
         """
         return self.get_names('name_glo_var')
+
 
     def get_glob_vars(self, names: npt.NDArray | None) -> dict[str, npt.NDArray] | None:
         """get_glob_vars _summary_
@@ -346,19 +368,28 @@ class ExodusReader:
         for vv in self._data.variables:
             print(vv)
 
+    def get_read_config(self) -> SimReadConfig:
+        """get_read_config _summary_
+
+        Returns:
+            SimReadConfig: _description_
+        """
+        read_config = SimReadConfig()
+
+        read_config.sidesets = self.get_sideset_names()
+        read_config.node_vars = self.get_node_var_names()
+        read_config.elem_vars = self.get_elem_var_names_and_blocks()
+        read_config.glob_vars = self.get_glob_var_names()
+
+        return read_config
+
 
     def read_sim_data(self,
-                      side_set_names: npt.NDArray | None,
-                      node_var_names: npt.NDArray | None,
-                      elem_var_names: tuple[npt.NDArray,list[int]] | None,
-                      glob_var_names: npt.NDArray | None) -> SimData:
+                      read_config: SimReadConfig) -> SimData:
         """read_sim_data _summary_
 
         Args:
-            side_set_names (npt.NDArray | None): _description_
-            node_var_names (npt.NDArray | None): _description_
-            elem_var_names (tuple[npt.NDArray,list[int]] | None): _description_
-            glob_var_names (npt.NDArray | None): _description_
+            read_config (SimReadConfig): _description_
 
         Returns:
             SimData: _description_
@@ -369,13 +400,10 @@ class ExodusReader:
         data.coords = self.get_coords()
         data.connect = self.get_connectivity()
 
-        data.side_sets = self.get_sidesets(side_set_names)
-        data.node_vars = self.get_node_vars(node_var_names)
-
-        if elem_var_names is not None:
-            data.elem_vars = self.get_elem_vars(elem_var_names[0],elem_var_names[1])
-
-        data.glob_vars = self.get_glob_vars(glob_var_names)
+        data.side_sets = self.get_sidesets(read_config.sidesets)
+        data.node_vars = self.get_node_vars(read_config.node_vars)
+        data.elem_vars = self.get_elem_vars(read_config.elem_vars)
+        data.glob_vars = self.get_glob_vars(read_config.glob_vars)
 
         return data
 
@@ -397,3 +425,4 @@ class ExodusReader:
         data.glob_vars = self.get_all_glob_vars()
 
         return data
+

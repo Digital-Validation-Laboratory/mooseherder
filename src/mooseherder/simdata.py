@@ -6,6 +6,7 @@ Authors: Lloyd Fletcher,
 ===============================================================================
 """
 from dataclasses import dataclass
+import numpy as np
 import numpy.typing as npt
 
 
@@ -72,8 +73,12 @@ class SimData:
     '''
 
 @dataclass
-class SimReadNames:
+class SimReadConfig:
+    """ Used to specify names of variables to be read into the SimData class.
+        Default behaviour reads all data. This class allows the user to only
+        extract the required variables by name.
+    """
     sidesets: npt.NDArray | None = None
     node_vars: npt.NDArray | None = None
-    elem_vars: tuple[npt.NDArray,list[int]] | None = None
+    elem_vars: list[tuple[str,int]] | None = None
     glob_vars: npt.NDArray | None = None
