@@ -12,7 +12,8 @@ from pathlib import Path
 from multiprocessing.pool import Pool
 from mooseherder.directorymanager import DirectoryManager
 import mooseherder.directorymanager as dm
-from mooseherder.exodusreader import ExodusReader, SimData
+from mooseherder.exodusreader import ExodusReader
+from mooseherder.simdata import SimData
 
 
 class SweepReader:
@@ -29,7 +30,6 @@ class SweepReader:
         """
         self._dir_manager = dir_manager
         self._output_files = list([])
-        self._sweep_results = list([])
         self._n_para_read = num_para_read
 
 
@@ -43,6 +43,8 @@ class SweepReader:
             list[list[Path]]: _description_
         """
         output_key = self._dir_manager.get_output_key_file(sweep_iter)
+        if not output_key.is_file():
+            raise FileNotFoundError(f'Output key file for sweep iteration {sweep_iter} not found at path: {output_key}')
 
         with open(output_key, 'r', encoding='utf-8') as okf:
             output_files = json.load(okf)
@@ -85,83 +87,29 @@ class SweepReader:
 
 
     def read_results_once(self,
-                          output_file: Path,
-                          var_keys: list,
-                          elem_var_blocks: list[int] | None = None) -> dict:
-        """read_results_once _summary_
+                          output_file: Path) -> SimData:
 
-        Args:
-            output_file (Path): _description_
-            var_keys (list): _description_
-            elem_var_blocks (list[int] | None, optional): _description_. Defaults to None.
-
-        Returns:
-            dict: _description_
-        """
-        # Create the
         reader = ExodusReader(output_file)
-        read_vars = dict({})
-
-        # Always get the nodal coords and the time vector
-        read_vars['coords'] = reader.get_coords()
-        read_vars['time'] = reader.get_time()
-
-        # Three cases:
-        # 1) nodal data (no block)
-        # 2) element data (with block)
-        # 3) standard variable string to access anything in exodus
-        for ii,kk in enumerate(var_keys):
-            if kk in reader.get_node_var_names():
-                read_vars[kk] = reader.get_node_data(kk)
-            elif (elem_var_blocks is not None) and (kk in reader.get_elem_var_names()):
-                read_vars[kk] = reader.get_elem_data(kk,elem_var_blocks[ii])
-            elif kk in reader.get_all_var_names():
-                read_vars[kk] = reader.get_var(kk)
-            else:
-                read_vars[kk] = None
-
-        return read_vars
+        return reader.read_all_sim_data()
 
 
-    def read_results_sequential(self, var_keys: list,
-                                sweep_iter: int | None = None,
-                                elem_var_blocks: list[int] | None = None) -> list[dict]:
-        """read_results_sequential _summary_
+    def read_results_sequential(self,
+                                sweep_iter: int | None = None) -> list[SimData]:
 
-        Args:
-            var_keys (list): _description_
-            sweep_iter (int | None, optional): _description_. Defaults to None.
-            elem_var_blocks (int | None, optional): _description_. Defaults to None.
-
-        Returns:
-            list[dict]: _description_
-        """
         self._start_read(sweep_iter)
 
-        self._sweep_results = list([])
+        sweep_results = list([])
         for ll in self._output_files:
             for ff in ll:
                 if ff is not None:
-                    self._sweep_results.append(
-                        self.read_results_once(ff,var_keys,elem_var_blocks))
+                    sweep_results.append(self.read_results_once(ff))
 
-        return self._sweep_results
+        return sweep_results
 
 
     def read_results_para(self,
-                          var_keys: list,
-                          sweep_iter: int | None = None,
-                          elem_var_blocks: list[int] | None = None) -> list[dict]:
-        """read_results_para _summary_
+                          sweep_iter: int | None = None) -> list[SimData]:
 
-        Args:
-            var_keys (list): _description_
-            sweep_iter (int | None, optional): _description_. Defaults to None.
-            elem_var_blocks (int | None, optional): _description_. Defaults to None.
-
-        Returns:
-            list[dict]: _description_
-        """
         self._start_read(sweep_iter)
 
         with Pool(self._n_para_read) as pool:
@@ -170,11 +118,11 @@ class SweepReader:
                 for ff in ll:
                     if ff is not None:
                         processes.append(pool.apply_async(
-                            self.read_results_once, args=(ff,var_keys,elem_var_blocks)))
+                            self.read_results_once, args=(ff,)))
 
-            self._sweep_results = [pp.get() for pp in processes]
+            sweep_results = [pp.get() for pp in processes]
 
-        return self._sweep_results
+        return sweep_results
 
 
     def read_results_para_generic(self,
@@ -196,9 +144,9 @@ class SweepReader:
             for ff in self._output_files:
                 processes.append(pool.apply_async(reader.read, args=(ff,)))
 
-            self._sweep_results = [pp.get() for pp in processes]
+            sweep_results = [pp.get() for pp in processes]
 
-        return self._sweep_results
+        return sweep_results
 
 
     def _start_read(self, sweep_iter: int | None):

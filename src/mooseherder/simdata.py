@@ -8,6 +8,7 @@ Authors: Lloyd Fletcher,
 from dataclasses import dataclass
 import numpy.typing as npt
 
+
 @dataclass
 class SimData:
     """ Data class for finite element simulation output.
@@ -44,7 +45,7 @@ class SimData:
     node_vars: dict[str,npt.NDArray] | None = None
     ''' Nodal variable by name.
         key = 'name' e.g. 'disp_x' or 'temp'
-        Gives the nodal variable as a numpy array N by t where N is the number
+        Gives the nodal variable as a numpy array, N by t where N is the number
         of nodes and t is the number of time steps. Note that element variables
         can be stored as nodal depending on output options or material output
         order selected.
@@ -54,15 +55,25 @@ class SimData:
     elem_vars: dict[tuple[str,int],npt.NDArray] | None = None
     ''' Element variables by name and block.
         key = (name, block num)
+        Gives the element variable as a numpy array, E by t where E is the
+        number of elements and t is the number of time steps. Note that element
+        variables might exist as nodal variables only depending on output
+        options and specified material output order.
         Defaults to None.
     '''
 
     glob_vars: dict[str,npt.NDArray] | None = None
     ''' Global variables by name. Global variable include postprocessors and
         extracted reactions at boundaries.
-        key = name (as specified in input file), e.g. 'react_y'
+        key = name (as specified in input file post-processor), e.g. 'react_y'
         Gives a numpy array with t entries corresponding to the number of time
         steps in the simulation.
         Defaults to None.
     '''
 
+@dataclass
+class SimReadNames:
+    sidesets: npt.NDArray | None = None
+    node_vars: npt.NDArray | None = None
+    elem_vars: tuple[npt.NDArray,list[int]] | None = None
+    glob_vars: npt.NDArray | None = None

@@ -106,17 +106,23 @@ class ExodusReader:
         return self.get_names('ss_names')
 
 
-    def get_all_sidesets(self) -> dict[tuple[str,str], npt.NDArray] | None:
-        """get_all_sidesets _summary_
+    def get_sidesets(self, names: npt.NDArray | None) -> dict[tuple[str,str], npt.NDArray] | None:
+        """get_sidesets _summary_
+
+        Args:
+            names (npt.NDArray | None): _description_
 
         Returns:
-            dict[str, npt.NDArray] | None: _description_
+            dict[tuple[str,str], npt.NDArray] | None: _description_
         """
+        if names is None:
+            return None
+
         node_key_tag = 'node_ns'
         elem_key_tag = 'elem_ss'
 
         side_sets = dict({})
-        for ii,nn in enumerate(self.get_sideset_names()): # type: ignore
+        for ii,nn in enumerate(names): # type: ignore
             node_key = f'{node_key_tag}{ii+1:d}'
             elem_key = f'{elem_key_tag}{ii+1:d}'
 
@@ -124,6 +130,16 @@ class ExodusReader:
             side_sets[(nn,'elem')] = self.get_var(elem_key)
 
         return side_sets
+
+
+    def get_all_sidesets(self) -> dict[tuple[str,str], npt.NDArray] | None:
+        """get_all_sidesets _summary_
+
+        Returns:
+            dict[str, npt.NDArray] | None: _description_
+        """
+
+        return self.get_sidesets(self.get_sideset_names())
 
 
     def get_node_var_names(self) -> npt.NDArray | None:
@@ -220,11 +236,22 @@ class ExodusReader:
 
 
     def get_glob_var_names(self) -> npt.NDArray | None:
+        """get_glob_var_names _summary_
 
+        Returns:
+            npt.NDArray | None: _description_
+        """
         return self.get_names('name_glo_var')
 
     def get_glob_vars(self, names: npt.NDArray | None) -> dict[str, npt.NDArray] | None:
+        """get_glob_vars _summary_
 
+        Args:
+            names (npt.NDArray | None): _description_
+
+        Returns:
+            dict[str, npt.NDArray] | None: _description_
+        """
         if self.get_glob_var_names() is None or names is None:
             return None
 
@@ -234,7 +261,6 @@ class ExodusReader:
             glob_vars[nn] = np.array(self._data.variables[key][:,ii])
 
         return glob_vars
-
 
 
     def get_all_glob_vars(self) -> dict[str, npt.NDArray] | None:
@@ -321,8 +347,41 @@ class ExodusReader:
             print(vv)
 
 
-    def read_sim_data(self) -> SimData:
+    def read_sim_data(self,
+                      side_set_names: npt.NDArray | None,
+                      node_var_names: npt.NDArray | None,
+                      elem_var_names: tuple[npt.NDArray,list[int]] | None,
+                      glob_var_names: npt.NDArray | None) -> SimData:
         """read_sim_data _summary_
+
+        Args:
+            side_set_names (npt.NDArray | None): _description_
+            node_var_names (npt.NDArray | None): _description_
+            elem_var_names (tuple[npt.NDArray,list[int]] | None): _description_
+            glob_var_names (npt.NDArray | None): _description_
+
+        Returns:
+            SimData: _description_
+        """
+        data = SimData()
+
+        data.time = self.get_time()
+        data.coords = self.get_coords()
+        data.connect = self.get_connectivity()
+
+        data.side_sets = self.get_sidesets(side_set_names)
+        data.node_vars = self.get_node_vars(node_var_names)
+
+        if elem_var_names is not None:
+            data.elem_vars = self.get_elem_vars(elem_var_names[0],elem_var_names[1])
+
+        data.glob_vars = self.get_glob_vars(glob_var_names)
+
+        return data
+
+
+    def read_all_sim_data(self) -> SimData:
+        """read_all_sim_data _summary_
 
         Returns:
             SimData: _description_
