@@ -12,7 +12,7 @@ from pathlib import Path
 from multiprocessing.pool import Pool
 from mooseherder.directorymanager import DirectoryManager
 import mooseherder.directorymanager as dm
-from mooseherder.exodusreader import ExodusReader
+from mooseherder.exodusreader import ExodusReader, SimData
 
 
 class SweepReader:

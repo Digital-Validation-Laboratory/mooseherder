@@ -16,24 +16,11 @@ There are several different cases that lead to different MOOSE output formats.
 Authors: Lloyd Fletcher, Rory Spencer
 ===============================================================================
 """
-from dataclasses import dataclass
 from pathlib import Path
 import netCDF4 as nc
 import numpy as np
 import numpy.typing as npt
-
-
-@dataclass
-class SimData:
-    """ _summary_
-    """
-    time: npt.NDArray | None = None
-    coords: npt.NDArray | None = None
-    connect: dict[str,npt.NDArray] | None = None
-    side_sets: dict[str,npt.NDArray] | None = None
-    node_vars: dict[str,npt.NDArray] | None = None
-    elem_vars: dict[tuple[str,int],npt.NDArray] | None = None
-    glob_vars: dict[str,npt.NDArray] | None = None
+from mooseherder.simdata import SimData
 
 
 class ExodusReader:
@@ -41,8 +28,6 @@ class ExodusReader:
     """
     def __init__(self, exodus_file: Path):
         """Construct class by reading the exodus file using the netCDF package.
-        Also reads the node and element variable names as well as the nodal
-        variables.
 
         Args:
             exodus_file (Path): path to exodus file to be read.
@@ -55,7 +40,14 @@ class ExodusReader:
 
 
     def get_names(self, key: str | None) -> npt.NDArray | None:
+        """get_names _summary_
 
+        Args:
+            key (str | None): _description_
+
+        Returns:
+            npt.NDArray | None: _description_
+        """
         if key not in self._data.variables or key is None:
             return None
 
@@ -63,7 +55,14 @@ class ExodusReader:
 
 
     def get_var(self, key: str) -> npt.NDArray:
+        """get_var _summary_
 
+        Args:
+            key (str): _description_
+
+        Returns:
+            npt.NDArray: _description_
+        """
         if key not in self._data.variables:
             return np.array([])
 
@@ -71,7 +70,11 @@ class ExodusReader:
 
 
     def get_connectivity_names(self) -> npt.NDArray:
+        """get_connectivity_names _summary_
 
+        Returns:
+            npt.NDArray: _description_
+        """
         names = np.array([])
         for bb in range(self.get_num_elem_blocks()):
             key = f'connect{bb+1:d}'
@@ -82,38 +85,65 @@ class ExodusReader:
 
 
     def get_connectivity(self) -> dict[str,npt.NDArray]:
+        """get_connectivity _summary_
 
-        vars = dict({})
+        Returns:
+            dict[str,npt.NDArray]: _description_
+        """
+        connect = dict({})
         for key in self.get_connectivity_names():
-            vars[key] = self.get_var(key)
+            connect[key] = self.get_var(key)
 
-        return vars
+        return connect
 
 
     def get_sideset_names(self) -> npt.NDArray | None:
+        """get_sideset_names _summary_
 
+        Returns:
+            npt.NDArray | None: _description_
+        """
         return self.get_names('ss_names')
 
 
-    def get_all_sidesets(self) -> dict[str, npt.NDArray] | None:
+    def get_all_sidesets(self) -> dict[tuple[str,str], npt.NDArray] | None:
+        """get_all_sidesets _summary_
 
-        key_tag = 'node_ns'
+        Returns:
+            dict[str, npt.NDArray] | None: _description_
+        """
+        node_key_tag = 'node_ns'
+        elem_key_tag = 'elem_ss'
 
-        vars = dict({})
+        side_sets = dict({})
         for ii,nn in enumerate(self.get_sideset_names()): # type: ignore
-            key = key_tag+'{:d}'.format(ii+1)
-            vars[nn] = self.get_var(key)
+            node_key = f'{node_key_tag}{ii+1:d}'
+            elem_key = f'{elem_key_tag}{ii+1:d}'
 
-        return vars
+            side_sets[(nn,'node')] = self.get_var(node_key)
+            side_sets[(nn,'elem')] = self.get_var(elem_key)
+
+        return side_sets
 
 
     def get_node_var_names(self) -> npt.NDArray | None:
+        """get_node_var_names _summary_
 
+        Returns:
+            npt.NDArray | None: _description_
+        """
         return self.get_names('name_nod_var')
 
 
     def get_node_vars(self, names: npt.NDArray | None) -> dict[str,npt.NDArray] | None:
+        """get_node_vars _summary_
 
+        Args:
+            names (npt.NDArray | None): _description_
+
+        Returns:
+            dict[str,npt.NDArray] | None: _description_
+        """
         if names is None:
             return None
 
@@ -128,23 +158,43 @@ class ExodusReader:
 
 
     def get_all_node_vars(self) -> dict[str, npt.NDArray] | None:
+        """get_all_node_vars _summary_
 
+        Returns:
+            dict[str, npt.NDArray] | None: _description_
+        """
         return self.get_node_vars(self.get_node_var_names())
 
 
     def get_elem_var_names(self) -> npt.NDArray | None:
+        """get_elem_var_names _summary_
 
+        Returns:
+            npt.NDArray | None: _description_
+        """
         return self.get_names('name_elem_var')
 
 
     def get_num_elem_blocks(self) -> int:
+        """get_num_elem_blocks _summary_
 
+        Returns:
+            int: _description_
+        """
         return self.get_names('eb_names').shape[0] # type: ignore
 
 
     def get_elem_vars(self, names: npt.NDArray | None,
                       blocks: list[int]) -> dict[tuple[str,int],npt.NDArray] | None:
+        """get_elem_vars _summary_
 
+        Args:
+            names (npt.NDArray | None): _description_
+            blocks (list[int]): _description_
+
+        Returns:
+            dict[tuple[str,int],npt.NDArray] | None: _description_
+        """
         if self.get_elem_var_names() is None or names is None:
             return None
 
@@ -160,50 +210,42 @@ class ExodusReader:
 
 
     def get_all_elem_vars(self) -> dict[tuple[str,int], npt.NDArray] | None:
+        """get_all_elem_vars _summary_
 
+        Returns:
+            dict[tuple[str,int], npt.NDArray] | None: _description_
+        """
         blocks = [ii+1 for ii in range(self.get_num_elem_blocks())]
         return self.get_elem_vars(self.get_elem_var_names(),blocks)
 
 
-    def get_all_glob_vars(self) -> dict[str, npt.NDArray]:
+    def get_glob_var_names(self) -> npt.NDArray | None:
 
-        name_key = 'name_glo_var'
+        return self.get_names('name_glo_var')
+
+    def get_glob_vars(self, names: npt.NDArray | None) -> dict[str, npt.NDArray] | None:
+
+        if self.get_glob_var_names() is None or names is None:
+            return None
+
         key = 'vals_glo_var'
+        glob_vars = dict({})
+        for ii,nn in enumerate(names): # type: ignore
+            glob_vars[nn] = np.array(self._data.variables[key][:,ii])
 
-        vars = dict({})
-        for ii,nn in enumerate(self.get_names(name_key)): # type: ignore
-            vars[nn] = np.array(self._data.variables[key][:,ii])
-
-        return vars
+        return glob_vars
 
 
-    '''
-    def get_elem_data(self, key: str, block: int) -> npt.NDArray:
-        """Gets the simulation data at elements for the variable requested with
-        'key'. Note that for tensor mechanics with material_output_order !=
-        CONSTANT the element data will be interpolated to nodes
 
-        Args:
-            key (str): string identifier key for the element variables
-            block (int): integer for the subdomain of the associated elements.
+    def get_all_glob_vars(self) -> dict[str, npt.NDArray] | None:
+        """get_all_glob_vars _summary_
 
         Returns:
-            np.array: returns an array with shape (T,E) where T is the number
-                of time steps and E is the number of elements in the specified
-                block. Returns an empty array if there are no element variables
-                or if the requested key/block does not exist.
+            dict[str, npt.NDArray]: _description_
         """
-        if self._elem_var_names.shape[0] == 0:
-            return np.array([])
 
-        ind = np.where(self._elem_var_names == key)[0][0]
-        name = f'vals_elem_var{ind+1:d}eb{block:d}'
+        return self.get_glob_vars(self.get_glob_var_names())
 
-        if name in self._data.variables:
-            return np.array(self._data.variables[name]).T
-
-        return np.array([])
-    '''
 
     def get_coords(self) -> npt.NDArray:
         """Gets the nodal coordinates in each spatial dimension setting any
@@ -280,7 +322,11 @@ class ExodusReader:
 
 
     def read_sim_data(self) -> SimData:
+        """read_sim_data _summary_
 
+        Returns:
+            SimData: _description_
+        """
         data = SimData()
 
         data.time = self.get_time()

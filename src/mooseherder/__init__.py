@@ -11,6 +11,7 @@ from mooseherder.exodusreader import ExodusReader
 from mooseherder.mooseherd import MooseHerd
 from mooseherder.directorymanager import DirectoryManager
 from mooseherder.sweepreader import SweepReader
+from mooseherder.simdata import SimData
 
 
 __all__ = ["inputmodifier",
@@ -20,4 +21,5 @@ __all__ = ["inputmodifier",
             "exodusreader",
             "mooseherd",
             "directorymanager",
-            "sweepreader"]
+            "sweepreader",
+            "simdata"]
