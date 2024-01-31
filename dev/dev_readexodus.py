@@ -11,7 +11,7 @@ def main() -> None:
     print('----------------------------------------------------------')
     #output_file = Path('scripts/moose/moose-mech-outtest_out.e')
 
-    output_file = Path('scripts/moose-test-cases/moose-mech-subdom-2d-o1_out.e')
+    output_file = Path('scripts/moose-test-cases/moose-mech-subdom-2d-o2_out.e')
     print('Reading exodus file:')
     print(output_file)
     print()
@@ -27,7 +27,9 @@ def main() -> None:
     #print(exodus_reader.get_names('connect1'))
     #print(exodus_reader._data.variables['ss_names'])
     #print(exodus_reader.get_connectivity_names())
-    pprint(exodus_reader.get_all_elem_vars())
+    pprint(exodus_reader.get_var('side_ss2'))
+    pprint(exodus_reader.get_var('node_ns2').shape)
+    pprint(exodus_reader.get_var('elem_ss2'))
 
 if __name__ == '__main__':
     main()
