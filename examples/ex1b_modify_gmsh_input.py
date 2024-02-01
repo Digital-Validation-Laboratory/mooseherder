@@ -14,9 +14,9 @@ GMSH_INPUT = Path("scripts/gmsh/gmsh_tens_spline_2d.geo")
 def main() -> None:
     """main: modify gmsh input and save to file
     """
-    print("------------------------------------------")
+    print("-"*80)
     print("EXAMPLE 1b: Modify gmsh input script")
-    print("------------------------------------------")
+    print("-"*80)
     gmsh_mod = InputModifier(GMSH_INPUT, "//", ";")
 
     print("Variables found the top of the gmsh input file:")
@@ -38,7 +38,7 @@ def main() -> None:
     print()
 
     print("Example complete.")
-    print("------------------------------------------")
+    print("-"*80)
     print()
 
 

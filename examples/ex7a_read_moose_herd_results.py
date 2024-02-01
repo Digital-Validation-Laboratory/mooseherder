@@ -5,6 +5,7 @@ EXAMPLE 7a: Run MOOSE in sequential then parallel mode then read sweep results
 Author: Lloyd Fletcher, Rory Spencer
 ==============================================================================
 '''
+import time
 from pathlib import Path
 from pprint import pprint
 from mooseherder import MooseHerd
@@ -18,9 +19,9 @@ USER_DIR = Path.home()
 def main() -> None:
     """main: parallel herd run once and read
     """
-    print('-----------------------------------------------------------')
+    print("-"*80)
     print('EXAMPLE 7a: Parallel Herd Setup & Run')
-    print('-----------------------------------------------------------')
+    print("-"*80)
     moose_dir = USER_DIR / 'moose'
     moose_app_dir = USER_DIR / 'moose-workdir/proteus'
     moose_app_name = 'proteus-opt'
@@ -66,12 +67,12 @@ def main() -> None:
     herd.run_para(moose_vars)
 
     print(f'Run time (parallel) = {herd.get_sweep_time():.3f} seconds')
-    print('-----------------------------------------------------------')
+    print("-"*80)
     print()
 
-    print('-----------------------------------------------------------')
+    print("-"*80)
     print('EXAMPLE 7a: Read Herd Output')
-    print('-----------------------------------------------------------')
+    print("-"*80)
     sweep_reader = SweepReader(dir_manager)
     output_files = sweep_reader.read_all_output_keys()
 
@@ -79,89 +80,39 @@ def main() -> None:
     pprint(output_files)
     print()
 
-    vars_to_read = ['disp_x','disp_y','disp_z','strain_xx']
-    elem_blocks = [0,0,0,1]
-
-    print('Variable keys to read as list:')
-    pprint(vars_to_read)
+    print("-"*80)
+    print('Reading the first output file, no SimReadConfig = read all.')
+    print('Returns as SimData object.')
+    single_sim_data = sweep_reader.read_results_once(output_files[0][0])
+    print(type(single_sim_data))
     print()
 
-    print('Element blocks associated with variable keys as list:')
-    pprint(elem_blocks)
+    print("-"*80)
+    print('Reading all output files sequentially as a list(SimData).')
+    print('All function parameters blank to read everything.')
     print()
+    start_time = time.perf_counter()
+    sweep_results_seq = sweep_reader.read_results_sequential()
+    read_time_seq = time.perf_counter() - start_time
 
-    print('-----------------------------------------------------------')
-    print('Reading the first output file, no element blocks specified.')
-    print('Variables returned as dict.')
-    read_vars = sweep_reader.read_results_once(output_files[0][0],
-                                               vars_to_read)
+    print(f'Number of simulations read: {len(sweep_results_seq ):d}')
+
+    print("-"*80)
+    print('Reading all output files in parallel as list(SimData).')
+    print('All function parameters blank to read everything.')
     print()
+    start_time = time.perf_counter()
+    sweep_results_para = sweep_reader.read_results_para()
+    read_time_para = time.perf_counter() - start_time
 
-    print('Variables read from file, time and coords are always read:')
-    pprint(list(read_vars.keys()))
+    print(f'Number of simulations outputs: {len(sweep_results_para):d}')
+
     print()
-
-    print('Variable = Time (t): ', end='')
-    print(type(read_vars['time']))
-    print(read_vars['time'].shape)
+    print("="*80)
+    print(f'Read time sequential = {read_time_seq:.6f} seconds')
+    print(f'Read time parallel   = {read_time_para:.6f} seconds')
+    print("="*80)
     print()
-
-    print('Variable = Coords, num nodes by (x,y,z): ', end='')
-    print(type(read_vars['coords']))
-    print(read_vars['coords'].shape)
-    print()
-
-    print('Variable = disp_x, num nodes by t: ', end='')
-    print(type(read_vars['disp_x']))
-    print(read_vars['disp_x'].shape)
-    print()
-
-    print('Variable = disp_z: ', end='')
-    print(type(read_vars['disp_z']))
-    print('NOTE: disp_z does not exist in the simulation so returns None')
-    print()
-
-    print('Variable = strain_xx: ', end='')
-    print(type(read_vars['strain_xx']))
-    print('NOTE: no elem block provided so strain_xx = None.')
-    print()
-
-    print('-----------------------------------------------------------')
-    print('Reading the first output file, element blocks specified.')
-    read_vars = sweep_reader.read_results_once(output_files[0][0],
-                                       vars_to_read,
-                                       elem_blocks)
-
-    print('Variable = strain_xx, : ', end='')
-    print(type(read_vars['strain_xx']))
-    print(read_vars['strain_xx'].shape)
-    print()
-
-    print('-----------------------------------------------------------')
-    print('Reading all output files sequentially as a list(dict).')
-    print()
-    read_all = sweep_reader.read_results_sequential(vars_to_read,
-                                                    None,
-                                                    elem_blocks)
-
-    print(f'Number of simulations outputs: {len(read_all):d}')
-    print('Variable keys for simulation output:')
-    print(list(read_all[0].keys()))
-    print()
-
-    print('-----------------------------------------------------------')
-    print('Reading all output files in parallel as list(dict).')
-    print()
-    read_all = sweep_reader.read_results_para(vars_to_read,
-                                              None,
-                                              elem_blocks)
-
-    print(f'Number of simulations outputs: {len(read_all):d}')
-    print('Variable keys for simulation output:')
-    print(list(read_all[0].keys()))
-    print()
-
-    print('-----------------------------------------------------------')
 
 
 if __name__ == '__main__':

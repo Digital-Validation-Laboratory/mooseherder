@@ -241,7 +241,7 @@ class ExodusReader:
         vars = dict({})
         for ii,nn in enumerate(names_blocks):
             key = f'{key_tag}{ii+1:d}eb{nn[1]:d}'
-            vars[(nn,nn[1])] = self.get_var(key)
+            vars[nn] = self.get_var(key)
 
         return vars
 

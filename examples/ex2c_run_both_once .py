@@ -17,9 +17,9 @@ USER_DIR = Path.home()
 def main():
     """main: run gmsh and moose once
     """
-    print('------------------------------------------')
+    print("-"*80)
     print('EXAMPLE 2c: Run Gmsh+MOOSE once')
-    print('------------------------------------------')
+    print("-"*80)
     gmsh_path = USER_DIR / 'moose-workdir/gmsh/bin/gmsh'
     gmsh_runner = GmshRunner(gmsh_path)
 
@@ -48,7 +48,9 @@ def main():
     print()
 
     # Set input and parallelisation options
-    moose_runner.set_opts(n_tasks=1,n_threads=4,redirect=True)
+    moose_runner.set_opts(n_tasks = 1,
+                          n_threads = 4,
+                          redirect_out = True)
     input_file = Path('scripts/moose/moose-mech-gmsh.i')
     moose_runner.set_input_file(input_file)
 
@@ -69,7 +71,7 @@ def main():
 
     print(f'Gmsh run time = {gmsh_run_time:.2f} seconds')
     print(f'MOOOSE run time = {moose_run_time:.2f} seconds')
-    print('------------------------------------------')
+    print("-"*80)
     print()
 
 if __name__ == '__main__':
