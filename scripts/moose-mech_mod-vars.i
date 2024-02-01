@@ -2,13 +2,13 @@
 dimension = 2 # Putting this variable outside the block to test
 
 #_* Variables Block
-n_elem_x = 20.0
+n_elem_x = 20
 n_elem_y = 40 # Testing comments in the variables block
 e_modulus = 3300000000.0
 # Comment line to test
 p_ratio = 0.3 # Another comment to test with 
 e_type = QUAD4
-time_end = 3.0
+time_end = 3
 #**
 
 [GlobalParams]

@@ -1,173 +1,146 @@
 '''
 ==============================================================================
-TEST: MOOSE Herd Tests
+TEST: MooseHerd Tests
 
 Authors: Lloyd Fletcher
 ==============================================================================
 '''
-
-'''
-TODO: Test create dirs
-- Include new run_dirs list
-'''
-
+import os
 import pytest
 from pytest import MonkeyPatch
-import os
-from pathlib import Path
-import multiprocessing as mp
-from mooseherder.inputmodifier import InputModifier
-from mooseherder.mooserunner import MooseRunner
 from mooseherder.mooseherd import MooseHerd
-import tests.herdchecktools as hct
+from mooseherder.directorymanager import DirectoryManager
+import tests.herdchecker as hct
+
+
+@pytest.fixture
+def dir_manager() -> DirectoryManager:
+    return DirectoryManager(hct.NUM_DIRS)
+
 
 @pytest.fixture()
-def base_dir():
-    return 'tests/'
+def herd_blank() -> MooseHerd:
+    (moose_runner,moose_modifier) = hct.create_moose_objs(hct.MOOSE_INPUT)
+    blank_manager = DirectoryManager(hct.NUM_DIRS)
+    return MooseHerd([moose_runner],[moose_modifier],blank_manager)
+
 
 @pytest.fixture()
-def moose_input():
-    return 'tests/moose/moose-test.i'
+def herd(dir_manager) -> MooseHerd:
+    (moose_runner,moose_modifier) = hct.create_moose_objs(hct.MOOSE_INPUT)
+    return MooseHerd([moose_runner],[moose_modifier],dir_manager)
+
 
 @pytest.fixture()
-def gmsh_input():
-    return 'tests/gmsh/gmsh-test.geo'
+def herd_gmsh(dir_manager) -> MooseHerd:
+    (moose_runner,moose_modifier) = hct.create_moose_objs(hct.MOOSE_INPUT)
+    (gmsh_runner,gmsh_modifier) = hct.create_gmsh_objs(hct.GMSH_INPUT)
 
-@pytest.fixture()
-def herd_blank(moose_input):
-    (moose_runner,moose_modifier) = hct.create_moose_objs(moose_input)
-    return MooseHerd(moose_runner,moose_modifier)
+    runners = [gmsh_runner,moose_runner]
+    modifiers = [gmsh_modifier,moose_modifier]
 
-@pytest.fixture()
-def herd(base_dir,moose_input):
-    (moose_runner,moose_modifier) = hct.create_moose_objs(moose_input)
-    herd = MooseHerd(moose_runner,moose_modifier)
-    herd.set_base_dir(base_dir)
-    return herd
-
-@pytest.fixture()
-def herd_gmsh(base_dir,gmsh_input):
-    moose_input = 'tests/moose/moose-test-gmsh.i'
-    (moose_runner,moose_modifier) = hct.create_moose_objs(moose_input)
-    (gmsh_runner,gmsh_modifier) = hct.create_gmsh_objs(gmsh_input)
-    herd = MooseHerd(moose_runner,moose_modifier,gmsh_runner,gmsh_modifier)
-    herd.set_base_dir(base_dir)
-    return herd
+    return MooseHerd(runners,modifiers,dir_manager)
 
 @pytest.fixture(autouse=True)
-def setup_teardown(herd,herd_gmsh):
+def setup_teardown(dir_manager):
     # Setup here
+    dir_manager.set_base_dir(hct.BASE_DIR)
+    dir_manager.create_dirs()
     yield
-    # Teardown here 
-    herd.clear_dirs()
-    herd_gmsh.clear_dirs()
+    # Teardown here
+    dir_manager.clear_dirs()
 
 @pytest.fixture()
-def moose_vars():
+def moose_sweep() -> list[list[dict]]:
     e_mod = [1e9,2e9]
+    p_rat = [0.3,0.35]
+
+    moose_vars = list([])
+    for ee in e_mod:
+        for pp in p_rat:
+            moose_vars.append([{'e_modulus':ee,'p_ratio':pp}])
+
+    return moose_vars
+
+@pytest.fixture()
+def moose_sweep_seq() -> list[list[dict]]:
+    e_mod = [1e9]
     p_rat = [0.3,0.35]
 
     moose_vars = list()
     for ee in e_mod:
         for pp in p_rat:
-            moose_vars.append({'e_modulus':ee,'p_ratio':pp})
+            moose_vars.append([{'e_modulus':ee,'p_ratio':pp}])
 
     return moose_vars
 
+
 @pytest.fixture()
-def gmsh_vars():
+def gmsh_sweep() -> list[list[dict | None]]:
+    p0 = [1E-3,1.1E-3]
+    p1 = [1.5E-3,2E-3]
+
+    gmsh_vars = list()
+    for ii in p0:
+        for jj in p1:
+            gmsh_vars.append([{'p0':ii ,'p1':jj},None])
+
+    return gmsh_vars
+
+@pytest.fixture()
+def gmsh_sweep_seq() -> list[list[dict | None]]:
     p0 = [1E-3,]
     p1 = [1.5E-3,2E-3]
 
     gmsh_vars = list()
     for ii in p0:
         for jj in p1:
-            gmsh_vars.append({'p0':ii ,'p1':jj})
-    
+            gmsh_vars.append([{'p0':ii ,'p1':jj},None])
+
     return gmsh_vars
 
-def test_set_base_dir(herd_blank,base_dir):
-    herd_blank.set_base_dir(base_dir)
-    assert herd_blank._base_dir == base_dir
 
-def test_set_base_dir_clear_old(herd_blank,base_dir):
-    prev_dir = herd_blank._run_dir
-    herd_blank.create_dirs()
-    herd_blank.set_base_dir(base_dir, clear_old_dirs = True)
-    assert herd_blank._base_dir == base_dir
-    assert os.path.isdir(prev_dir+'-1') == False
+def test_create_herd_blank(herd_blank: MooseHerd) -> None:
+    assert herd_blank is not None
 
-def test_set_base_dir_err(herd_blank):
-    base_dir = 'no_exist/'
-    with pytest.raises(FileExistsError) as errinfo:
-        herd_blank.set_base_dir(base_dir)
-    msg, = errinfo.value.args
-    assert msg == "Specified base directory does not exist."
+def test_create_herd(herd: MooseHerd) -> None:
+    assert herd is not None
 
-def test_set_names(herd):
-    herd.set_names('sim-dir','sim','mesh')
-    assert herd._sub_dir == 'sim-dir'
-    assert herd._moose_input_name == 'sim'
-    assert herd._gmsh_input_name == 'mesh'
+def test_create_herd_gmsh(herd_gmsh: MooseHerd) -> None:
+    assert herd_gmsh is not None
 
-    herd.set_names()
-    assert herd._sub_dir == 'moose-workdir'
-    assert herd._moose_input_name == 'moose-sim'
-    assert herd._gmsh_input_name == 'gmsh-mesh'
 
-def test_set_flags(herd):
-    herd.set_flags(one_dir = True, keep_all = False)
-    assert herd._one_dir == True
-    assert herd._keep_all == False
+def test_set_input_copy_name(herd: MooseHerd) -> None:
+    new_name = 'sim-name'
+    herd.set_input_copy_name(new_name)
+    assert herd._input_name == new_name
 
-    herd.set_flags()
-    assert herd._one_dir == False
+    herd.set_input_copy_name()
+    assert herd._input_name == 'sim'
+
+def test_set_keep_flag(herd: MooseHerd) -> None:
+    herd.set_keep_flag(True)
     assert herd._keep_all == True
 
-def test_create_dirs_one_dir(herd):
-    herd.set_flags(one_dir = True)
-    herd.create_dirs()
-    assert os.path.isdir(herd._run_dir+'-1')
+    herd.set_keep_flag(False)
+    assert herd._keep_all == False
 
-def test_create_dirs_multi_dir(herd):
-    herd.set_flags(one_dir = False)
-    herd.create_dirs()
-    assert os.path.isdir(herd._run_dir+'-1')
-    assert os.path.isdir(herd._run_dir+'-2')
+    herd.set_keep_flag()
+    assert herd._keep_all == True
 
-def test_clear_dirs(herd):
-    herd.create_dirs()
-    herd.clear_dirs()
-    assert os.path.isdir(herd._run_dir+'-1') == False
-    assert os.path.isdir(herd._run_dir+'-2') == False
 
 @pytest.mark.parametrize(
-    ('n_moose','expected'),
+    ('n_para','expected'),
     (
         (0, 1),
         (-1,1),
         (2.5,2),
-        (os.cpu_count()+1,os.cpu_count())
+        (os.cpu_count()+1,os.cpu_count()) # type: ignore
     )
 )
-def test_para_opts_no_dirs(n_moose,expected,herd):
-    herd.para_opts(n_moose,1,1,True,False)
-    assert herd._n_moose == expected
-
-
-@pytest.mark.parametrize(
-    ('n_moose','expected'),
-    (
-        (0, 1),
-        (-1,1),
-        (2.5,2),
-        (os.cpu_count()+1,os.cpu_count())
-    )
-)
-def test_para_opts_create_dirs(n_moose,expected,herd):
-    herd.para_opts(n_moose,1,1,True,True)
-    assert herd._n_moose == expected
-    assert os.path.isdir(herd._run_dir+'-'+str(expected))
+def test_set_num_para_sims(n_para: int, expected: int, herd: MooseHerd):
+    herd.set_num_para_sims(n_para)
+    assert herd._n_para_sims == expected
 
 
 @pytest.mark.parametrize(
@@ -178,28 +151,15 @@ def test_para_opts_create_dirs(n_moose,expected,herd):
         ('process-2','2'),
         ('process-3','2'),
         ('process-4','1'),
-    )   
+    )
 )
-def test_get_worker_num(process,expected,monkeypatch,herd) -> None:
+def test_get_worker_num(process: str,
+                        expected: str,
+                        monkeypatch,
+                        herd: MooseHerd) -> None:
     monkeypatch.setattr(MooseHerd,'_get_process_name',lambda _: process)
     worker_num = herd._get_worker_num()
     assert worker_num == expected
-
-
-@pytest.mark.parametrize(
-    ('worker_num','one_dir','expected'),
-    (
-        ('4',False, '-4/'),
-        ('1',True, '-1/'),
-        ('2',True, '-1/'),
-        ('4',True, '-1/'),
-    )   
-)
-def test_get_run_dir(worker_num,one_dir,expected,herd):
-    herd.para_opts(n_moose = 2)
-    herd.set_flags(one_dir = one_dir)
-    run_dir = herd._get_run_dir(worker_num)
-    assert run_dir == herd._run_dir+expected
 
 
 @pytest.mark.parametrize(
@@ -211,48 +171,17 @@ def test_get_run_dir(worker_num,one_dir,expected,herd):
         (0,'1',True, '1'),
         (1,'2',True, '2'),
         (3,'5',True, '4'),
-    )   
+    )
 )
-def test_get_run_num(sim_iter,worker_num,keep_all,expected,herd):
-    herd.para_opts(n_moose = 2)
-    herd.set_flags(one_dir = False, keep_all = keep_all)
+def test_get_run_num(sim_iter: int,
+                     worker_num: str,
+                     keep_all: bool,
+                     expected: str,
+                     herd: MooseHerd) -> None:
+    herd.set_num_para_sims(hct.NUM_PARA)
+    herd.set_keep_flag(keep_all)
     run_num = herd._get_run_num(sim_iter,worker_num)
     assert run_num == expected
-
-
-def test_run_gmsh(herd_gmsh,gmsh_vars):
-    herd = herd_gmsh
-    herd.para_opts(n_moose = 2)
-    
-    worker_num = '1'
-    sim_iter = 0
-
-    run_dir = herd._get_run_dir(worker_num)
-    run_num = herd._get_run_num(sim_iter,worker_num)
-
-    gmsh_save = herd._run_gmsh(gmsh_vars[0],run_dir,run_num)
-
-    assert gmsh_vars[0]['p0'] == herd._gmsh_modifier._vars['p0']
-    assert gmsh_vars[0]['p1'] == herd._gmsh_modifier._vars['p1']
-    assert os.path.isfile(gmsh_save)
-    assert os.path.isfile(os.path.split(gmsh_save)[0]+'/gmsh-test.msh')
-
-
-def test_run_moose(herd,moose_vars):
-    herd.para_opts(n_moose = 2)
-    
-    worker_num = '1'
-    sim_iter = 0
-
-    run_dir = herd._get_run_dir(worker_num)
-    run_num = herd._get_run_num(sim_iter,worker_num)
-
-    moose_save = herd._run_moose(moose_vars[0],run_dir,run_num)
-
-    assert moose_vars[0]['e_modulus'] == herd._moose_modifier._vars['e_modulus']
-    assert moose_vars[0]['p_ratio'] == herd._moose_modifier._vars['p_ratio']
-    assert os.path.isfile(moose_save)
-    assert os.path.isfile(os.path.split(moose_save)[0]+'/moose-sim-1_out.e')
 
 
 @pytest.mark.parametrize(
@@ -260,23 +189,26 @@ def test_run_moose(herd,moose_vars):
     (
         (0,'1'),
         (8,'4'),
-    )   
+    )
 )
-def test_run_once_moose_only(sim_iter,worker_num,herd,moose_vars,monkeypatch):
+def test_run_once_moose_only(sim_iter: int,
+                             worker_num: str,
+                             herd: MooseHerd,
+                             moose_sweep: list[list[dict]],
+                             monkeypatch):
     # Force the process number to be not the main process
     monkeypatch.setattr(MooseHerd, '_get_worker_num', lambda _: worker_num)
 
-    herd.para_opts(n_moose = 4)
+    herd.set_num_para_sims(hct.NUM_PARA)
 
-    output_exodus = herd.run_once(sim_iter,moose_vars[0])
+    output_paths = herd.run_once(sim_iter,moose_sweep[0]) # type: ignore
 
-    worker_path = os.path.split(output_exodus)[0]
-    stdout_file =  worker_path + '/stdout.processor.0'
+    worker_path = output_paths[0].parent # type: ignore
+    stdout_file =  worker_path / 'stdout.processor.0' # type: ignore
 
-    assert os.path.isfile(output_exodus), 'Output exodus does not exist, MOOSE run failed.'
-    assert os.path.isfile(stdout_file), 'stdout file does not exist, MOOSE run failed or redirect flag set incorrectly.'
+    assert output_paths[0].is_file(), 'Output exodus does not exist, MOOSE run failed.' # type: ignore
+    assert stdout_file.is_file(), 'stdout file does not exist, MOOSE run failed or redirect flag set incorrectly.'
     assert hct.check_solve_converged(stdout_file), 'MOOSE run did not converge, check stdout file.'
-    assert herd._iter_start_time >= 0, 'Iteration start time is less than 0'
     assert herd._iter_run_time >= 0, 'Iteration run time is less than 0'
 
 
@@ -285,25 +217,27 @@ def test_run_once_moose_only(sim_iter,worker_num,herd,moose_vars,monkeypatch):
     (
         (0,'1'),
         (8,'4'),
-    )   
+    )
 )
-def test_run_once_with_gmsh(sim_iter, worker_num, herd_gmsh, gmsh_vars, monkeypatch):
+def test_run_once_with_gmsh(sim_iter: int,
+                             worker_num: str,
+                             herd_gmsh: MooseHerd,
+                             gmsh_sweep: list[list[dict]],
+                             monkeypatch):
     # Force the process number to be not the main process
     monkeypatch.setattr(MooseHerd, '_get_worker_num', lambda _: worker_num)
-    moose_vars = herd_gmsh._moose_modifier.get_vars()
 
-    herd_gmsh.para_opts(n_moose = 4)
+    herd_gmsh.set_num_para_sims(hct.NUM_PARA)
 
-    output_exodus = herd_gmsh.run_once(sim_iter,moose_vars,gmsh_vars[0])
+    output_paths = herd_gmsh.run_once(sim_iter,gmsh_sweep[0]) # type: ignore
 
-    worker_path = os.path.split(output_exodus)[0]
-    stdout_file =  worker_path + '/stdout.processor.0'
+    worker_path = output_paths[1].parent # type: ignore
+    stdout_file =  worker_path / 'stdout.processor.0' # type: ignore
 
-    assert os.path.isfile(worker_path+'/gmsh-test.msh'), 'Gmsh mesh was not created.'
-    assert os.path.isfile(output_exodus), 'Output exodus does not exist, MOOSE run failed.'
-    assert os.path.isfile(stdout_file), 'stdout file does not exist, MOOSE run failed or redirect flag set incorrectly.'
+    assert (worker_path / 'gmsh-test.msh').is_file(), 'Gmsh mesh was not created.'
+    assert output_paths[1].is_file(), 'Output exodus does not exist, MOOSE run failed.' # type: ignore
+    assert stdout_file.is_file(), 'stdout file does not exist, MOOSE run failed or redirect flag set incorrectly.'
     assert hct.check_solve_converged(stdout_file), 'MOOSE run did not converge, check stdout file.'
-    assert herd_gmsh._iter_start_time >= 0, 'Iteration start time is less than 0'
     assert herd_gmsh._iter_run_time >= 0, 'Iteration run time is less than 0'
 
 
@@ -312,46 +246,67 @@ def test_run_once_with_gmsh(sim_iter, worker_num, herd_gmsh, gmsh_vars, monkeypa
     (
         (True, 2),
         (False, 1),
-    )   
+    )
 )
-def test_run_sequential_moose_only(keep_all,expected,herd,moose_vars):
-    gmsh_vars = None
-    hct.run_check_sequential(keep_all,expected,herd,moose_vars,gmsh_vars)
-
+def test_run_sequential_moose_only(keep_all: bool,
+                                   expected: int,
+                                   herd: MooseHerd,
+                                   dir_manager: DirectoryManager,
+                                   moose_sweep_seq: list[list[dict | None]]):
+    hct.run_check_seq(keep_all,
+                      expected,
+                      herd,
+                      dir_manager,
+                      moose_sweep_seq)
 
 @pytest.mark.parametrize(
     ('keep_all', 'expected'),
     (
         (True, 2),
         (False, 1),
-    )   
+    )
 )
-def test_run_sequential_with_gmsh(keep_all,expected,herd_gmsh,gmsh_vars):
-    moose_vars = [herd_gmsh._moose_modifier.get_vars()]
-    hct.run_check_sequential(keep_all,expected,herd_gmsh,moose_vars,gmsh_vars)
+def test_run_sequential_with_gmsh(keep_all: bool,
+                                   expected: int,
+                                   herd_gmsh: MooseHerd,
+                                   dir_manager: DirectoryManager,
+                                   gmsh_sweep_seq: list[list[dict | None]]):
+    hct.run_check_seq(keep_all,
+                      expected,
+                      herd_gmsh,
+                      dir_manager,
+                      gmsh_sweep_seq)
 
 
 @pytest.mark.parametrize(
-    ('keep_all', 'expected'),
+    ('keep_all',),
     (
-        (True, 2),
-        (False, 1),
-    )   
+        (True,),
+        (False,),
+    )
 )
-def test_run_para_moose_only(keep_all,expected,herd,moose_vars):
-    gmsh_vars = None
-    hct.run_check_para(keep_all,expected,herd,moose_vars,gmsh_vars)
-
+def test_run_para_moose_only(keep_all: bool,
+                            herd: MooseHerd,
+                            dir_manager: DirectoryManager,
+                            moose_sweep: list[list[dict | None]]):
+    hct.run_check_para(keep_all,
+                      herd,
+                      dir_manager,
+                      moose_sweep)
 
 @pytest.mark.parametrize(
-    ('keep_all', 'expected'),
+    ('keep_all',),
     (
-        (True, 2),
-        (False, 1),
-    )   
+        (True,),
+        (False,),
+    )
 )
-def test_run_para_with_gmsh(keep_all,expected,herd_gmsh,gmsh_vars):
-    moose_vars = [herd_gmsh._moose_modifier.get_vars()]
-    hct.run_check_para(keep_all,expected,herd_gmsh,moose_vars,gmsh_vars)
-
+def test_run_para_with_gmsh(keep_all: bool,
+                            herd_gmsh: MooseHerd,
+                            dir_manager: DirectoryManager,
+                            gmsh_sweep: list[list[dict | None]]):
+    hct.run_check_para(keep_all,
+                      herd_gmsh,
+                      dir_manager,
+                      gmsh_sweep)
 

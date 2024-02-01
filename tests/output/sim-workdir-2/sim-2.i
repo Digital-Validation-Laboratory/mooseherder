@@ -1,8 +1,14 @@
-#_* Variables
-# n_elem_x = 100
-#n_elem_y = 100 # Trying to break the code
-#e_modulus = 1e9
-#p_ratio = 0.3
+# This is a simple MOOSE tensor mechanics input script for testing the herder
+dimension = 2 # Putting this variable outside the block to test
+
+#_* Variables Block
+n_elem_x = 20
+n_elem_y = 10 # Testing comments in the variables block
+e_modulus = 1000000000.0
+# Comment line to test
+p_ratio = 0.35 # Another comment to test with 
+e_type = QUAD4
+time_end = 3
 #**
 
 [GlobalParams]
@@ -12,18 +18,19 @@
 [Mesh]
     [generated]
         type = GeneratedMeshGenerator
-        dim = 2
-        nx = 100 # ${n_elem_x}
-        ny = 100 # ${n_elem_y}
+        dim = ${dimension}
+        nx = ${n_elem_x}
+        ny = ${n_elem_y}
         xmax = 2
         ymax = 1
+        elem_type = ${e_type}
     []
 []
 
 [Modules/TensorMechanics/Master]
     [all]
         add_variables = true
-        generate_output = 'vonmises_stress strain_xx strain_yy strain_zz'
+        generate_output = 'vonmises_stress strain_xx strain_yy strain_xy strain_zz'
     []
 []
 
@@ -55,8 +62,8 @@
 [Materials]
     [elasticity]
         type = ComputeIsotropicElasticityTensor
-        youngs_modulus = 1e9 # ${e_modulus}
-        poissons_ratio = 0.3 # ${p_ratio}
+        youngs_modulus = ${e_modulus}
+        poissons_ratio = ${p_ratio}
     []
     [stress]
         type = ComputeLinearElasticStress
@@ -76,7 +83,7 @@
     # we chose a direct solver here
     petsc_options_iname = '-pc_type'
     petsc_options_value = 'lu'
-    end_time = 5
+    end_time = ${time_end}
     dt = 1
 []
 
