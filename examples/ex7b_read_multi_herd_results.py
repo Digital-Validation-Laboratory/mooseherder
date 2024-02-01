@@ -108,6 +108,7 @@ def main() -> None:
     print('NOTE: the specific variables read from the exodus file can be controlled')
     print('using the mooseherder.simdata.SimReadConfig class - see the simdata module')
     print('and example 6 using the ExodusReader class.')
+    print()
 
 
 if __name__ == '__main__':

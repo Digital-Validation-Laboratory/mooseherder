@@ -18,9 +18,9 @@ USER_DIR = Path.home()
 def main():
     """main _summary_
     """
-    print('------------------------------------------')
+    print("-"*80)
     print('EXAMPLE 4: Herd Setup')
-    print('------------------------------------------')
+    print("-"*80)
 
     # Setup MOOSE
     moose_dir = USER_DIR / 'moose'
@@ -71,37 +71,37 @@ def main():
         print(vv)
 
     print()
-    print('------------------------------------------')
+    print("-"*80)
     print('EXAMPLE 4a: Run Gmsh+MOOSE once, modify gmsh only')
-    print('------------------------------------------')
+    print("-"*80)
 
     # Single run saved in moose-workdir-1
     herd.run_once(0,var_sweep[0])
 
     print(f'Run time (once) = {herd.get_iter_time():.3f}) seconds')
-    print('------------------------------------------')
+    print("-"*80)
     print()
 
-    print('------------------------------------------')
+    print("-"*80)
     print('EXAMPLE 4b: Run MOOSE sequentially, modify gmsh only')
-    print('------------------------------------------')
+    print("-"*80)
 
     # Run all variable combinations (8) sequentially in moose-workdir-1
     herd.run_sequential(var_sweep)
 
     print(f'Run time (sequential) = {herd.get_sweep_time():.3f} seconds')
-    print('------------------------------------------')
+    print("-"*80)
     print()
-    print('------------------------------------------')
+    print("-"*80)
     print('EXAMPLE 4c: Run MOOSE in parallel, modify gmsh only')
-    print('------------------------------------------')
+    print("-"*80)
 
     # Run all variable combinations across 4 MOOSE instances with two runs saved in
     # each moose-workdir
     herd.run_para(var_sweep)
 
     print(f'Run time (parallel) = {herd.get_sweep_time():.3f} seconds')
-    print('------------------------------------------')
+    print("-"*80)
     print()
 
 if __name__ == '__main__':

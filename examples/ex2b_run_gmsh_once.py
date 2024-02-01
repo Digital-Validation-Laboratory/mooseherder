@@ -14,9 +14,9 @@ USER_DIR = Path.home()
 def main():
     """main: create mesh with gmsh in 2D then 3D
     """
-    print('------------------------------------------')
+    print("-"*80)
     print('EXAMPLE 2b: Run Gmsh 2D once')
-    print('------------------------------------------')
+    print("-"*80)
     gmsh_path = USER_DIR / 'moose-workdir/gmsh/bin/gmsh'
     gmsh_runner = GmshRunner(gmsh_path)
 
@@ -33,12 +33,12 @@ def main():
 
     print()
     print(f'Gmsh 2D run time = {run_time :.3f} seconds')
-    print('------------------------------------------')
+    print("-"*80)
     print()
 
-    print('------------------------------------------')
+    print("-"*80)
     print('EXAMPLE 2b: Run Gmsh 3D once')
-    print('------------------------------------------')
+    print("-"*80)
     gmsh_path = USER_DIR / 'moose-workdir/gmsh/bin/gmsh'
     gmsh_runner = GmshRunner(gmsh_path)
 
@@ -55,7 +55,7 @@ def main():
 
     print()
     print(f'Gmsh 3D run time = {run_time :.3f} seconds')
-    print('------------------------------------------')
+    print("-"*80)
     print()
 
 

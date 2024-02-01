@@ -14,9 +14,9 @@ USER_DIR = Path.home()
 def main() -> None:
     """main: run moose once with runner class
     """
-    print('------------------------------------------')
+    print("-"*80)
     print('EXAMPLE 2a: Run MOOSE once')
-    print('------------------------------------------')
+    print("-"*80)
     # Create the moose runner with correct paths to moose and apps
     moose_dir = USER_DIR / 'moose'
     moose_app_dir = USER_DIR / 'moose-workdir/proteus'
@@ -43,7 +43,7 @@ def main() -> None:
 
     print()
     print(f'MOOSE run time = {run_time:.3f} seconds')
-    print('------------------------------------------')
+    print("-"*80)
     print()
 
 if __name__ == '__main__':

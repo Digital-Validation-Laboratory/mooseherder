@@ -13,7 +13,7 @@ from multiprocessing.pool import Pool
 from mooseherder.directorymanager import DirectoryManager
 import mooseherder.directorymanager as dm
 from mooseherder.exodusreader import ExodusReader
-from mooseherder.simdata import SimData
+from mooseherder.simdata import SimData, SimReadConfig
 
 
 class SweepReader:
@@ -87,30 +87,45 @@ class SweepReader:
 
 
     def read_results_once(self,
-                          output_file: Path) -> SimData:
+                          output_file: Path,
+                          read_config: SimReadConfig | None = None) -> SimData:
+        """read_results_once _summary_
 
+        Args:
+            output_file (Path): _description_
+            read_config (SimReadConfig | None): _description_
+
+        Returns:
+            SimData: _description_
+        """
         reader = ExodusReader(output_file)
-        return reader.read_all_sim_data()
+
+        if read_config is None:
+            return reader.read_all_sim_data()
+
+        return reader.read_sim_data(read_config)
 
 
     def read_results_sequential(self,
-                                sweep_iter: int | None = None) -> list[SimData]:
+                                sweep_iter: int | None = None,
+                                read_config: SimReadConfig | None = None) -> list[SimData]:
 
-        self._start_read(sweep_iter)
+        self._start_read_output_keys(sweep_iter)
 
         sweep_results = list([])
         for ll in self._output_files:
             for ff in ll:
                 if ff is not None:
-                    sweep_results.append(self.read_results_once(ff))
+                    sweep_results.append(self.read_results_once(ff,read_config))
 
         return sweep_results
 
 
     def read_results_para(self,
-                          sweep_iter: int | None = None) -> list[SimData]:
+                          sweep_iter: int | None = None,
+                          read_config: SimReadConfig | None = None) -> list[SimData]:
 
-        self._start_read(sweep_iter)
+        self._start_read_output_keys(sweep_iter)
 
         with Pool(self._n_para_read) as pool:
             processes = list([])
@@ -118,38 +133,14 @@ class SweepReader:
                 for ff in ll:
                     if ff is not None:
                         processes.append(pool.apply_async(
-                            self.read_results_once, args=(ff,)))
+                            self.read_results_once, args=(ff,read_config)))
 
             sweep_results = [pp.get() for pp in processes]
 
         return sweep_results
 
 
-    def read_results_para_generic(self,
-                                  reader,
-                                  sweep_iter: int | None = None) -> list:
-        """read_results_para_generic _summary_
-
-        Args:
-            reader (_type_): _description_
-            sweep_iter (int | None, optional): _description_. Defaults to None.
-
-        Returns:
-            list: _description_
-        """
-        self._start_read(sweep_iter)
-
-        with Pool(self._n_para_read) as pool:
-            processes = list([])
-            for ff in self._output_files:
-                processes.append(pool.apply_async(reader.read, args=(ff,)))
-
-            sweep_results = [pp.get() for pp in processes]
-
-        return sweep_results
-
-
-    def _start_read(self, sweep_iter: int | None):
+    def _start_read_output_keys(self, sweep_iter: int | None):
         """_start_read _summary_
 
         Args:

@@ -17,9 +17,9 @@ USER_DIR = Path.home()
 def main():
     """main: run moose once, sequential then parallel.
     """
-    print('------------------------------------------')
+    print("-"*80)
     print('EXMAPLE 5: Herd Setup')
-    print('------------------------------------------')
+    print("-"*80)
 
     moose_dir = USER_DIR / 'moose'
     moose_app_dir = USER_DIR / 'moose-workdir/proteus'
@@ -64,9 +64,9 @@ def main():
 
 
     print()
-    print('------------------------------------------')
+    print("-"*80)
     print('EXMAPLE 5: Run MOOSE in parallel x3')
-    print('------------------------------------------')
+    print("-"*80)
 
     # Run all variable combinations across 4 MOOSE instances with two runs saved in
     # each moose-workdir
@@ -74,7 +74,7 @@ def main():
         herd.run_para(moose_vars)
 
         print(f'Run time (para {rr+1}) = {herd.get_sweep_time():.3f} seconds')
-        print('------------------------------------------')
+        print("-"*80)
 
     print()
 
