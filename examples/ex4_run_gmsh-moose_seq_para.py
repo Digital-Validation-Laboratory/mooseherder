@@ -8,6 +8,7 @@ Author: Lloyd Fletcher, Rory Spencer
 from pathlib import Path
 from mooseherder import MooseHerd
 from mooseherder import MooseRunner
+from mooseherder import MooseConfig
 from mooseherder import GmshRunner
 from mooseherder import InputModifier
 from mooseherder import DirectoryManager
@@ -22,25 +23,24 @@ def main():
     print('EXAMPLE 4: Herd Setup')
     print("-"*80)
 
-    # Setup MOOSE
-    moose_dir = USER_DIR / 'moose'
-    moose_app_dir = USER_DIR / 'moose-workdir/proteus'
-    moose_app_name = 'proteus-opt'
-    moose_input = Path('scripts/moose/moose-mech-gmsh.i')
+    # Setup MOOSE runner and input modifier
 
+    moose_input = Path('scripts/moose/moose-mech-gmsh.i')
     moose_modifier = InputModifier(moose_input,'#','')
-    moose_runner = MooseRunner(moose_dir,moose_app_dir,moose_app_name)
-    moose_runner.set_opts(n_tasks = 1,
-                          n_threads = 2,
-                          redirect_out = False)
+
+    moose_config = MooseConfig().read_config(Path.cwd() / 'moose-config.json')
+    moose_runner = MooseRunner(moose_config)
+    moose_runner.set_run_opts(n_tasks = 1,
+                              n_threads = 2,
+                              redirect_out = True)
 
     # Setup Gmsh
-    gmsh_path = USER_DIR / 'moose-workdir/gmsh/bin/gmsh'
     gmsh_input = Path('scripts/gmsh/gmsh_tens_spline_2d.geo')
+    gmsh_modifier = InputModifier(gmsh_input,'//',';')
 
+    gmsh_path = USER_DIR / 'moose-workdir/gmsh/bin/gmsh'
     gmsh_runner = GmshRunner(gmsh_path)
     gmsh_runner.set_input_file(gmsh_input)
-    gmsh_modifier = InputModifier(gmsh_input,'//',';')
 
     # Setup herd composition
     sim_runners = [gmsh_runner,moose_runner]

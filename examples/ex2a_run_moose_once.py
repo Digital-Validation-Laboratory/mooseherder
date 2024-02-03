@@ -7,9 +7,8 @@ Author: Lloyd Fletcher
 """
 import time
 from pathlib import Path
+from mooseherder import MooseConfig
 from mooseherder import MooseRunner
-
-USER_DIR = Path.home()
 
 def main() -> None:
     """main: run moose once with runner class
@@ -17,19 +16,16 @@ def main() -> None:
     print("-"*80)
     print('EXAMPLE 2a: Run MOOSE once')
     print("-"*80)
-    # Create the moose runner with correct paths to moose and apps
-    moose_dir = USER_DIR / 'moose'
-    moose_app_dir = USER_DIR / 'moose-workdir/proteus'
-    moose_app_name = 'proteus-opt'
-    moose_runner = MooseRunner(moose_dir,moose_app_dir,moose_app_name) # type: ignore
 
-    print(f'MOOSE directory: {str(moose_dir)}')
-    print(f'MOOSE app directory: {str(moose_app_dir)}')
-    print(f'MOOSE app name: {str(moose_app_name)}')
-    print()
+    config_path = Path.cwd() / 'moose-config.json'
+    moose_config = MooseConfig().read_config(config_path)
+    print(f'Reading MOOSE config from: \n{str(config_path)}\n')
 
-    # Set input and parallelisation options
-    moose_runner.set_opts(n_tasks = 2, n_threads = 4,redirect_out = True)
+    print('Creating the MooseRunner with the specified config.\n')
+    moose_runner = MooseRunner(moose_config)
+
+    print('Setting the input file and run parallelisation options.\n')
+    moose_runner.set_run_opts(n_tasks = 1, n_threads = 4, redirect_out = False)
     input_file = Path('scripts/moose/moose-mech-simple.i')
     moose_runner.set_input_file(input_file)
 

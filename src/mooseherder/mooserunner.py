@@ -9,28 +9,25 @@ import os
 import subprocess
 from pathlib import Path
 from mooseherder.simrunner import SimRunner
+from mooseherder.mooseconfig import MooseConfig
 
 class MooseRunner(SimRunner):
     """Used to run MOOSE models (*.i) from python.
     """
-    def __init__(self, moose_path: Path, app_path: Path, app_name: str):
+    def __init__(self, config: MooseConfig):
         """Constructor for MOOSE runner taking all required paths to MOOSE app/
         Sets default parallelisation options to 1 MPI task and 1 thread. Sets
         environment variables required for MPI setup.
 
         Args:
-            moose_dir (str): Full path to main moose directory e.g. '/home/USER/moose'
-            app_dir (str): Full path to moose app e.g. '/home/USER/moose-workdir/proteus'
-            app_name (tsr): Name of the moose app to be used in the command line string e.g. 'proteus-opt'
+            TODO
         """
+        self._config = config.get_config()
+
         self._n_threads = 1
         self._n_tasks = 1
         self._redirect_stdout = True
-        self._moose_path = moose_path
-        self._app_path = app_path
-        self._app_name = app_name
         self._run_str = ''
-
         self._input_path = None
 
 
@@ -42,9 +39,9 @@ class MooseRunner(SimRunner):
         os.environ['F90'] = 'mpif90'
         os.environ['F77'] = 'mpif77'
         os.environ['FC'] = 'mpif90'
-        os.environ['MOOSE_DIR'] = str(self._moose_path)
-        if not str(self._app_path) in os.environ["PATH"]:
-            os.environ["PATH"] = os.environ["PATH"] + ':' + str(self._app_path)
+        os.environ['MOOSE_DIR'] = str(self._config['main_path'])
+        if not str(self._config['app_path']) in os.environ["PATH"]:
+            os.environ["PATH"] = os.environ["PATH"] + ':' + str(self._config['app_path'])
 
     def set_threads(self, n_threads: int) -> None:
         """Sets the number of threads asked of MOOSE on the command line.
@@ -87,9 +84,9 @@ class MooseRunner(SimRunner):
         """
         self._redirect_stdout = redirect_flag
 
-    def set_opts(self, n_tasks: int = 1,
-                 n_threads: int = 1,
-                 redirect_out: bool = True) -> None:
+    def set_run_opts(self, n_tasks: int = 1,
+                    n_threads: int = 1,
+                    redirect_out: bool = True) -> None:
         """Sets all options for MOOSE run parallelisation and output.
 
         Args:
@@ -201,11 +198,11 @@ class MooseRunner(SimRunner):
 
         if self._n_tasks > 1:
             run_str = 'mpirun -np ' + str(self._n_tasks) + ' '\
-                            + self._app_name \
+                            + str(self._config['app_name']) \
                             + ' --n-threads=' + str(self._n_threads) + ' -i ' \
                             + str(self._input_path.name) + redirect_str
         else:
-            run_str = self._app_name + \
+            run_str = str(self._config['app_name']) + \
                             ' --n-threads=' + str(self._n_threads) + ' -i ' \
                             + str(self._input_path.name) + redirect_str
 

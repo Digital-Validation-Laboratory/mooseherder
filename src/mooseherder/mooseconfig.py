@@ -6,8 +6,10 @@ MOOSE Config Class
 Authors: Lloyd Fletcher
 ===============================================================================
 '''
+from typing import Self
 import json
 from pathlib import Path
+
 
 class MooseConfig:
     """ _summary_
@@ -19,8 +21,21 @@ class MooseConfig:
             config (dict[str,Path  |  str] | None, optional): _description_. Defaults to None.
         """
         self._required_keys = ['main_path','app_path','app_name']
-        self._check_config_valid(config)
+
+        if config is not None:
+            self._check_config_valid(config)
+
         self._config = config
+
+
+    def get_config(self) -> dict[str,Path | str]:
+        """get_config _summary_
+
+        Returns:
+            dict[str,Path | str] | None: _description_
+        """
+        self._check_config_valid(self._config)
+        return self._config # type: ignore
 
 
     def _check_config_valid(self, config: dict[str,Path | str] | None = None) -> None:
@@ -30,9 +45,6 @@ class MooseConfig:
             config (dict[str,Path  |  str] | None, optional): _description_. Defaults to None.
 
         Raises:
-            MooseConfigError: _description_
-            MooseConfigError: _description_
-            MooseConfigError: _description_
             MooseConfigError: _description_
         """
         if config is None:
@@ -96,7 +108,7 @@ class MooseConfig:
         return conv_config
 
 
-    def read_config(self, config_path: Path) -> dict[str, Path | str] | None:
+    def read_config(self, config_path: Path) -> Self:
         """read_config _summary_
 
         Args:
@@ -106,7 +118,7 @@ class MooseConfig:
             FileNotFoundError: _description_
 
         Returns:
-            dict[str, Path | str] | None: _description_
+            Self: _description_
         """
         if not config_path.is_file():
             raise FileNotFoundError(
@@ -119,7 +131,7 @@ class MooseConfig:
         self._check_config_valid(config_paths)
 
         self._config = config_paths
-        return config_paths
+        return self
 
 
     def save_config(self,config_path: Path) -> None:
@@ -140,4 +152,8 @@ class MooseConfig:
 
 
 class MooseConfigError(Exception):
-    pass
+    """MooseConfigError _summary_
+
+    Args:
+        Exception (_type_): _description_
+    """

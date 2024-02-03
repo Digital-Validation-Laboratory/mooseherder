@@ -9,6 +9,7 @@ Author: Lloyd Fletcher
 import time
 import os, shutil
 from pathlib import Path
+from mooseherder import MooseConfig
 from mooseherder import GmshRunner
 from mooseherder import MooseRunner
 
@@ -36,19 +37,18 @@ def main():
     gmsh_runner.run()
     gmsh_run_time = time.perf_counter()-gmsh_start
 
-    # Create the moose runner with correct paths to moose and apps
-    moose_dir = USER_DIR / 'moose'
-    moose_app_dir = USER_DIR / 'moose-workdir/proteus'
-    moose_app_name = 'proteus-opt'
-    moose_runner = MooseRunner(moose_dir,moose_app_dir,moose_app_name)
 
-    print('MOOSE directory:' + str(moose_dir))
-    print('MOOSE app directory: ' + str(moose_app_dir))
-    print('MOOSE app name: ' + moose_app_name)
-    print()
+    config_path = Path.cwd() / 'moose-config.json'
+    print(f'Reading MOOSE config from: \n{str(config_path)}\n')
+    moose_config = MooseConfig()
+    moose_config.read_config(config_path)
 
-    # Set input and parallelisation options
-    moose_runner.set_opts(n_tasks = 1,
+    print('Creating the MooseRunner with the specified config.\n')
+    moose_runner = MooseRunner(moose_config)
+
+
+    print('Setting the input file and run parallelisation options.\n')
+    moose_runner.set_run_opts(n_tasks = 1,
                           n_threads = 4,
                           redirect_out = True)
     input_file = Path('scripts/moose/moose-mech-gmsh.i')

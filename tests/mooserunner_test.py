@@ -152,7 +152,7 @@ def test_get_output_path(runner: MooseRunner,input_runner: MooseRunner):
 def test_assemble_run_str(opts: tuple[int,int,bool],
                           expected: str,
                           input_runner: MooseRunner) -> None:
-    input_runner.set_opts(opts[0],opts[1],opts[2])
+    input_runner.set_run_opts(opts[0],opts[1],opts[2])
     assert input_runner.assemble_run_str() == expected
 
 
@@ -170,7 +170,7 @@ def test_assemble_run_str_with_input(opts: tuple[int,int,bool],
                                      expected: str,
                                      runner: MooseRunner,
                                      input_path: Path) -> None:
-    runner.set_opts(opts[0],opts[1],opts[2])
+    runner.set_run_opts(opts[0],opts[1],opts[2])
     assert runner.assemble_run_str(input_path) == expected
 
 
@@ -204,7 +204,7 @@ def test_assemble_run_str_err_with_input(runner: MooseRunner,
 def test_run(opts: tuple[int,int,bool],
              stdout_exist: tuple[bool,bool],
              input_runner: MooseRunner) -> None:
-    input_runner.set_opts(opts[0],opts[1],opts[2])
+    input_runner.set_run_opts(opts[0],opts[1],opts[2])
     input_runner.run()
 
     assert os.path.isfile(input_runner.get_output_path()) is True, 'No exodus output.' # type: ignore
@@ -216,7 +216,7 @@ def test_run(opts: tuple[int,int,bool],
 
 
 def test_run_broken(runner: MooseRunner, input_broken: Path) -> None:
-    runner.set_opts(1,4,True)
+    runner.set_run_opts(1,4,True)
     runner.run(input_broken)
 
     stdout_file = runner.get_input_dir() / 'stdout.processor.0' # type: ignore
@@ -237,7 +237,7 @@ def test_run_noexist(runner: MooseRunner, input_noexist: Path) -> None:
 
 
 def test_run_with_input(runner: MooseRunner, input_path: Path) -> None:
-    runner.set_opts(1,4,True)
+    runner.set_run_opts(1,4,True)
     runner.run(input_path)
 
     assert os.path.isfile(runner.get_output_path()) is True, 'Exodus output does not exist when solve should have run' # type: ignore

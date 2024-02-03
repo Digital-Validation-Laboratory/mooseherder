@@ -17,7 +17,7 @@ def main() -> None:
     moose_runner = MooseRunner(moose_dir,moose_app_dir,moose_app_name) # type: ignore
 
     # Set input and parallelisation options
-    moose_runner.set_opts(n_tasks = 1, n_threads = 4,redirect_out = False)
+    moose_runner.set_run_opts(n_tasks = 1, n_threads = 4,redirect_out = False)
     input_file = Path('scripts/moose/moose-mech-outtest.i')
     moose_runner.set_input_file(input_file)
 

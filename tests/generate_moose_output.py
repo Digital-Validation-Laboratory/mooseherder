@@ -23,7 +23,7 @@ moose_app_name = 'proteus-opt'
 moose_runner = MooseRunner(moose_dir,moose_app_dir,moose_app_name)
 
 # Set input and parallelisation options
-moose_runner.set_opts(n_tasks=4,
+moose_runner.set_run_opts(n_tasks=4,
                       n_threads=2,
                       redirect_out=True)
 

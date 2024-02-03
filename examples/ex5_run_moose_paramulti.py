@@ -8,6 +8,7 @@ Author: Lloyd Fletcher, Rory Spencer
 from pathlib import Path
 from mooseherder import MooseHerd
 from mooseherder import MooseRunner
+from mooseherder import MooseConfig
 from mooseherder import InputModifier
 from mooseherder import DirectoryManager
 
@@ -21,16 +22,15 @@ def main():
     print('EXMAPLE 5: Herd Setup')
     print("-"*80)
 
-    moose_dir = USER_DIR / 'moose'
-    moose_app_dir = USER_DIR / 'moose-workdir/proteus'
-    moose_app_name = 'proteus-opt'
+    # Setup the MOOSE input modifier and runner
     moose_input = Path('scripts/moose/moose-mech-simple.i')
-
     moose_modifier = InputModifier(moose_input,'#','')
-    moose_runner = MooseRunner(moose_dir,moose_app_dir,moose_app_name)
-    moose_runner.set_opts(n_tasks = 1,
-                          n_threads = 2,
-                          redirect_out = True)
+
+    moose_config = MooseConfig().read_config(Path.cwd() / 'moose-config.json')
+    moose_runner = MooseRunner(moose_config)
+    moose_runner.set_run_opts(n_tasks = 1,
+                              n_threads = 2,
+                              redirect_out = True)
 
     dir_manager = DirectoryManager(n_dirs=4)
 
