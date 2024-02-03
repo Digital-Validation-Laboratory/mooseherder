@@ -1,4 +1,5 @@
-# MOOSE output files
+# MOOSE config/output files
+moose-config.json
 *.e
 examples/sim-workdir-*
 examples/*.csv
