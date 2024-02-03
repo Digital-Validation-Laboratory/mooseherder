@@ -7,8 +7,9 @@ name = "mooseherder"
 version = "0.0.1"
 description = "A python herder for calling MOOSE and gmsh to run parallel parametric sweeps of simulations."
 authors = [
-  { name = "thescepticalrabbit", email = "thescepticalrabbit@gmail.com" }
+  { name = "thescepticalrabbit", email = "thescepticalrabbit@gmail.com" },
   { name = "fusmatrs", email = ""},
+  { name = "lukethehuman", email = ""},
 ]
 license = { file = "LICENSE" }
 readme = "README.md"

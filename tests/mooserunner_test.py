@@ -12,21 +12,11 @@ import pytest
 from mooseherder.mooserunner import MooseRunner
 import tests.herdchecker as hc
 
-USER_DIR = Path.home()
-
-def test_moose_dir_exists() -> None:
-    moose_dir = USER_DIR / 'moose'
-    assert moose_dir.is_dir() is True
-
-    moose_app_dir = USER_DIR / 'moose-workdir/proteus'
-    assert moose_app_dir.is_dir() is True
 
 @pytest.fixture()
 def runner() -> MooseRunner:
-    moose_dir = USER_DIR / 'moose'
-    moose_app_dir = USER_DIR / 'moose-workdir/proteus'
-    moose_app_name = 'proteus-opt'
-    return MooseRunner(moose_dir,moose_app_dir,moose_app_name)
+    moose_config = hc.create_moose_config()
+    return MooseRunner(moose_config)
 
 @pytest.fixture()
 def input_path() -> Path:
@@ -42,10 +32,8 @@ def input_broken() -> Path:
 
 @pytest.fixture()
 def input_runner(input_path: Path) -> MooseRunner:
-    moose_dir = USER_DIR / 'moose'
-    moose_app_dir = USER_DIR / 'moose-workdir/proteus'
-    moose_app_name = 'proteus-opt'
-    my_runner = MooseRunner(moose_dir,moose_app_dir,moose_app_name)
+    moose_config = hc.create_moose_config()
+    my_runner = MooseRunner(moose_config)
     my_runner.set_input_file(input_path)
     return my_runner
 
@@ -71,7 +59,7 @@ def test_set_env_vars(runner: MooseRunner) -> None:
     assert os.environ['F90'] == 'mpif90'
     assert os.environ['F77'] == 'mpif77'
     assert os.environ['FC'] == 'mpif90'
-    assert os.environ['MOOSE_DIR'] == str(runner._moose_path)
+    assert os.environ['MOOSE_DIR'] == str(runner._config['main_path'])
 
 @pytest.mark.parametrize(
     ('n_threads','expected'),

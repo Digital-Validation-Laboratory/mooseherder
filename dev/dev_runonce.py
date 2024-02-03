@@ -1,5 +1,6 @@
 import time
 from pathlib import Path
+from mooseherder import MooseConfig
 from mooseherder import MooseRunner
 
 USER_DIR = Path.home()
@@ -11,10 +12,12 @@ def main() -> None:
     print('EXAMPLE 2a: Run MOOSE once')
     print('------------------------------------------')
     # Create the moose runner with correct paths to moose and apps
-    moose_dir = USER_DIR / 'moose'
-    moose_app_dir = USER_DIR / 'moose-workdir/proteus'
-    moose_app_name = 'proteus-opt'
-    moose_runner = MooseRunner(moose_dir,moose_app_dir,moose_app_name) # type: ignore
+    config_path = Path.cwd() / 'moose-config.json'
+    moose_config = MooseConfig().read_config(config_path)
+    print(f'Reading MOOSE config from: \n{str(config_path)}\n')
+
+    print('Creating the MooseRunner with the specified config.\n')
+    moose_runner = MooseRunner(moose_config)
 
     # Set input and parallelisation options
     moose_runner.set_run_opts(n_tasks = 1, n_threads = 4,redirect_out = False)

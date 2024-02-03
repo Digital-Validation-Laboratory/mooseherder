@@ -10,6 +10,7 @@ import os
 from pathlib import Path
 from mooseherder.inputmodifier import InputModifier
 from mooseherder.mooserunner import MooseRunner
+from mooseherder.mooseconfig import MooseConfig
 from mooseherder.gmshrunner import GmshRunner
 from mooseherder.mooseherd import MooseHerd
 from mooseherder.directorymanager import DirectoryManager
@@ -20,28 +21,38 @@ NUM_DIRS = 4
 NUM_PARA = 4
 NUM_CALLS = 3
 BASE_DIR = Path('tests/')
+
+MOOSE_PATH = Path.home()/'moose'
+MOOSE_APP_PATH = Path().home()/'moose-workdir'/'proteus'
+MOOSE_APP_NAME = 'proteus-opt'
 MOOSE_INPUT = Path('tests/moose/moose-test.i')
+
+GMSH_APP_PATH = Path().home() / 'moose-workdir/gmsh/bin/gmsh'
 GMSH_INPUT = Path('tests/gmsh/gmsh-test.geo')
+
 OUTPUT_PATH = Path('tests/output/')
 
-def create_moose_objs(input_file: Path) -> tuple[MooseRunner,InputModifier]:
-    moose_dir = USER_DIR / 'moose'
-    moose_app_dir = USER_DIR / 'moose-workdir/proteus'
-    moose_app_name = 'proteus-opt'
-    moose_input = input_file
 
+def create_moose_config() -> MooseConfig:
+    return MooseConfig({'main_path': MOOSE_PATH,
+                        'app_path': MOOSE_APP_PATH,
+                        'app_name': MOOSE_APP_NAME})
+
+
+def create_moose_objs(input_file: Path) -> tuple[MooseRunner,InputModifier]:
+    moose_config = create_moose_config()
+    moose_runner = MooseRunner(moose_config)
+
+    moose_input = input_file
     moose_modifier = InputModifier(moose_input,'#','')
-    moose_runner = MooseRunner(moose_dir,moose_app_dir,moose_app_name)
 
     return (moose_runner,moose_modifier)
 
 
 def create_gmsh_objs(input_file: Path) -> tuple[GmshRunner,InputModifier]:
-    gmsh_path = USER_DIR / 'moose-workdir/gmsh/bin/gmsh'
     gmsh_input = input_file
-
     gmsh_modifier = InputModifier(gmsh_input,'//',';')
-    gmsh_runner = GmshRunner(gmsh_path)
+    gmsh_runner = GmshRunner(GMSH_APP_PATH)
     gmsh_runner.set_input_file(gmsh_input)
 
     return (gmsh_runner,gmsh_modifier)
