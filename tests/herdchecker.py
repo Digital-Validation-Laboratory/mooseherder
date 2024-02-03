@@ -7,7 +7,9 @@ Authors: Lloyd Fletcher
 '''
 
 import os
+from typing import Any
 from pathlib import Path
+from pprint import pprint
 from mooseherder.inputmodifier import InputModifier
 from mooseherder.mooserunner import MooseRunner
 from mooseherder.mooseconfig import MooseConfig
@@ -16,7 +18,6 @@ from mooseherder.mooseherd import MooseHerd
 from mooseherder.directorymanager import DirectoryManager
 
 
-USER_DIR = Path.home()
 NUM_DIRS = 4
 NUM_PARA = 4
 NUM_CALLS = 3
@@ -189,3 +190,11 @@ def run_check_para(keep_all: bool,
         herd.run_para(sweep_vars)
         check_run_sweep(herd, dir_manager, run_check)
         check_input_output_count_para(herd, dir_manager, run_check)
+
+def debug_print(to_print: Any) -> None:
+    print()
+    print('-'*80)
+    pprint(to_print)
+    print('-'*80)
+    print()
+
