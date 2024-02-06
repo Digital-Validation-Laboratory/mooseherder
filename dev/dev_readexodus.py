@@ -27,7 +27,7 @@ def main() -> None:
     sim_data = exodus_reader.read_sim_data(read_config)
 
     np.set_printoptions(precision=6,edgeitems=1,linewidth=100,threshold=10)
-    pprint(sim_data.node_vars['disp_x'][:,-1])
+    pprint(exodus_reader.get_time().shape)
 
 
 if __name__ == '__main__':

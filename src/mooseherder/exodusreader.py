@@ -219,6 +219,14 @@ class ExodusReader:
         """
         return self.get_names('name_elem_var')
 
+    def get_num_elem_blocks(self) -> int:
+        """get_num_elem_blocks _summary_
+
+        Returns:
+            int: _description_
+        """
+        return self.get_names('eb_names').shape[0] # type: ignore
+
 
     def get_elem_var_names_and_blocks(self) -> list[tuple[str,int]] | None:
         """get_elem_var_names_and_blocks _summary_
@@ -237,15 +245,6 @@ class ExodusReader:
                 names_blocks.append((str(nn),bb))
 
         return names_blocks
-
-
-    def get_num_elem_blocks(self) -> int:
-        """get_num_elem_blocks _summary_
-
-        Returns:
-            int: _description_
-        """
-        return self.get_names('eb_names').shape[0] # type: ignore
 
 
     def get_elem_vars(self, names_blocks: list[tuple[str,int]] | None
