@@ -12,13 +12,14 @@ import json
 from pathlib import Path
 
 class DirectoryManager:
-    """ _summary_
+    """ Manages directories for running simulations in parallel.
     """
     def __init__(self, n_dirs: int = 1) -> None:
-        """__init__ _summary_
+        """__init__
 
         Args:
-            n_dirs (int, optional): _description_. Defaults to 1.
+            n_dirs (int, optional): number of directories to be created.
+            Defaults to 1.
         """
         self._n_dirs = n_dirs
         self._sub_dir = 'sim-workdir'
@@ -28,23 +29,27 @@ class DirectoryManager:
 
 
     def set_sub_dir_name(self, sub_dir_name: str) -> None:
-        """set_sub_dir_name _summary_
+        """set_sub_dir_name:
 
         Args:
-            sub_dir_name (str): _description_
+            sub_dir_name (str): string to be used to name the created
+            directories
         """
         self._sub_dir = sub_dir_name
 
 
     def set_base_dir(self, base_dir: Path, clear_old_dirs = False) -> None:
-        """set_base_dir _summary_
+        """set_base_dir:
 
         Args:
-            base_dir (Path): _description_
-            clear_old_dirs (bool, optional): _description_. Defaults to False.
+            base_dir (Path): directory in which the new working directories will
+                be created.
+            clear_old_dirs (bool, optional): deletes previous directories in
+                the base directory and their contents if they exist. Defaults
+                to False.
 
         Raises:
-            FileExistsError: _description_
+            FileExistsError: the selected base directory does no exist.
         """
         if not base_dir.is_dir():
             raise FileExistsError("Specified base directory does not exist.")
@@ -56,10 +61,10 @@ class DirectoryManager:
 
 
     def create_dirs(self) -> list[Path]:
-        """create_dirs _summary_
+        """create_dirs: Creates the specified number of directories based on the sub_dir name.
 
         Returns:
-            list[Path]: _description_
+            list[Path]: list of paths to the created directories
         """
         self._run_dirs = list([])
 
@@ -75,7 +80,8 @@ class DirectoryManager:
 
 
     def clear_dirs(self) -> None:
-        """clear_dirs _summary_
+        """clear_dirs: deletes all working directories in the base directory
+        that have the corresponding sub-directory name and their contents.
         """
         all_dirs = os.listdir(self._base_dir)
         for dd in all_dirs:
@@ -85,22 +91,24 @@ class DirectoryManager:
 
 
     def get_all_run_dirs(self) -> list[Path]:
-        """get_all_run_dirs _summary_
+        """get_all_run_dirs:
 
         Returns:
-            list[Path]: _description_
+            list[Path]: paths to all created directories.
         """
         return self._run_dirs
 
 
     def get_run_dir(self, dir_num: int) -> Path:
-        """get_run_dir _summary_
+        """get_run_dir:
 
         Args:
-            dir_num (int): _description_
+            dir_num (int): number of the directory path to be retrieved. Can be
+                greater than the specified number of directories and will wrap
+                appropriately
 
         Returns:
-            Path: _description_
+            Path: path to the directory
         """
         if dir_num >= self._n_dirs:
             dir_num = dir_num % self._n_dirs
@@ -109,40 +117,51 @@ class DirectoryManager:
 
 
     def set_output_paths(self, output_paths: list[list[Path]]) -> None:
-        """set_output_paths _summary_
+        """set_output_paths:
 
         Args:
-            output_paths (list[list[Path]]): _description_
+            output_paths (list[list[Path]]): paths to all outputs from the
+                variable sweep. Outer list is the variable combination run
+                inner list is based on the order the simulations were called.
         """
         self._output_paths = output_paths
 
 
     def get_output_paths(self) -> list[list[Path]]:
-        """get_output_paths _summary_
+        """get_output_paths:
 
         Returns:
-            list[list[Path]]: _description_
+            list[list[Path]]: paths to all outputs from the variable sweep.
+                Outer list is the variable combination run inner list is based
+                on the order the simulations were called.
         """
         return self._output_paths
 
 
-    def get_output_key_file(self, sweep_iter: int) -> Path:
-        """get_output_key_file _summary_
+    def get_output_key_file(self, sweep_iter: int = 1) -> Path:
+        """get_output_key_file: gets the path to the output key file created
+        during the variable sweep mapping directories to given combinations
+        of variables that were run.
 
         Args:
-            sweep_iter (int): _description_
+            sweep_iter (int): number corresponding to the sweep iteration to
+                retrieve. Defaults to 1.
 
         Returns:
-            Path: _description_
+            Path: path to the output key file that maps output paths to the
+                combinations of variables in the sweep.
         """
         return self._run_dirs[0] / f'output-key-{sweep_iter:d}.json'
 
 
     def write_output_key(self, sweep_iter: int) -> None:
-        """write_output_key _summary_
+        """write_output_key: converts the output paths to strings and saves
+        them in json format.
 
         Args:
-            sweep_iter (int): _description_
+            sweep_iter (int): number corresponing to the sweep iteration to
+                write. The sweep iteration is used to number the output key
+                files.
         """
         str_output = output_paths_to_str(self._output_paths)
 
@@ -150,16 +169,15 @@ class DirectoryManager:
             json.dump(str_output, okf, indent=4)
 
 
-
-
 def output_paths_to_str(output_files: list[list[Path]]) -> list[list[str]]:
-    """output_paths_to_str _summary_
+    """output_paths_to_str: helper functions for converting the output paths
+    to strings to allow them to be saved as json.
 
     Args:
-        output_files (list[list[Path]]): _description_
+        output_files (list[list[Path]]):
 
     Returns:
-        list[list[str]]: _description_
+        list[list[str]]:
     """
     str_output = list([])
     for sim_iter in output_files:

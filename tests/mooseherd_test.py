@@ -41,6 +41,7 @@ def herd_gmsh(dir_manager) -> MooseHerd:
 
     return MooseHerd(runners,modifiers,dir_manager)
 
+
 @pytest.fixture(autouse=True)
 def setup_teardown(dir_manager):
     # Setup here
@@ -49,6 +50,7 @@ def setup_teardown(dir_manager):
     yield
     # Teardown here
     dir_manager.clear_dirs()
+
 
 @pytest.fixture()
 def moose_sweep() -> list[list[dict]]:
@@ -61,6 +63,7 @@ def moose_sweep() -> list[list[dict]]:
             moose_vars.append([{'e_modulus':ee,'p_ratio':pp}])
 
     return moose_vars
+
 
 @pytest.fixture()
 def moose_sweep_seq() -> list[list[dict]]:
@@ -87,6 +90,7 @@ def gmsh_sweep() -> list[list[dict | None]]:
 
     return gmsh_vars
 
+
 @pytest.fixture()
 def gmsh_sweep_seq() -> list[list[dict | None]]:
     p0 = [1E-3,]
@@ -103,8 +107,10 @@ def gmsh_sweep_seq() -> list[list[dict | None]]:
 def test_create_herd_blank(herd_blank: MooseHerd) -> None:
     assert herd_blank is not None
 
+
 def test_create_herd(herd: MooseHerd) -> None:
     assert herd is not None
+
 
 def test_create_herd_gmsh(herd_gmsh: MooseHerd) -> None:
     assert herd_gmsh is not None
@@ -117,6 +123,7 @@ def test_set_input_copy_name(herd: MooseHerd) -> None:
 
     herd.set_input_copy_name()
     assert herd._input_name == 'sim'
+
 
 def test_set_keep_flag(herd: MooseHerd) -> None:
     herd.set_keep_flag(True)

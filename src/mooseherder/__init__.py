@@ -13,6 +13,7 @@ from mooseherder.directorymanager import DirectoryManager
 from mooseherder.sweepreader import SweepReader
 from mooseherder.simdata import SimData
 from mooseherder.simdata import SimReadConfig
+from mooseherder.mooseconfig import MooseConfig
 
 
 __all__ = ["inputmodifier",
@@ -24,4 +25,4 @@ __all__ = ["inputmodifier",
             "directorymanager",
             "sweepreader",
             "simdata",
-            "simreadconfig"]
+            "mooseconfig"]

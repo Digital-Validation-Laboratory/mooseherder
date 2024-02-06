@@ -4,7 +4,7 @@ dimension = 2 # Putting this variable outside the block to test
 #_* Variables Block
 n_elem_x = 20
 n_elem_y = 20 # Testing comments in the variables block
-e_modulus = 1e9
+e_modulus = 2e9
 # Comment line to test
 p_ratio = 0.3 # Another comment to test with
 e_type = QUAD4
@@ -24,6 +24,21 @@ time_end = 3
         xmax = 2
         ymax = 1
         elem_type = ${e_type}
+    []
+
+    [block1]
+        type = SubdomainBoundingBoxGenerator
+        input = generated
+        block_id = 1
+        bottom_left = '0 0 0'
+        top_right = '1 1 0'
+    []
+    [block2]
+        type = SubdomainBoundingBoxGenerator
+        input = block1
+        block_id = 2
+        bottom_left = '1 0 0'
+        top_right = '2 1 0'
     []
 []
 
@@ -56,10 +71,17 @@ time_end = 3
 []
 
 [Materials]
-    [elasticity]
+    [elasticity1]
         type = ComputeIsotropicElasticityTensor
         youngs_modulus = ${e_modulus}
         poissons_ratio = ${p_ratio}
+        block = 1
+    []
+    [elasticity2]
+        type = ComputeIsotropicElasticityTensor
+        youngs_modulus = ${fparse 0.25*e_modulus}
+        poissons_ratio = ${fparse 0.5*p_ratio}
+        block = 2
     []
     [stress]
         type = ComputeLinearElasticStress
@@ -75,7 +97,7 @@ time_end = 3
 
 [Executioner]
     type = Transient
-    # we chose a direct solver here
+    solve_type = NEWTON
     petsc_options_iname = '-pc_type'
     petsc_options_value = 'lu'
     end_time = ${time_end}
@@ -83,7 +105,6 @@ time_end = 3
 []
 
 [Outputs]
-    #exodus = true
     [./out]
         type = Exodus
         elemental_as_nodal = true

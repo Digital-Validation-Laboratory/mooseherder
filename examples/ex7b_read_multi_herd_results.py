@@ -10,6 +10,7 @@ from pathlib import Path
 from pprint import pprint
 from mooseherder import MooseHerd
 from mooseherder import MooseRunner
+from mooseherder import MooseConfig
 from mooseherder import InputModifier
 from mooseherder import DirectoryManager
 from mooseherder import SweepReader
@@ -23,16 +24,15 @@ def main() -> None:
     print("-"*80)
     print('EXAMPLE 7b: Parallel Herd Setup & Run')
     print("-"*80)
-    moose_dir = USER_DIR / 'moose'
-    moose_app_dir = USER_DIR / 'moose-workdir/proteus'
-    moose_app_name = 'proteus-opt'
+    # Setup the MOOSE input modifier and runner
     moose_input = Path('scripts/moose/moose-mech-simple.i')
-
     moose_modifier = InputModifier(moose_input,'#','')
-    moose_runner = MooseRunner(moose_dir,moose_app_dir,moose_app_name)
-    moose_runner.set_opts(n_tasks = 1,
-                          n_threads = 2,
-                          redirect_out = True)
+
+    moose_config = MooseConfig().read_config(Path.cwd() / 'moose-config.json')
+    moose_runner = MooseRunner(moose_config)
+    moose_runner.set_run_opts(n_tasks = 1,
+                              n_threads = 2,
+                              redirect_out = True)
 
     dir_manager = DirectoryManager(n_dirs=4)
 
@@ -108,6 +108,7 @@ def main() -> None:
     print('NOTE: the specific variables read from the exodus file can be controlled')
     print('using the mooseherder.simdata.SimReadConfig class - see the simdata module')
     print('and example 6 using the ExodusReader class.')
+    print()
 
 
 if __name__ == '__main__':

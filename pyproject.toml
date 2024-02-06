@@ -5,9 +5,11 @@ build-backend = "setuptools.build_meta"
 [project]
 name = "mooseherder"
 version = "0.0.1"
-description = "A python herder for calling MOOSE and gmsh to run parallel parametric sweeps of simulations"
+description = "A python herder for calling MOOSE and gmsh to run parallel parametric sweeps of simulations."
 authors = [
   { name = "thescepticalrabbit", email = "thescepticalrabbit@gmail.com" },
+  { name = "fusmatrs", email = ""},
+  { name = "lukethehuman", email = ""},
 ]
 license = { file = "LICENSE" }
 readme = "README.md"
@@ -16,7 +18,7 @@ classifiers = [
     "License :: GNU LGPL",
     "Operating System :: OS Independent",
 ]
-requires-python = ">=3.9"
+requires-python = ">=3.10"
 dependencies = [
   "numpy>=1.26.0",
   "netCDF4>=1.6.5"

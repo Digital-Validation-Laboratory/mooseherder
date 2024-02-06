@@ -14,9 +14,9 @@ MOOSE_INPUT = Path("scripts/moose/moose-mech-simple.i")
 def main() -> None:
     """main: modify moose input script and write modified file.
     """
-    print("------------------------------------------")
+    print("-"*80)
     print("EXAMPLE 1a: Modify MOOSE input script")
-    print("------------------------------------------")
+    print("-"*80)
     moose_mod = InputModifier(MOOSE_INPUT, comment_char="#", end_char="")
 
     print("Variables found the top of the MOOSE input file:")
@@ -38,7 +38,7 @@ def main() -> None:
     print()
 
     print("Example complete.")
-    print("------------------------------------------")
+    print("-"*80)
     print()
 
 

@@ -81,3 +81,6 @@ class SimReadConfig:
     node_vars: npt.NDArray | None = None
     elem_vars: list[tuple[str,int]] | None = None
     glob_vars: npt.NDArray | None = None
+
+
+#TODO: add conversion to Rory's pycoatl format -> spatial data.

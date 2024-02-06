@@ -27,26 +27,35 @@ class ExodusReader:
     """Class to read exodus files output by MOOSE using the netCDF package.
     """
     def __init__(self, exodus_file: Path):
-        """Construct class by reading the exodus file using the netCDF package.
+        """__init__: Construct class by reading the exodus file using the
+        netCDF package.
 
         Args:
-            exodus_file (Path): path to exodus file to be read.
+            exodus_file (Path): path to the exodus file to read
+
+        Raises:
+            FileNotFoundError: the specified exodus file does not exist
         """
+
         if not exodus_file.is_file() and exodus_file.suffix != '.e':
             raise FileNotFoundError('Exodus file not found at specified path')
 
         self._exodus_path = exodus_file
-        self._data = nc.Dataset(str(self._exodus_path)) # type: ignore
+        self._data = nc.Dataset(str(self._exodus_path))
 
 
     def get_names(self, key: str | None) -> npt.NDArray | None:
-        """get_names _summary_
+        """get_names: Extract a list of variable names from the dataset. Useful
+        for getting node/element/sideset/global variables names.
 
         Args:
-            key (str | None): _description_
+            key (str | None): string key used to extract a list of names from
+                the dataset e.g. 'node_var_names'. If key is None returns None.
 
         Returns:
-            npt.NDArray | None: _description_
+            npt.NDArray | None: numpy array of strings representing the names
+                that correspond to the variables in the dataset. Returns None
+                if the specified key does not exist in the dataset.
         """
         if key not in self._data.variables or key is None:
             return None
@@ -55,13 +64,14 @@ class ExodusReader:
 
 
     def get_var(self, key: str) -> npt.NDArray:
-        """get_var _summary_
+        """get_var: Extract a numeric variable from the dataset.
 
         Args:
-            key (str): _description_
+            key (str): key corresponding to the variable in the dataset. e.g.
+                'time_whole'
 
         Returns:
-            npt.NDArray: _description_
+            npt.NDArray: numpy numeric array containing the variable data.
         """
         if key not in self._data.variables:
             return np.array([])
@@ -70,10 +80,12 @@ class ExodusReader:
 
 
     def get_connectivity_names(self) -> npt.NDArray:
-        """get_connectivity_names _summary_
+        """get_connectivity_names:
 
         Returns:
-            npt.NDArray: _description_
+            npt.NDArray: array of element connectivity keys as strings of the
+                form connectX where X is an integer of 1 or greater e.g.
+                connect1.
         """
         names = np.array([])
         for bb in range(self.get_num_elem_blocks()):
@@ -85,10 +97,15 @@ class ExodusReader:
 
 
     def get_connectivity(self) -> dict[str,npt.NDArray]:
-        """get_connectivity _summary_
+        """get_connectivity:
 
         Returns:
-            dict[str,npt.NDArray]: _description_
+            dict[str,npt.NDArray]: dictionary containing the element
+                connectivity tables based on keys related to the subdomain e.g.
+                key 'connect1' returns the element connectivity table for
+                subdomain 1. The table has dimensions N by n_e where N is the
+                total number of nodes in the subdomain and n_e is the number
+                of nodes per element.
         """
         connect = dict({})
         for key in self.get_connectivity_names():
@@ -98,22 +115,29 @@ class ExodusReader:
 
 
     def get_sideset_names(self) -> npt.NDArray | None:
-        """get_sideset_names _summary_
+        """get_sideset_names:
 
         Returns:
-            npt.NDArray | None: _description_
+            npt.NDArray | None: numpy array of strings corresponding to the
+                sideset names specified in the simulation. Returns None if no
+                sideset names are found.
         """
         return self.get_names('ss_names')
 
 
-    def get_sidesets(self, names: npt.NDArray | None) -> dict[tuple[str,str], npt.NDArray] | None:
-        """get_sidesets _summary_
+    def get_sidesets(self, names: npt.NDArray | None
+                     ) -> dict[tuple[str,str], npt.NDArray] | None:
+        """get_sidesets:
 
         Args:
-            names (npt.NDArray | None): _description_
+            names (npt.NDArray | None): numpy array of strings specifying the
+                sideset names to extract from the dataset. If None return None.
 
         Returns:
-            dict[tuple[str,str], npt.NDArray] | None: _description_
+            dict[tuple[str,str], npt.NDArray] | None: dictionary of sideset
+                nodes and element sets by name. The key is a tuple with the
+                first string being the sideset name and the second being either
+                'node' or 'elem'. Returns None if no sidesets found.
         """
         if names is None:
             return None
@@ -133,29 +157,34 @@ class ExodusReader:
 
 
     def get_all_sidesets(self) -> dict[tuple[str,str], npt.NDArray] | None:
-        """get_all_sidesets _summary_
+        """get_all_sidesets:
 
         Returns:
-            dict[str, npt.NDArray] | None: _description_
+            dict[tuple[str,str], npt.NDArray] | None: dictionary of sideset
+                nodes and element sets by name. The key is a tuple with the
+                first string being the sideset name and the second being either
+                'node' or 'elem'. Returns None if no sidesets found.
         """
 
         return self.get_sidesets(self.get_sideset_names())
 
 
     def get_node_var_names(self) -> npt.NDArray | None:
-        """get_node_var_names _summary_
+        """get_node_var_names:
 
         Returns:
-            npt.NDArray | None: _description_
+            npt.NDArray | None: numpy array of strings containing the nodal
+                variable names. Returns None if no nodal variables are found.
         """
         return self.get_names('name_nod_var')
 
 
     def get_node_vars(self, names: npt.NDArray | None) -> dict[str,npt.NDArray] | None:
-        """get_node_vars _summary_
+        """get_node_vars:
 
         Args:
-            names (npt.NDArray | None): _description_
+            names (npt.NDArray | None): numpy array of strings that are the
+                variable
 
         Returns:
             dict[str,npt.NDArray] | None: _description_
@@ -210,15 +239,12 @@ class ExodusReader:
         return names_blocks
 
 
-    def get_num_elem_blocks(self) -> int | None:
+    def get_num_elem_blocks(self) -> int:
         """get_num_elem_blocks _summary_
 
         Returns:
             int: _description_
         """
-        if 'eb_names' not in self._data.variables:
-            return None
-
         return self.get_names('eb_names').shape[0] # type: ignore
 
 

@@ -10,6 +10,7 @@ from pprint import pprint
 from pathlib import Path
 import numpy as np
 from mooseherder import MooseRunner
+from mooseherder import MooseConfig
 from mooseherder import ExodusReader
 
 USER_DIR = Path.home()
@@ -23,13 +24,11 @@ def main() -> None:
     print('Generating exodus output to read by running MOOSE once.')
 
     # Create the moose runner with correct paths to moose and apps
-    moose_dir = USER_DIR / 'moose'
-    moose_app_dir = USER_DIR / 'moose-workdir/proteus'
-    moose_app_name = 'proteus-opt'
-    moose_runner = MooseRunner(moose_dir,moose_app_dir,moose_app_name) # type: ignore
+    moose_config = MooseConfig().read_config(Path.cwd() / 'moose-config.json')
+    moose_runner = MooseRunner(moose_config)
 
     # Set input and parallelisation options
-    moose_runner.set_opts(n_tasks = 1, n_threads = 4,redirect_out = True)
+    moose_runner.set_run_opts(n_tasks = 1, n_threads = 4,redirect_out = True)
     input_file = Path('scripts/moose/moose-mech-simple.i')
     moose_runner.set_input_file(input_file)
 
