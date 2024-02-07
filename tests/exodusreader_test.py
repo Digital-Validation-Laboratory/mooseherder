@@ -14,11 +14,43 @@ import tests.herdchecker as hc
 NUM_TIME_STEPS = 4
 NUM_NODES = 441
 NUM_ELEMS_PER_BLOCK = 200
-NUM_BLOCKS = 2
-NUM_SIDESETS = 4
-NUM_NODE_VARS = 10
-NUM_ELEM_VARS = 8
 NODES_PER_ELEM = 4
+NUM_BLOCKS = 2
+
+NUM_SIDESETS = 4
+SIDESET_NAMES = ('bottom',
+                'right',
+                'top',
+                'left')
+
+NUM_NODE_VARS = 10
+NODE_VAR_NAMES = ('disp_x',
+             'disp_y',
+             'strain_xx',
+             'strain_xy',
+             'strain_yy',
+             'strain_zz',
+             'stress_xx',
+             'stress_xy',
+             'stress_yy',
+             'vonmises_stress')
+
+NUM_ELEM_VARS = 8
+ELEM_VAR_NAMES = ('strain_xx',
+                  'strain_xy',
+                  'strain_yy',
+                  'strain_zz',
+                  'stress_xx',
+                  'stress_xy',
+                  'stress_yy',
+                  'vonmises_stress')
+
+
+NUM_GLO_VARS = 4
+GLO_VAR_NAMES = ('avg_yy_stress',
+                'max_y_disp',
+                'max_yy_stress',
+                'react_y')
 
 
 @pytest.fixture
@@ -45,10 +77,20 @@ def tests_init_reader_path_err() -> None:
     assert msg == 'Exodus file not found at specified path'
 
 
-def test_get_names(reader: ExodusReader) -> None:
-    check_names = reader.get_names('ss_names')
-    ss_names = np.array(['bottom','right','top','left'])
-    assert (ss_names == check_names).all()
+@pytest.mark.parametrize(
+    ('name_key','expected'),
+    (
+        ('ss_names', SIDESET_NAMES),
+        ('name_nod_var',NODE_VAR_NAMES),
+        ('name_elem_var',ELEM_VAR_NAMES),
+        ('name_glo_var',GLO_VAR_NAMES)
+    )
+)
+def test_get_names(name_key: str,
+                   expected: tuple[str],
+                   reader: ExodusReader) -> None:
+    check_names = reader.get_names(name_key)
+    assert (check_names == expected).all()
 
 
 def test_get_names_none(reader: ExodusReader) -> None:
@@ -66,6 +108,30 @@ def test_get_var(reader: ExodusReader) -> None:
     check_var = reader.get_var(key)
     assert check_var.shape[0] > 0
     assert check_var.shape == (NUM_NODES,)
+
+
+@pytest.mark.parametrize(
+    ('keys','expected'),
+    (
+        (('top','ss_names','node_ns'),'node_ns3'),
+        (('top','ss_names','elem_ss'),'elem_ss3'),
+        (('disp_x','name_nod_var','vals_nod_var'),'vals_nod_var1'),
+        (('disp_y','name_nod_var','vals_nod_var'),'vals_nod_var2'),
+        (('stress_xy','name_nod_var','vals_nod_var'),'vals_nod_var8'),
+        (('strain_yy','name_elem_var','vals_elem_var'),'vals_elem_var3'),
+        (('stress_xx','name_elem_var','vals_elem_var'),'vals_elem_var5'),
+    )
+)
+def test_get_key(keys: tuple[str,str,str],
+                 expected: str,
+                 reader: ExodusReader) -> None:
+
+    name = keys[0]
+    all_names = reader.get_names(keys[1])
+    key_tag = keys[2]
+
+    key = reader.get_key(name,all_names,key_tag) # type: ignore
+    assert key == expected
 
 
 def test_get_var_no_key(reader: ExodusReader) -> None:
@@ -94,6 +160,7 @@ def test_get_sideset_names(reader: ExodusReader) -> None:
     check_names = reader.get_sideset_names()
     assert check_names is not None
     assert check_names.shape == (NUM_SIDESETS,)
+    assert (check_names == SIDESET_NAMES).all()
 
 
 def test_get_sidesets_none(reader: ExodusReader) -> None:
@@ -113,6 +180,7 @@ def test_get_node_var_names(reader: ExodusReader) -> None:
     node_var_names = reader.get_node_var_names()
     assert node_var_names is not None
     assert node_var_names.shape == (NUM_NODE_VARS,)
+    assert (node_var_names == NODE_VAR_NAMES).all()
 
 
 def test_get_node_vars_none(reader: ExodusReader) -> None:
@@ -129,14 +197,33 @@ def test_get_all_node_vars(reader: ExodusReader) -> None:
 
 
 def test_get_elem_var_names(reader: ExodusReader) -> None:
-    pass
+    elem_var_names = reader.get_elem_var_names()
+    assert elem_var_names is not None
+    assert elem_var_names.shape == (NUM_ELEM_VARS,)
+    assert (elem_var_names == ELEM_VAR_NAMES).all()
 
 
 def test_get_num_elem_blocks(reader: ExodusReader) -> None:
-    pass
+    num_blocks = reader.get_num_elem_blocks()
+    assert num_blocks == NUM_BLOCKS
 
 
 def test_get_elem_var_names_and_blocks(reader: ExodusReader) -> None:
-    pass
+    var_names_and_blocks = reader.get_elem_var_names_and_blocks()
+    assert var_names_and_blocks is not None
+    assert len(var_names_and_blocks) == NUM_ELEM_VARS*NUM_BLOCKS
 
 
+def test_get_all_elem_vars(reader: ExodusReader) -> None:
+    elem_vars = reader.get_all_elem_vars()
+    assert elem_vars is not None
+    assert len(elem_vars.keys()) == NUM_ELEM_VARS*NUM_BLOCKS
+    for ee in elem_vars:
+        assert elem_vars[ee].shape == (NUM_ELEMS_PER_BLOCK,NUM_TIME_STEPS)
+
+
+def test_get_glob_var_names(reader: ExodusReader) -> None:
+    glob_var_names = reader.get_glob_var_names()
+    assert glob_var_names is not None
+    assert glob_var_names.shape == (NUM_GLO_VARS,)
+    assert (glob_var_names == GLO_VAR_NAMES).all()

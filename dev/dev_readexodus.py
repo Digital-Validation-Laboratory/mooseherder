@@ -20,14 +20,16 @@ def main() -> None:
     exodus_reader = ExodusReader(output_file)
 
     print('Printing all variable keys in exodus file:')
-    exodus_reader.print_vars()
+    #exodus_reader.print_vars()
     print()
     print('----------------------------------------------------------')
     read_config = exodus_reader.get_read_config()
     sim_data = exodus_reader.read_sim_data(read_config)
+    elem_vars = exodus_reader.get_all_elem_vars()
 
     np.set_printoptions(precision=6,edgeitems=1,linewidth=100,threshold=10)
-    pprint(exodus_reader.get_time().shape)
+    pprint(exodus_reader.get_glob_var_names())
+
 
 
 if __name__ == '__main__':

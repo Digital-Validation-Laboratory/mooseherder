@@ -79,6 +79,30 @@ class ExodusReader:
         return np.array(self._data.variables[key]).T
 
 
+    def get_key(self,
+                name: str,
+                all_names: npt.NDArray,
+                key_tag: str) -> str | None:
+        """get_key
+
+        Args:
+            all_names (npt.NDArray): all possible name keys extracted using the
+                get names function.
+            name (str): the specific name key that the user wants to extract
+            key_tag (str): the string tag that is prepended to get the variable
+                from the dataset.
+
+        Returns:
+            str | None: the string key in the dataset to get the variable
+        """
+        inds = np.where(all_names == name)[0]
+        if inds.shape[0] == 0:
+            return None
+
+        key = f'{key_tag}{inds[0]+1:d}'
+        return key
+
+
     def get_connectivity_names(self) -> npt.NDArray:
         """get_connectivity_names:
 
@@ -139,16 +163,18 @@ class ExodusReader:
                 first string being the sideset name and the second being either
                 'node' or 'elem'. Returns None if no sidesets found.
         """
-        if names is None:
+        all_names = self.get_sideset_names()
+
+        if names is None or all_names is None:
             return None
 
         node_key_tag = 'node_ns'
         elem_key_tag = 'elem_ss'
 
         side_sets = dict({})
-        for ii,nn in enumerate(names): # type: ignore
-            node_key = f'{node_key_tag}{ii+1:d}'
-            elem_key = f'{elem_key_tag}{ii+1:d}'
+        for nn in names: # type: ignore
+            node_key = self.get_key(nn,all_names,node_key_tag)
+            elem_key = self.get_key(nn,all_names,elem_key_tag)
 
             side_sets[(nn,'node')] = self.get_var(node_key)
             side_sets[(nn,'elem')] = self.get_var(elem_key)
@@ -192,11 +218,13 @@ class ExodusReader:
         if names is None:
             return None
 
+        all_names = self.get_node_var_names()
         key_tag = 'vals_nod_var'
         vars = dict({})
 
-        for ii,nn in enumerate(names): # type: ignore
-            key = f'{key_tag}{ii+1:d}'
+        for nn in names: # type: ignore
+            inds = np.where(all_names == nn)[0]
+            key = f'{key_tag}{inds[0]+1:d}'
             vars[nn] = self.get_var(key)
 
         return vars
@@ -218,6 +246,7 @@ class ExodusReader:
             npt.NDArray | None: _description_
         """
         return self.get_names('name_elem_var')
+
 
     def get_num_elem_blocks(self) -> int:
         """get_num_elem_blocks _summary_
@@ -258,14 +287,16 @@ class ExodusReader:
         Returns:
             dict[tuple[str,int],npt.NDArray] | None: _description_
         """
-        if self.get_elem_var_names() is None or names_blocks is None:
+        all_names = self.get_elem_var_names()
+
+        if all_names is None or names_blocks is None:
             return None
 
         key_tag = 'vals_elem_var'
 
         vars = dict({})
-        for ii,nn in enumerate(names_blocks):
-            key = f'{key_tag}{ii+1:d}eb{nn[1]:d}'
+        for nn in names_blocks:
+            key = self.get_key(nn[0],all_names,key_tag) + f'eb{nn[1]:d}'
             vars[nn] = self.get_var(key)
 
         return vars
@@ -299,13 +330,17 @@ class ExodusReader:
         Returns:
             dict[str, npt.NDArray] | None: _description_
         """
-        if self.get_glob_var_names() is None or names is None:
+        all_names = self.get_glob_var_names()
+
+        if all_names is None or names is None:
             return None
 
         key = 'vals_glo_var'
+
         glob_vars = dict({})
-        for ii,nn in enumerate(names): # type: ignore
-            glob_vars[nn] = np.array(self._data.variables[key][:,ii])
+        for nn in names: # type: ignore
+            inds = np.where(all_names == nn)[0]
+            glob_vars[nn] = np.array(self._data.variables[key][:,inds[0]])
 
         return glob_vars
 
