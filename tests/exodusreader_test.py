@@ -6,9 +6,12 @@ Authors: Lloyd Fletcher
 ==============================================================================
 '''
 from pathlib import Path
+from dataclasses import fields
 import pytest
 import numpy as np
+import numpy.typing as npt
 from mooseherder.exodusreader import ExodusReader
+from mooseherder.simdata import SimData, SimReadConfig
 import tests.herdchecker as hc
 
 NUM_TIME_STEPS = 4
@@ -16,6 +19,8 @@ NUM_NODES = 441
 NUM_ELEMS_PER_BLOCK = 200
 NODES_PER_ELEM = 4
 NUM_BLOCKS = 2
+
+CONNECT_NAMES = ('connect1','connect2')
 
 NUM_SIDESETS = 4
 SIDESET_NAMES = ('bottom',
@@ -149,7 +154,7 @@ def test_get_connectivity_names(reader: ExodusReader) -> None:
 def test_get_connectivity(reader: ExodusReader) -> None:
     check_connect = reader.get_connectivity()
     assert check_connect is not None
-    assert list(check_connect.keys()) == ['connect1','connect2']
+    assert tuple(check_connect.keys()) == CONNECT_NAMES
     assert check_connect['connect1'].shape == (
         NODES_PER_ELEM,NUM_ELEMS_PER_BLOCK)
     assert check_connect['connect2'].shape == (
@@ -227,3 +232,96 @@ def test_get_glob_var_names(reader: ExodusReader) -> None:
     assert glob_var_names is not None
     assert glob_var_names.shape == (NUM_GLO_VARS,)
     assert (glob_var_names == GLO_VAR_NAMES).all()
+
+
+def test_get_glob_vars_none(reader: ExodusReader) -> None:
+    glob_vars = reader.get_glob_vars(None)
+    assert glob_vars is None
+
+
+def test_get_all_glob_vars(reader: ExodusReader) -> None:
+    glob_vars = reader.get_all_glob_vars()
+    assert glob_vars is not None
+    assert len(glob_vars.keys()) == (NUM_TIME_STEPS)
+    assert tuple(glob_vars.keys()) == GLO_VAR_NAMES
+    for gg in glob_vars:
+        assert glob_vars[gg].shape == (NUM_TIME_STEPS,)
+
+def test_get_coords(reader: ExodusReader) -> None:
+    coords = reader.get_coords()
+    assert coords.shape == (NUM_NODES,3)
+
+
+@pytest.mark.parametrize(
+    ('coord','dim','expected'),
+    (
+        (np.array([]),4,np.array([0,0,0,0])),
+        (np.array([0,1,2,3]),4,np.array([0,1,2,3])),
+    )
+)
+def test_expand_coords(coord: npt.NDArray,
+                       dim: int,
+                       expected: npt.NDArray,
+                       reader: ExodusReader) -> None:
+    check = reader._expand_coord(coord,dim)
+    assert (check == expected).all()
+
+
+def test_get_time(reader: ExodusReader) -> None:
+    check_time = reader.get_time()
+    assert check_time.shape == (NUM_TIME_STEPS,)
+
+
+def test_get_read_config(reader: ExodusReader) -> None:
+    config = reader.get_read_config()
+
+    for ff in fields(config):
+        assert getattr(config,ff.name) is not None
+
+    assert (config.sidesets == SIDESET_NAMES).all()
+    assert (config.node_vars == NODE_VAR_NAMES).all()
+    assert len(config.elem_vars) == NUM_ELEM_VARS*NUM_BLOCKS # type: ignore
+    assert (config.glob_vars == GLO_VAR_NAMES).all()
+
+
+def test_read_sim_data(reader: ExodusReader) -> None:
+    config = reader.get_read_config()
+    data = reader.read_sim_data(config)
+    check_sim_data(data)
+
+
+def test_read_all_sim_data(reader: ExodusReader) -> None:
+    data = reader.read_all_sim_data()
+    check_sim_data(data)
+
+
+def check_sim_data(data: SimData) -> None:
+    for ff in fields(data):
+        assert getattr(data,ff.name) is not None
+
+    assert data.time.shape == (NUM_TIME_STEPS,)
+    assert data.coords.shape == (NUM_NODES,3)
+
+    assert tuple(data.connect.keys()) == CONNECT_NAMES
+    for cc in data.connect:
+        assert data.connect[cc].shape == (NODES_PER_ELEM,NUM_ELEMS_PER_BLOCK)
+
+    assert len(data.side_sets.keys()) == NUM_SIDESETS*2
+    for ss in data.side_sets:
+        assert ss[0] in SIDESET_NAMES
+        assert ss[1] in ('node','elem')
+
+    assert tuple(data.node_vars.keys()) == NODE_VAR_NAMES
+    for nn in data.node_vars:
+        assert data.node_vars[nn].shape == (NUM_NODES,NUM_TIME_STEPS)
+
+    assert len(data.elem_vars.keys()) == NUM_ELEM_VARS*NUM_BLOCKS
+    for ee in data.elem_vars:
+        assert ee[0] in ELEM_VAR_NAMES
+        assert ee[1] in (1,2)
+        assert data.elem_vars[ee].shape == (NUM_ELEMS_PER_BLOCK,NUM_TIME_STEPS)
+
+    assert tuple(data.glob_vars.keys()) == GLO_VAR_NAMES
+    for gg in data.glob_vars:
+        data.glob_vars[gg].shape == (NUM_TIME_STEPS,)
+
