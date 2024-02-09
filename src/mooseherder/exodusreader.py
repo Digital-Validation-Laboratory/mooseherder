@@ -296,7 +296,7 @@ class ExodusReader:
 
         vars = dict({})
         for nn in names_blocks:
-            key = self.get_key(nn[0],all_names,key_tag) + f'eb{nn[1]:d}'
+            key = self.get_key(nn[0],all_names,key_tag) + f'eb{nn[1]:d}' # type: ignore
             vars[nn] = self.get_var(key)
 
         return vars
@@ -389,13 +389,13 @@ class ExodusReader:
         return self.coords
 
 
-    def _expand_coord(self,coord: npt.NDArray, dim: int) -> npt.NDArray:
+    def _expand_coord(self, coord: npt.NDArray, dim: int) -> npt.NDArray:
         """Helper function to create an array of zeros to pad any spatial
         dimensions that are not defined for the simulation.
 
         Args:
             coord (np.array): the coordinate array.
-            dim (int): the size of the vector of zeros to creat if coord is
+            dim (int): the size of the vector of zeros to create if coord is
                 empty.
 
         Returns:

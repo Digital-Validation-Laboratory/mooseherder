@@ -24,8 +24,16 @@ class DirectoryManager:
         self._n_dirs = n_dirs
         self._sub_dir = 'sim-workdir'
         self._base_dir = Path().cwd()
-        self._run_dirs = list([])
+        self._run_dirs = self._set_run_dirs()
         self._output_paths = list([])
+
+    def _set_run_dirs(self) -> list[Path]:
+
+        run_dirs = list([])
+        for nn in range(self._n_dirs): # type: ignore
+            run_dirs.append(self._base_dir / (self._sub_dir + '-' + str(nn+1)))
+
+        return run_dirs
 
 
     def set_sub_dir_name(self, sub_dir_name: str) -> None:
@@ -36,6 +44,7 @@ class DirectoryManager:
             directories
         """
         self._sub_dir = sub_dir_name
+        self._run_dirs = self._set_run_dirs()
 
 
     def set_base_dir(self, base_dir: Path, clear_old_dirs = False) -> None:
@@ -58,6 +67,7 @@ class DirectoryManager:
             self.clear_dirs()
 
         self._base_dir = base_dir
+        self._run_dirs = self._set_run_dirs()
 
 
     def create_dirs(self) -> list[Path]:
@@ -66,15 +76,9 @@ class DirectoryManager:
         Returns:
             list[Path]: list of paths to the created directories
         """
-        self._run_dirs = list([])
-
-        for nn in range(self._n_dirs): # type: ignore
-            run_sub_dir = self._base_dir / (self._sub_dir + '-' + str(nn+1))
-
-            if not run_sub_dir.is_dir():
-                run_sub_dir.mkdir()
-
-            self._run_dirs.append(run_sub_dir)
+        for rr in self._run_dirs:
+            if not rr.is_dir():
+                rr.mkdir()
 
         return self._run_dirs
 

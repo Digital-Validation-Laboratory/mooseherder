@@ -75,7 +75,7 @@ def main() -> None:
     print("-"*80)
     print('EXAMPLE 7b: Read Herd Sweep Output')
     print("-"*80)
-    sweep_reader = SweepReader(dir_manager)
+    sweep_reader = SweepReader(dir_manager,num_para_read=4)
     output_files = sweep_reader.read_all_output_keys()
 
     print('Herd output files (from output_keys.json):')

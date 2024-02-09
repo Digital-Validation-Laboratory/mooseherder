@@ -11,7 +11,7 @@ import pytest
 import numpy as np
 import numpy.typing as npt
 from mooseherder.exodusreader import ExodusReader
-from mooseherder.simdata import SimData, SimReadConfig
+from mooseherder.simdata import SimData
 import tests.herdchecker as hc
 
 NUM_TIME_STEPS = 4
