@@ -83,7 +83,7 @@ def main() -> None:
     print()
 
     print("-"*80)
-    print('Reading all output files sequentially as a list(dict).')
+    print('Reading all output files sequentially as a list(SimData).')
     print()
     start_time = time.perf_counter()
     read_all = sweep_reader.read_results_sequential()
@@ -92,7 +92,7 @@ def main() -> None:
     print(f'Number of simulations outputs: {len(read_all):d}')
 
     print("-"*80)
-    print('Reading all output files in parallel as list(dict).')
+    print('Reading all output files in parallel as list(SimData).')
     print()
     start_time = time.perf_counter()
     read_all = sweep_reader.read_results_para()

@@ -9,6 +9,7 @@ Authors: Lloyd Fletcher
 import os
 import shutil
 import json
+from typing import Any
 from pathlib import Path
 
 class DirectoryManager:
@@ -171,6 +172,32 @@ class DirectoryManager:
 
         with open(self.get_output_key_file(sweep_iter), "w", encoding='utf-8') as okf:
             json.dump(str_output, okf, indent=4)
+
+
+    def get_sweep_var_file(self, sweep_iter: int = 1) -> Path:
+        """get_sweep_var_file _summary_
+
+        Args:
+            sweep_iter (int, optional): _description_. Defaults to 1.
+
+        Returns:
+            Path: _description_
+        """
+        return self._run_dirs[0] / f'sweep-vars-{sweep_iter:d}.json'
+
+
+    def write_sweep_vars(self,
+                         sweep_vars: list[list[dict | None]],
+                         sweep_iter: int = 1) -> None:
+        """write_sweep_vars _summary_
+
+        Args:
+            sweep_vars (list[list[dict[str, Any]]]): _description_
+            sweep_iter (int, optional): _description_. Defaults to 1.
+        """
+        with open(self.get_sweep_var_file(sweep_iter), "w", encoding='utf-8') as okf:
+            json.dump(sweep_vars, okf, indent=4)
+
 
 
 def output_paths_to_str(output_files: list[list[Path]]) -> list[list[str]]:

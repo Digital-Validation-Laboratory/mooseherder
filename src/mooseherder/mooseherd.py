@@ -248,6 +248,7 @@ class MooseHerd:
 
         self._dir_manager.set_output_paths(output_files)
         self._dir_manager.write_output_key(self._sweep_iter)
+        self._dir_manager.write_sweep_vars(self._var_sweep,self._sweep_iter)
 
 
     def run_sequential(self, var_sweep: list[list[dict | None]]) -> list[list[Path | None]]:

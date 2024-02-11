@@ -42,7 +42,6 @@ def main() -> None:
     print(f'Read time parallel   = {read_time_para:.6f} seconds')
     print("="*80)
 
-    pprint(sweep_data[23].coords)
 
 if __name__ == '__main__':
     main()
