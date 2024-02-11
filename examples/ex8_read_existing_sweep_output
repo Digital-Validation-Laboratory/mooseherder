@@ -19,7 +19,7 @@ def main() -> None:
     print('EXAMPLE 8: Read Existing Sweep Results')
     print("-"*80)
 
-    base_dir = Path('examples/example_sweep_output/')
+    base_dir = Path('examples/example_output/')
     print(f'Reading from sub directories in:\n{base_dir}\n')
 
     dir_manager = DirectoryManager(n_dirs=4)
@@ -27,8 +27,15 @@ def main() -> None:
 
     sweep_reader = SweepReader(dir_manager,num_para_read=4)
     output_files = sweep_reader.read_all_output_keys()
+    sweep_variables = sweep_reader.read_all_sweep_var_files()
+
     print('Output files in json keys:')
     pprint(output_files)
+    print()
+
+    print('Sweep variables:')
+    pprint(sweep_variables)
+    print()
 
     print("-"*80)
     print('Reading all output files in parallel as list(SimData).')

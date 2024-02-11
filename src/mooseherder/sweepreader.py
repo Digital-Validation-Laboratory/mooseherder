@@ -61,20 +61,83 @@ class SweepReader:
         Returns:
             list[list[Path]]: _description_
         """
-        work_dir_files = os.listdir(self._dir_manager.get_run_dir(0))
+        output_paths = self._find_files_by_str(self._dir_manager.get_output_key_tag(),
+                                               self._dir_manager.get_run_dir(0))
 
-        key_count = 0
+        if len(output_paths) == 0:
+            raise FileNotFoundError("No output key json files found.")
+
         output_files = list([])
-        for ff in work_dir_files:
-            if 'output-key' in ff:
-                key_count += 1
-                output_files = output_files + self.read_output_key(key_count)
-
-        if key_count == 0:
-            raise FileNotFoundError("No output key files found.")
+        for ii,_ in enumerate(output_paths):
+            output_files = output_files + self.read_output_key(ii+1)
 
         self._output_files = output_files
         return self._output_files
+
+
+    def read_sweep_var_file(self, sweep_iter: int = 1) -> list[list[dict | None]]:
+        """read_sweep_var_file _summary_
+
+        Args:
+            sweep_iter (int, optional): _description_. Defaults to 1.
+
+        Raises:
+            FileNotFoundError: _description_
+
+        Returns:
+            list[list[dict | None]]: _description_
+        """
+        sweep_var_file = self._dir_manager.get_sweep_var_file(sweep_iter)
+        if not sweep_var_file.is_file():
+            raise FileNotFoundError(f'Sweep variable file for sweep iteration {sweep_iter} not found at path: {sweep_var_file}')
+
+        with open(sweep_var_file, 'r', encoding='utf-8') as svf:
+            sweep_vars = json.load(svf)
+
+        return sweep_vars
+
+
+    def read_all_sweep_var_files(self) -> list[list[dict | None]]:
+        """read_all_sweep_var_files _summary_
+
+        Raises:
+            FileNotFoundError: _description_
+
+        Returns:
+            list[list[dict | None]]: _description_
+        """
+        sweep_var_paths = self._find_files_by_str(self._dir_manager.get_sweep_var_tag(),
+                                                  self._dir_manager.get_run_dir(0))
+
+        if len(sweep_var_paths) == 0:
+            raise FileNotFoundError("No sweep variable json files found.")
+
+        sweep_vars = list([])
+        for ii,_ in enumerate(sweep_var_paths):
+            sweep_vars = sweep_vars  + self.read_sweep_var_file(ii+1)
+
+        return sweep_vars
+
+
+    def _find_files_by_str(self, search_str: str, search_path: Path) -> list[Path]:
+        """_find_files_by_str _summary_
+
+        Args:
+            search_str (str): _description_
+            search_path (Path): _description_
+
+        Returns:
+            list[Path]: _description_
+        """
+        found_files = list([])
+
+        all_files = os.listdir(search_path)
+
+        for ff in all_files:
+            if search_str in ff:
+                found_files.append(Path(ff))
+
+        return found_files
 
 
     def get_output_files(self) -> list[list[Path]]:
@@ -109,7 +172,15 @@ class SweepReader:
     def read_results_sequential(self,
                                 sweep_iter: int | None = None,
                                 read_config: SimReadConfig | None = None) -> list[SimData]:
+        """read_results_sequential _summary_
 
+        Args:
+            sweep_iter (int | None, optional): _description_. Defaults to None.
+            read_config (SimReadConfig | None, optional): _description_. Defaults to None.
+
+        Returns:
+            list[SimData]: _description_
+        """
         self._start_read_output_keys(sweep_iter)
 
         sweep_results = list([])
@@ -124,7 +195,15 @@ class SweepReader:
     def read_results_para(self,
                           sweep_iter: int | None = None,
                           read_config: SimReadConfig | None = None) -> list[SimData]:
+        """read_results_para _summary_
 
+        Args:
+            sweep_iter (int | None, optional): _description_. Defaults to None.
+            read_config (SimReadConfig | None, optional): _description_. Defaults to None.
+
+        Returns:
+            list[SimData]: _description_
+        """
         self._start_read_output_keys(sweep_iter)
 
         with Pool(self._n_para_read) as pool:

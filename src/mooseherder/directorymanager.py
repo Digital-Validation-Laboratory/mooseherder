@@ -9,7 +9,6 @@ Authors: Lloyd Fletcher
 import os
 import shutil
 import json
-from typing import Any
 from pathlib import Path
 
 class DirectoryManager:
@@ -27,9 +26,16 @@ class DirectoryManager:
         self._base_dir = Path().cwd()
         self._run_dirs = self._set_run_dirs()
         self._output_paths = list([])
+        self._output_key_tag = 'output-key'
+        self._sweep_var_tag = 'sweep-vars'
+
 
     def _set_run_dirs(self) -> list[Path]:
+        """_set_run_dirs _summary_
 
+        Returns:
+            list[Path]: _description_
+        """
         run_dirs = list([])
         for nn in range(self._n_dirs): # type: ignore
             run_dirs.append(self._base_dir / (self._sub_dir + '-' + str(nn+1)))
@@ -70,6 +76,23 @@ class DirectoryManager:
         self._base_dir = base_dir
         self._run_dirs = self._set_run_dirs()
 
+
+    def get_output_key_tag(self) -> str:
+        """get_output_key_tag _summary_
+
+        Returns:
+            str: _description_
+        """
+        return self._output_key_tag
+
+
+    def get_sweep_var_tag(self) -> str:
+        """get_sweep_var_tag _summary_
+
+        Returns:
+            str: _description_
+        """
+        return self._sweep_var_tag
 
     def create_dirs(self) -> list[Path]:
         """create_dirs: Creates the specified number of directories based on the sub_dir name.
@@ -156,7 +179,7 @@ class DirectoryManager:
             Path: path to the output key file that maps output paths to the
                 combinations of variables in the sweep.
         """
-        return self._run_dirs[0] / f'output-key-{sweep_iter:d}.json'
+        return self._run_dirs[0] / f'{self._output_key_tag}-{sweep_iter:d}.json'
 
 
     def write_output_key(self, sweep_iter: int) -> None:
@@ -183,7 +206,7 @@ class DirectoryManager:
         Returns:
             Path: _description_
         """
-        return self._run_dirs[0] / f'sweep-vars-{sweep_iter:d}.json'
+        return self._run_dirs[0] / f'{self._sweep_var_tag}-{sweep_iter:d}.json'
 
 
     def write_sweep_vars(self,
@@ -231,6 +254,7 @@ def output_str_to_paths(output_files: list[list[str]]) -> list[list[Path]]:
         list[list[Path]]: _description_
     """
     str_output = list([])
+
     for sim_iter in output_files:
         iter_output = list([])
         for output_path in sim_iter:
