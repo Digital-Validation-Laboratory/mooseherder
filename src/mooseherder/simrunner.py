@@ -25,12 +25,12 @@ class SimRunner(ABC):
 
     @abstractmethod
     def run(self, input_file: Path | None = None) -> None:
-        """run _summary_
+        """run
         """
 
 
     @abstractmethod
     def get_output_path(self) -> Path | None:
-        """get_output_path _summary_
+        """get_output_path
         """
 
