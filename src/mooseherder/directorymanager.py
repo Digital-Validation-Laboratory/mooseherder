@@ -12,7 +12,8 @@ import json
 from pathlib import Path
 
 class DirectoryManager:
-    """ Manages directories for running simulations in parallel.
+    """ Manages directories for running simulations in parallel with the
+    mooseherd.
     """
     def __init__(self, n_dirs: int = 1) -> None:
         """__init__
@@ -55,7 +56,8 @@ class DirectoryManager:
 
 
     def set_base_dir(self, base_dir: Path, clear_old_dirs = False) -> None:
-        """set_base_dir:
+        """set_base_dir: sets the base directory to create sub-directors for
+        running the simulations. The base directory must exist.
 
         Args:
             base_dir (Path): directory in which the new working directories will
@@ -94,8 +96,10 @@ class DirectoryManager:
         """
         return self._sweep_var_tag
 
+
     def create_dirs(self) -> list[Path]:
-        """create_dirs: Creates the specified number of directories based on the sub_dir name.
+        """create_dirs: Creates the specified number of directories based on
+        the sub_dir name.
 
         Returns:
             list[Path]: list of paths to the created directories
@@ -138,7 +142,9 @@ class DirectoryManager:
         Returns:
             Path: path to the directory
         """
-        if dir_num >= self._n_dirs:
+        if dir_num < 0:
+            dir_num = 0
+        elif dir_num >= self._n_dirs:
             dir_num = dir_num % self._n_dirs
 
         return self._run_dirs[dir_num]
@@ -198,13 +204,15 @@ class DirectoryManager:
 
 
     def get_sweep_var_file(self, sweep_iter: int = 1) -> Path:
-        """get_sweep_var_file _summary_
+        """get_sweep_var_file: path to the json file which contains the
+        dictionary of variables that were analysed at the given sweep iteration
 
         Args:
-            sweep_iter (int, optional): _description_. Defaults to 1.
+            sweep_iter (int, optional): Sweep iteration (call number to herd
+                run_para). Defaults to 1.
 
         Returns:
-            Path: _description_
+            Path: path to the json sweep variable file.
         """
         return self._run_dirs[0] / f'{self._sweep_var_tag}-{sweep_iter:d}.json'
 
@@ -212,11 +220,14 @@ class DirectoryManager:
     def write_sweep_vars(self,
                          sweep_vars: list[list[dict | None]],
                          sweep_iter: int = 1) -> None:
-        """write_sweep_vars _summary_
+        """write_sweep_vars: writes the sweep variable dictionary to a json
+        file to log the variables used for each simulation.
 
         Args:
-            sweep_vars (list[list[dict[str, Any]]]): _description_
-            sweep_iter (int, optional): _description_. Defaults to 1.
+            sweep_vars (list[list[dict[str, Any]]]): sweep variables as passed
+                to the herd to run.
+            sweep_iter (int, optional): iteration number for number of calls to the
+                herd. Defaults to 1.
         """
         with open(self.get_sweep_var_file(sweep_iter), "w", encoding='utf-8') as okf:
             json.dump(sweep_vars, okf, indent=4)
@@ -224,14 +235,14 @@ class DirectoryManager:
 
 
 def output_paths_to_str(output_files: list[list[Path]]) -> list[list[str]]:
-    """output_paths_to_str: helper functions for converting the output paths
+    """output_paths_to_str: helper function for converting the output paths
     to strings to allow them to be saved as json.
 
     Args:
         output_files (list[list[Path]]):
 
     Returns:
-        list[list[str]]:
+        list[list[str]]: as input with Path converted to str
     """
     str_output = list([])
     for sim_iter in output_files:
@@ -245,13 +256,15 @@ def output_paths_to_str(output_files: list[list[Path]]) -> list[list[str]]:
 
 
 def output_str_to_paths(output_files: list[list[str]]) -> list[list[Path]]:
-    """output_str_to_paths _summary_
+    """output_str_to_paths: helper function to convert strings read from output
+    key json to paths.
 
     Args:
-        output_files (list[list[str]]): _description_
+        output_files (list[list[str]]): output file list of path strings as in
+            the output key file.
 
     Returns:
-        list[list[Path]]: _description_
+        list[list[Path]]: as input with str converted to Path.
     """
     str_output = list([])
 
