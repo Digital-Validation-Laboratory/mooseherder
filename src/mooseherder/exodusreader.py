@@ -314,14 +314,21 @@ class ExodusReader:
 
     def get_elem_vars(self, names_blocks: list[tuple[str,int]] | None
                       ) -> dict[tuple[str,int],npt.NDArray] | None:
-        """get_elem_vars _summary_
+        """get_elem_vars: gets the element variables as a dictionary keyed by
+        tuples which containg the element variable name and the block number.
+        For example: ('strain_xx',1). The element data is given as a numpy
+        array with dimensions E_bxT where E_b is the number of element in the
+        block and T is the number of time steps.
 
         Args:
-            names (npt.NDArray | None): _description_
-            blocks (list[int]): _description_
+            names_blocks (list[tuple[str,int]] | None): list of tuples
+                containing the combination of element variables names and
+                blocks to be extracted from the dataset.
 
         Returns:
-            dict[tuple[str,int],npt.NDArray] | None: _description_
+            dict[tuple[str,int],npt.NDArray] | None: contains the variables
+                requested keyed using the input names_blocks with the data
+                given as a numpy array.
         """
         all_names = self.get_elem_var_names()
 
@@ -339,32 +346,49 @@ class ExodusReader:
 
 
     def get_all_elem_vars(self) -> dict[tuple[str,int], npt.NDArray] | None:
-        """get_all_elem_vars _summary_
+        """get_all_elem_vars: gets all element variables as a dictionary keyed by
+        tuples which containg the element variable name and the block number.
+        For example: ('strain_xx',1). The element data is given as a numpy
+        array with dimensions E_bxT where E_b is the number of element in the
+        block and T is the number of time steps.
+
 
         Returns:
-            dict[tuple[str,int], npt.NDArray] | None: _description_
+            dict[tuple[str,int], npt.NDArray] | None: contains the variables
+                requested keyed using the input names_blocks with the data
+                given as a numpy array.
         """
 
         return self.get_elem_vars(self.get_elem_var_names_and_blocks())
 
 
     def get_glob_var_names(self) -> npt.NDArray | None:
-        """get_glob_var_names _summary_
+        """get_glob_var_names: gets the names of all global variables in the
+        dataset. Global variables include the output of all MOOSE post-
+        processors.
 
         Returns:
-            npt.NDArray | None: _description_
+            npt.NDArray | None: numpy array containing the global variable
+                names as strings.
         """
         return self.get_names('name_glo_var')
 
 
-    def get_glob_vars(self, names: npt.NDArray | None) -> dict[str, npt.NDArray] | None:
-        """get_glob_vars _summary_
+    def get_glob_vars(self, names: npt.NDArray | None
+                      ) -> dict[str, npt.NDArray] | None:
+        """get_glob_vars: gets the specified global variables as a dictionary
+        keyed by the variable name specified in the MOOSE input file. The data
+        is given as a numpy array of T dimensions where T is the number of time
+        steps.
 
         Args:
-            names (npt.NDArray | None): _description_
+            names (npt.NDArray | None): numpy array of strings specifying the
+                global variable names to extract from the dataset. If this is
+                None then return None.
 
         Returns:
-            dict[str, npt.NDArray] | None: _description_
+            dict[str, npt.NDArray] | None: dictionary keyed with the global
+                variable names requested giving the data as a numpy array.
         """
         all_names = self.get_glob_var_names()
 
@@ -382,20 +406,21 @@ class ExodusReader:
 
 
     def get_all_glob_vars(self) -> dict[str, npt.NDArray] | None:
-        """get_all_glob_vars _summary_
+        """get_all_glob_vars: gets all global variables as a dictionary
+        keyed by the variable name specified in the MOOSE input file. The data
+        is given as a numpy array of T dimensions where T is the number of time
+        steps.
 
         Returns:
-            dict[str, npt.NDArray]: _description_
+            dict[str, npt.NDArray] | None: dictionary keyed with all global
+                variable names giving the data as numpy arrays.
         """
-
         return self.get_glob_vars(self.get_glob_var_names())
 
 
     def get_coords(self) -> npt.NDArray:
         """Gets the nodal coordinates in each spatial dimension setting any
         undefined dimensions to zeros.
-
-        return np.array([])
 
         Raises:
             RuntimeError: no spatial dimensions found.
@@ -465,10 +490,14 @@ class ExodusReader:
             print(vv)
 
     def get_read_config(self) -> SimReadConfig:
-        """get_read_config _summary_
+        """get_read_config: constructs a SimReadConfig object by extracting
+        all the variable names found in the exodus dataset. Useful for creating
+        a mostly populated SimReadConfig and removing variables that are
+        unwanted.
 
         Returns:
-            SimReadConfig: _description_
+            SimReadConfig: data class containing names of variables to be
+                extracted from the exodus dataset. See mooseherder.simdata.
         """
         read_config = SimReadConfig()
 
@@ -482,13 +511,15 @@ class ExodusReader:
 
     def read_sim_data(self,
                       read_config: SimReadConfig) -> SimData:
-        """read_sim_data _summary_
+        """read_sim_data: reads the simulation data based on the specified
+        SimReadConfig object.
 
         Args:
-            read_config (SimReadConfig): _description_
+            read_config (SimReadConfig): data class containing the names of
+                the variables that are to be extracted from the exodus dataset.
 
         Returns:
-            SimData: _description_
+            SimData: data class containing data from the simulation.
         """
         data = SimData()
 
@@ -505,10 +536,10 @@ class ExodusReader:
 
 
     def read_all_sim_data(self) -> SimData:
-        """read_all_sim_data _summary_
+        """read_all_sim_data: gets all simulation data from the exodus dataset.
 
         Returns:
-            SimData: _description_
+            SimData: data class containing the data from the simulation.
         """
         data = SimData()
 

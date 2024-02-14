@@ -25,7 +25,11 @@ class MooseConfig:
 
 
     def get_config(self) -> dict[str,Path | str]:
+        """_summary_
 
+        Returns:
+            dict[str,Path | str]: _description_
+        """
         self._check_config_valid(self._config)
         return self._config # type: ignore
 
@@ -52,7 +56,14 @@ class MooseConfig:
 
     def convert_path_to_str(self, in_config: dict[str,Path | str] | None
                              ) -> dict[str,str] | None:
+        """_summary_
 
+        Args:
+            in_config (dict[str,Path  |  str] | None): _description_
+
+        Returns:
+            dict[str,str] | None: _description_
+        """
         if in_config is None:
             return None
 
@@ -65,7 +76,14 @@ class MooseConfig:
 
     def convert_str_to_path(self, in_config: dict[str,str] | None = None
                              ) -> dict[str, Path | str] | None:
+        """_summary_
 
+        Args:
+            in_config (dict[str,str] | None, optional): _description_. Defaults to None.
+
+        Returns:
+            dict[str, Path | str] | None: _description_
+        """
         if in_config is None:
             return None
 
@@ -80,7 +98,14 @@ class MooseConfig:
 
 
     def save_config(self,config_path: Path) -> None:
+        """_summary_
 
+        Args:
+            config_path (Path): _description_
+
+        Raises:
+            MooseConfigError: _description_
+        """
         if not config_path.parent.is_dir():
             raise MooseConfigError('Parent path to save config file does not exist.')
 
@@ -90,7 +115,17 @@ class MooseConfig:
 
 
     def read_config(self, config_path: Path) -> Self:
+        """_summary_
 
+        Args:
+            config_path (Path): _description_
+
+        Raises:
+            MooseConfigError: _description_
+
+        Returns:
+            Self: _description_
+        """
         if not config_path.is_file():
             raise MooseConfigError(
                 f'MOOSE config file does not exist at: {str(config_path)}.')
