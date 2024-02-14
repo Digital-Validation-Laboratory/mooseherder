@@ -25,10 +25,14 @@ from mooseherder.simdata import SimData, SimReadConfig
 
 class ExodusReader:
     """Class to read exodus files output by MOOSE using the netCDF package.
+    This class handles extracting the data from the exodus file and creates
+    a SimData object with the required data. Most used cases are covered with
+    by creating an ExodusReader and then calling either read_sim_data() or
+    read_all_sim_data() specified at the bottom of the class.
     """
     def __init__(self, exodus_file: Path):
         """__init__: Construct class by reading the exodus file using the
-        netCDF package.
+        netCDF package. The exodus file must exist.
 
         Args:
             exodus_file (Path): path to the exodus file to read
@@ -83,7 +87,8 @@ class ExodusReader:
                 name: str,
                 all_names: npt.NDArray,
                 key_tag: str) -> str | None:
-        """get_key
+        """get_key: builds the key required to extract a given variable from
+        the exodus dataset.
 
         Args:
             all_names (npt.NDArray): all possible name keys extracted using the
@@ -104,7 +109,8 @@ class ExodusReader:
 
 
     def get_connectivity_names(self) -> npt.NDArray:
-        """get_connectivity_names:
+        """get_connectivity_names: gets the connectivity names in the exodus
+        dataset. These are of the form 'connect1', 'connect2' etc.
 
         Returns:
             npt.NDArray: array of element connectivity keys as strings of the
@@ -121,7 +127,8 @@ class ExodusReader:
 
 
     def get_connectivity(self) -> dict[str,npt.NDArray]:
-        """get_connectivity:
+        """get_connectivity: returns the connectivity table as a dictionary
+        keyed with the name 'connectX' and the table itseld as numpy array.
 
         Returns:
             dict[str,npt.NDArray]: dictionary containing the element
@@ -139,7 +146,8 @@ class ExodusReader:
 
 
     def get_sideset_names(self) -> npt.NDArray | None:
-        """get_sideset_names:
+        """get_sideset_names: returns the sideset names as a numpy array of
+        strings.
 
         Returns:
             npt.NDArray | None: numpy array of strings corresponding to the
@@ -151,7 +159,9 @@ class ExodusReader:
 
     def get_sidesets(self, names: npt.NDArray | None
                      ) -> dict[tuple[str,str], npt.NDArray] | None:
-        """get_sidesets:
+        """get_sidesets: returns the sidesets as a dictionary keyed by a tuple
+        of ('sideset_name', 'node' | 'elem'). Gives either the list of node
+        numbers or element numbers based on the specified key.
 
         Args:
             names (npt.NDArray | None): numpy array of strings specifying the
@@ -183,7 +193,9 @@ class ExodusReader:
 
 
     def get_all_sidesets(self) -> dict[tuple[str,str], npt.NDArray] | None:
-        """get_all_sidesets:
+        """get_all_sidesets: returns all sidesets as a dictionary keyed by a tuple
+        of ('sideset_name', 'node' | 'elem'). Gives either the list of node
+        numbers or element numbers based on the specified key.
 
         Returns:
             dict[tuple[str,str], npt.NDArray] | None: dictionary of sideset
@@ -196,7 +208,8 @@ class ExodusReader:
 
 
     def get_node_var_names(self) -> npt.NDArray | None:
-        """get_node_var_names:
+        """get_node_var_names: gets the nodal variable names as a numpy array
+        of strings e.g. np.array(['disp_x','disp_y'])
 
         Returns:
             npt.NDArray | None: numpy array of strings containing the nodal
@@ -206,14 +219,20 @@ class ExodusReader:
 
 
     def get_node_vars(self, names: npt.NDArray | None) -> dict[str,npt.NDArray] | None:
-        """get_node_vars:
+        """get_node_vars: gets the specified nodal variables as a dictionary
+        keyed by the variable name (e.g. 'disp_x') where the nodal variable is
+        given as a numpy array of dimensions NxT where N is the number of nodes
+        and T is the number of time steps in the simulation.
 
         Args:
             names (npt.NDArray | None): numpy array of strings that are the
-                variable
+                variables to be extracted from the exodus dataset.
 
         Returns:
-            dict[str,npt.NDArray] | None: _description_
+            dict[str,npt.NDArray] | None: dictionary of requested nodal
+                variables. Keys are nodal variable names e.g. 'disp_x' and the
+                variable data is given as a numpy array. returns None if no
+                nodal variables are found.
         """
         if names is None:
             return None
@@ -231,10 +250,17 @@ class ExodusReader:
 
 
     def get_all_node_vars(self) -> dict[str, npt.NDArray] | None:
-        """get_all_node_vars _summary_
+        """get_all_node_vars: as get_node_vars but returns all nodal variables
+        found in the dataset. Gets all specified nodal variables as a dictionary
+        keyed by the variable name (e.g. 'disp_x') where the nodal variable is
+        given as a numpy array of dimensions NxT where N is the number of nodes
+        and T is the number of time steps in the simulation.
 
         Returns:
-            dict[str, npt.NDArray] | None: _description_
+            dict[str, npt.NDArray] | None: dictionary of requested nodal
+                variables. Keys are nodal variable names e.g. 'disp_x' and the
+                variable data is given as a numpy array. returns None if no
+                nodal variables are found.
         """
         return self.get_node_vars(self.get_node_var_names())
 
