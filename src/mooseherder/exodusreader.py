@@ -266,36 +266,46 @@ class ExodusReader:
 
 
     def get_elem_var_names(self) -> npt.NDArray | None:
-        """get_elem_var_names _summary_
+        """get_elem_var_names: gets the element variable names as a numpy array
+        of strings if they exist. Note that there are several cases where the
+        element variables may be interpolated to nodes and stored as nodal data
 
         Returns:
-            npt.NDArray | None: _description_
+            npt.NDArray | None: element variable names as a numpy array of
+                strings. An example variable name is 'strain_xx'. Returns None
+                if no element variable names exist in the dataset.
         """
         return self.get_names('name_elem_var')
 
 
     def get_num_elem_blocks(self) -> int:
-        """get_num_elem_blocks _summary_
+        """get_num_elem_blocks: gets the number of element blocks (i.e.
+        sub-domains) in the simulation. These are used to partition the element
+        data.
 
         Returns:
-            int: _description_
+            int: number of element blocks/sub-domains in the simulation.
         """
         return self.get_names('eb_names').shape[0] # type: ignore
 
 
     def get_elem_var_names_and_blocks(self) -> list[tuple[str,int]] | None:
-        """get_elem_var_names_and_blocks _summary_
+        """get_elem_var_names_and_blocks: returns a list of all possible
+        combinations of element variables names and block numbers present in
+        the dataset.
 
         Returns:
-            list[tuple[str,int]] | None: _description_
+            list[tuple[str,int]] | None: list of tuples containing the element
+                variable names and block numbers. Returns None if there are no
+                element variable name or element blocks.
         """
-        if self.get_elem_var_names is None or self.get_num_elem_blocks() is None:
+        if self.get_elem_var_names() is None or self.get_num_elem_blocks() is None:
             return None
 
         blocks = [ii+1 for ii in range(self.get_num_elem_blocks())] # type: ignore
         names_blocks = list([])
 
-        for nn in self.get_elem_var_names(): # type: ignore
+        for nn in self.get_elem_var_names():
             for bb in blocks:
                 names_blocks.append((str(nn),bb))
 
