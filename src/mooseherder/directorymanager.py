@@ -32,10 +32,13 @@ class DirectoryManager:
 
 
     def _set_run_dirs(self) -> list[Path]:
-        """_set_run_dirs _summary_
+        """_set_run_dirs: helper function that populates the list of
+        directories that will be created by the manager. Uses the base directory
+        at the start of the path and then creates numbered sub-directory paths
+        based on the sub directory name and number of directories specified.
 
         Returns:
-            list[Path]: _description_
+            list[Path]:
         """
         run_dirs = list([])
         for nn in range(self._n_dirs): # type: ignore
@@ -45,11 +48,13 @@ class DirectoryManager:
 
 
     def set_sub_dir_name(self, sub_dir_name: str) -> None:
-        """set_sub_dir_name:
+        """set_sub_dir_name: used to set the string used at the start of the
+        created sub-directores. default on creation is 'sim-workdir'. Populates
+        the list of run directories using the new sub directory name.
 
         Args:
             sub_dir_name (str): string to be used to name the created
-            directories
+                sub-directories within the base directory.
         """
         self._sub_dir = sub_dir_name
         self._run_dirs = self._set_run_dirs()
@@ -80,29 +85,33 @@ class DirectoryManager:
 
 
     def get_output_key_tag(self) -> str:
-        """get_output_key_tag _summary_
+        """get_output_key_tag: returns the string used to name the output
+        key files that map the simulation outputs to the various directories
+        that are being managed.
 
         Returns:
-            str: _description_
+            str: common string used to name the output key json files.
         """
         return self._output_key_tag
 
 
     def get_sweep_var_tag(self) -> str:
-        """get_sweep_var_tag _summary_
+        """get_sweep_var_tag: returns ths string used to name the sweep
+        variable json file that contains a copy of the dictionary the user
+        provided as part of the parameter sweep.
 
         Returns:
-            str: _description_
+            str: common string used to name the sweep variable json files.
         """
         return self._sweep_var_tag
 
 
     def create_dirs(self) -> list[Path]:
         """create_dirs: Creates the specified number of directories based on
-        the sub_dir name.
+        the sub_dir name within the base directory.
 
         Returns:
-            list[Path]: list of paths to the created directories
+            list[Path]: list of paths to the directories to create.
         """
         for rr in self._run_dirs:
             if not rr.is_dir():
@@ -123,7 +132,8 @@ class DirectoryManager:
 
 
     def get_all_run_dirs(self) -> list[Path]:
-        """get_all_run_dirs:
+        """get_all_run_dirs: returns the list of paths to all the directories
+        that can be used to run simulations.
 
         Returns:
             list[Path]: paths to all created directories.
@@ -132,7 +142,11 @@ class DirectoryManager:
 
 
     def get_run_dir(self, dir_num: int) -> Path:
-        """get_run_dir:
+        """get_run_dir: returns the path to the run directory based on the
+        input directory number. The directory number can be greater than the
+        number of managed directories in the run_dirs list in this case the
+        directory number will wrap and point at an existing run directory
+        allowing multiple simulations to be run in the same directory.
 
         Args:
             dir_num (int): number of the directory path to be retrieved. Can be
@@ -151,7 +165,8 @@ class DirectoryManager:
 
 
     def set_output_paths(self, output_paths: list[list[Path]]) -> None:
-        """set_output_paths:
+        """set_output_paths: sets the list of lists to the simulation output
+        based on herder input.
 
         Args:
             output_paths (list[list[Path]]): paths to all outputs from the
@@ -162,7 +177,8 @@ class DirectoryManager:
 
 
     def get_output_paths(self) -> list[list[Path]]:
-        """get_output_paths:
+        """get_output_paths: returns the list of lists to the simulation output
+        files.
 
         Returns:
             list[list[Path]]: paths to all outputs from the variable sweep.
