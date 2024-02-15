@@ -42,7 +42,7 @@ def main():
     herd.set_num_para_sims(n_para=4)
 
      # Send all the output to the examples directory and clear out old output
-    dir_manager.set_base_dir(Path('examples/example_output/'))
+    dir_manager.set_base_dir(Path('examples/'))
     dir_manager.clear_dirs()
     dir_manager.create_dirs()
 
