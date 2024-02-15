@@ -7,6 +7,7 @@ scripts/*.csv
 tests/sim-workdir-*
 *.processor.*
 # Keep MOOSE output files used for pytest
+!examples/example_output/sim-workdir-*/*.e
 !tests/output/*.e
 !tests/output/sim-workdir-*/*.e
 

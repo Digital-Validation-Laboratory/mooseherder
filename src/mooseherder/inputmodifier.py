@@ -1,6 +1,6 @@
 """
 ===============================================================================
-Generic Input Modifier Class
+InputModifier Class
 
 Authors: Lloyd Fletcher, Rory Spencer
 ===============================================================================
@@ -13,10 +13,11 @@ class InputModifier:
     Class to modify variables in generic text-based input files.
 
     Once variables have been modified by the user by passing in a dictionary of
-    new variables the MOOSE input can be written to file.
+    new variables the input can be written to file.
 
     Variable definition blocks should begin #comment character#* and end
-    #comment character#**, e.g. //_* and //** for gmsh
+    #comment character#**, e.g. //_* and //** for gmsh or #_* and #** for
+    moose.
     """
 
     def __init__(
@@ -71,12 +72,11 @@ class InputModifier:
                 is the variable key, the second is the variable value as a float
                 or string, the third is any comment string remaining.
         """
-        # Strip all whitespace and comments to separate variable name, equals sign and value
+
         extract_var = var_line.strip()
         extract_var = extract_var.replace(self._end_char, "")
         extract_var = extract_var.split(self._comment_char)[0]  # Remove trailing comments should they exist
 
-        # Split the variable key and value based on the equals sign return an empty string if not
         var_key = ""
         var_val = ""
         if extract_var and extract_var.find("=") >= 0:
@@ -91,7 +91,6 @@ class InputModifier:
 
             var_key = extract_var.split("=", 1)[0].strip()
 
-        # Get the comment string
         if len(var_line.split(self._comment_char)) > 1:
             com_loc = var_line.find(self._comment_char)
             comment_str = var_line[com_loc + len(self._comment_char) :]
@@ -99,6 +98,7 @@ class InputModifier:
             comment_str = ""
 
         return (var_key, var_val, comment_str)
+
 
     def read_vars(self) -> None:
         """Reads the variables in the file"""
@@ -117,8 +117,6 @@ class InputModifier:
         start_string = self._comment_char + self._var_start_str
         end_string = self._comment_char + self._var_end_str
 
-        # Flag to make sure we only find the first instance of the character
-        # also allows case when start and end block strings are the same
         start_found = False
         for ii, ll in enumerate(self._input_lines):
             if start_string in ll and (not start_found):

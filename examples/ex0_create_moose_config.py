@@ -8,14 +8,12 @@ Author: Lloyd Fletcher
 from pathlib import Path
 from mooseherder.mooseconfig import MooseConfig
 
-USER_DIR = Path.home()
-
 
 def main() -> None:
     """main: create moose config json
     """
-    config = {'main_path': USER_DIR / 'moose',
-            'app_path': USER_DIR / 'moose-workdir/proteus',
+    config = {'main_path': Path.home()/ 'moose',
+            'app_path': Path.home() / 'moose-workdir/proteus',
             'app_name': 'proteus-opt'}
 
     moose_config = MooseConfig(config)

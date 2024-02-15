@@ -15,12 +15,14 @@ class MooseRunner(SimRunner):
     """Used to run MOOSE models (*.i) from python.
     """
     def __init__(self, config: MooseConfig):
-        """Constructor for MOOSE runner taking all required paths to MOOSE app/
-        Sets default parallelisation options to 1 MPI task and 1 thread. Sets
-        environment variables required for MPI setup.
+        """__init__: Constructor for MOOSE runner taking a MooseConfig object
+        that contains the paths to the main MOOSE install, the MOOSE app and
+        the MOOSE app name. Sets default parallelisation options to 1 MPI task
+        and 1 thread. Sets environment variables required for MPI setup.
 
         Args:
-            TODO
+            config (MooseConfig): moose configuration object containing the
+                required paths and app name to construct the command string.
         """
         self._config = config.get_config()
 
@@ -103,10 +105,10 @@ class MooseRunner(SimRunner):
 
 
     def get_input_file(self) -> Path | None:
-        """get_input_file _summary_
+        """get_input_file
 
         Returns:
-            Path | None: _description_
+            Path | None: full path to the input file or None if not specified.
         """
         return self._input_path
 

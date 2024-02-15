@@ -126,7 +126,7 @@ def test_save_config_parent_dir_err(config: MooseConfig) -> None:
 
 
 def test_read_config(config_dict: dict[str, Path | str]) -> None:
-    read_path = Path('tests/config/moose-config-test.json')
+    read_path = Path().cwd() / 'moose-config.json'
     read_config = MooseConfig().read_config(read_path)
     assert read_config.get_config() == config_dict
 

@@ -2,7 +2,7 @@
 ===============================================================================
 SimData Class
 
-Authors: Lloyd Fletcher,
+Authors: Lloyd Fletcher
 ===============================================================================
 """
 from dataclasses import dataclass
