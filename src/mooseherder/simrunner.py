@@ -9,7 +9,10 @@ from abc import ABC, abstractmethod
 from pathlib import Path
 
 class SimRunner(ABC):
-    """SimRunner: Abstract Base Class for
+    """SimRunner: ABC for the moosherd simulation chain. A simulation has an
+    input file which can be get or set. The simulation can then be run with the
+    given input files and then the path to the simulation output file can be
+    retrieved.
     """
     @abstractmethod
     def get_input_file(self) -> Path | None:
@@ -27,7 +30,6 @@ class SimRunner(ABC):
     def run(self, input_file: Path | None = None) -> None:
         """run
         """
-
 
     @abstractmethod
     def get_output_path(self) -> Path | None:
