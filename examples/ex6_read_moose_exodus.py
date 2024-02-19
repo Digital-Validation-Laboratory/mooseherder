@@ -85,10 +85,10 @@ def main() -> None:
     print()
 
     print('Element variables are an exception as they also need a block.')
-    read_config.elem_vars = [('strain_xx',1),('stress_yy',1)]
+    read_config.elem_vars = [('strain_xx',1),('strain_yy',1)]
     sim_data = exodus_reader.read_sim_data(read_config)
-    print("sim_data.elem_vars[('stress_xx',1)] = ")
-    pprint(sim_data.elem_vars[('strain_xx',1)]) # type: ignore
+    print("sim_data.elem_vars[('strain_xx',1)] = ")
+    print(sim_data.elem_vars[('strain_xx',1)]) # type: ignore
     print()
 
     print('NOTE: depending on output settings element variables may appear as nodal.')

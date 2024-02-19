@@ -12,9 +12,9 @@ from mooseherder.mooseconfig import MooseConfig
 def main() -> None:
     """main: create moose config json
     """
-    config = {'main_path': Path.home()/ 'moose',
-            'app_path': Path.home() / 'moose-workdir/proteus',
-            'app_name': 'proteus-opt'}
+    config = {'main_path': Path.home()/ 'projects/moose',
+            'app_path': Path.home() / 'projects/sloth',
+            'app_name': 'sloth-opt'}
 
     moose_config = MooseConfig(config)
 

@@ -1,5 +1,5 @@
 {
-    "main_path": "/home/lloydf/moose",
-    "app_path": "/home/lloydf/moose-workdir/proteus",
-    "app_name": "proteus-opt"
+    "main_path": "/home/rspencer/projects/moose",
+    "app_path": "/home/rspencer/projects/sloth",
+    "app_name": "sloth-opt"
 }

@@ -1,11 +1,15 @@
-[tool.poetry]
+[build-system]
+requires = ["setuptools>=61.0"]
+build-backend = "setuptools.build_meta"
+
+[project]
 name = "mooseherder"
 version = "0.0.1"
 description = "A python herder for calling MOOSE and gmsh to run parallel parametric sweeps of simulations."
 authors = [
   { name = "thescepticalrabbit", email = "thescepticalrabbit@gmail.com" },
-  { name = "fusmatrs", email = ""},
-  { name = "lukethehuman", email = ""},
+  { name = "fusmatrs", email = "rory.spencer@ukaea.uk"},
+  { name = "lukethehuman", email = "email@email.com"},
 ]
 license = { file = "LICENSE" }
 readme = "README.md"
@@ -14,20 +18,15 @@ classifiers = [
     "License :: GNU LGPL",
     "Operating System :: OS Independent",
 ]
-requires-python = ">=3.10"
+requires-python = ">=3.11"
 dependencies = [
   "numpy>=1.26.0",
   "netCDF4>=1.6.5"
 ]
 
-[tool.poetry.dependencies]
-python = "^3.9"
+[project.urls]
+"Repository" = "https://github.com/ScepticalRabbit/mooseherder"
+"Issue Tracker" = "https://github.com/ScepticalRabbit/mooseherder/issues"
 
-[tool.poetry.dev-dependencies]
-
-[tool.poetry.group.dev.dependencies]
-ipykernel = "^6.27.1"
-
-[build-system]
-requires = ["poetry-core>=1.0.0"]
-build-backend = "poetry.core.masonry.api"
+[tool.setuptools.packages.find]
+where = ["src"]
