@@ -1,6 +1,6 @@
 """
 ==============================================================================
-EXAMPLE 2a: Run MOOSE using mooseherder once
+EXAMPLE: Run MOOSE using mooseherder once
 
 Author: Lloyd Fletcher
 ==============================================================================
@@ -14,7 +14,7 @@ def main() -> None:
     """main: run moose once with runner class
     """
     print("-"*80)
-    print('EXAMPLE 2a: Run MOOSE once')
+    print('EXAMPLE: Run MOOSE once')
     print("-"*80)
 
     config_path = Path.cwd() / 'moose-config.json'

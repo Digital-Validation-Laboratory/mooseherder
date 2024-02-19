@@ -1,6 +1,6 @@
 """
 ==============================================================================
-EXAMPLE 2c: Run gmsh+MOOSE once with mooseherder with MOOSE reading the gmsh
+EXAMPLE: Run gmsh+MOOSE once with mooseherder with MOOSE reading the gmsh
 generated mesh.
 
 Author: Lloyd Fletcher
@@ -19,7 +19,7 @@ def main():
     """main: run gmsh and moose once
     """
     print("-"*80)
-    print('EXAMPLE 2c: Run Gmsh+MOOSE once')
+    print('EXAMPLE: Run Gmsh+MOOSE once')
     print("-"*80)
 
     gmsh_path = USER_DIR / 'moose-workdir/gmsh/bin/gmsh'
