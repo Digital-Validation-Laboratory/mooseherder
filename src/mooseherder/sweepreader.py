@@ -77,18 +77,16 @@ class SweepReader:
         """
         output_paths = self._find_files_by_str(self._dir_manager.get_output_key_tag(),
                                                self._dir_manager.get_run_dir(0))
-        #print(output_paths)
 
         if len(output_paths) == 0:
             raise FileNotFoundError("No output key json files found.")
 
         output_files = list([])
-        for ii,output_path in enumerate(output_paths):
+        for output_path in output_paths:
             sweep_iter = output_path.name.split('.')[0].split('-')[-1]
             output_files = output_files + self.read_output_key(int(sweep_iter))
 
         self._output_files = output_files
-        #print(output_files)
         return self._output_files
 
 
@@ -225,7 +223,7 @@ class SweepReader:
         sweep_results = list([])
         for ll in self._output_files:
             for ff in ll:
-                if ff.exists():
+                if ff is not None and ff.exists():
                     sweep_results.append(self.read_results_once(ff,read_config))
 
         return sweep_results
