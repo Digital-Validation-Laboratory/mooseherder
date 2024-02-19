@@ -1,6 +1,6 @@
 """
 ==============================================================================
-EXAMPLE 2b: Run gmsh with mooseherder once
+EXAMPLE: Run gmsh with mooseherder once
 
 Author: Lloyd Fletcher
 ==============================================================================
@@ -15,7 +15,7 @@ def main():
     """main: create mesh with gmsh in 2D then 3D
     """
     print("-"*80)
-    print('EXAMPLE 2b: Run Gmsh 2D once')
+    print('EXAMPLE: Run Gmsh 2D once')
     print("-"*80)
     gmsh_path = USER_DIR / 'moose-workdir/gmsh/bin/gmsh'
     gmsh_runner = GmshRunner(gmsh_path)
@@ -37,7 +37,7 @@ def main():
     print()
 
     print("-"*80)
-    print('EXAMPLE 2b: Run Gmsh 3D once')
+    print('EXAMPLE: Run Gmsh 3D once')
     print("-"*80)
     gmsh_path = USER_DIR / 'moose-workdir/gmsh/bin/gmsh'
     gmsh_runner = GmshRunner(gmsh_path)

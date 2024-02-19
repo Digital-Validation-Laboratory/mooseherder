@@ -11,3 +11,5 @@ moose_config = MooseConfig(config)
 
 save_path = Path.cwd() / 'moose-config.json'
 moose_config.save_config(save_path)
+
+save_path = Path.home() / 'py-workdir' / 'pycave' / 'scripts' / 'moose-config.json'

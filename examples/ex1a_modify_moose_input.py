@@ -1,6 +1,6 @@
 """
 ==============================================================================
-EXAMPLE 1a: Modify input script for MOOSE with mooseherder
+EXAMPLE: Modify input script for MOOSE with mooseherder
 
 Author: Lloyd Fletcher
 ==============================================================================
@@ -15,7 +15,7 @@ def main() -> None:
     """main: modify moose input script and write modified file.
     """
     print("-"*80)
-    print("EXAMPLE 1a: Modify MOOSE input script")
+    print("EXAMPLE: Modify MOOSE input script")
     print("-"*80)
     moose_mod = InputModifier(MOOSE_INPUT, comment_char="#", end_char="")
 

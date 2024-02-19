@@ -49,6 +49,7 @@ def main():
 
     # Start the herd and create working directories
     herd = MooseHerd(sim_runners,input_modifiers,dir_manager)
+    herd.set_num_para_sims(n_para=4)
     # Don't have to clear directories on creation of the herd but we do so here
     # so that directory creation doesn't raise errors
     dir_manager.set_base_dir(Path('examples/'))

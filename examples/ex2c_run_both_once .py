@@ -1,6 +1,6 @@
 """
 ==============================================================================
-EXAMPLE 2c: Run gmsh+MOOSE once with mooseherder with MOOSE reading the gmsh
+EXAMPLE: Run gmsh+MOOSE once with mooseherder with MOOSE reading the gmsh
 generated mesh.
 
 Author: Lloyd Fletcher
@@ -19,8 +19,9 @@ def main():
     """main: run gmsh and moose once
     """
     print("-"*80)
-    print('EXAMPLE 2c: Run Gmsh+MOOSE once')
+    print('EXAMPLE: Run Gmsh+MOOSE once')
     print("-"*80)
+
     gmsh_path = USER_DIR / 'moose-workdir/gmsh/bin/gmsh'
     gmsh_runner = GmshRunner(gmsh_path)
 
@@ -33,21 +34,25 @@ def main():
 
     print('Running gmsh...')
     print()
+
     gmsh_start = time.perf_counter()
     gmsh_runner.run()
     gmsh_run_time = time.perf_counter()-gmsh_start
 
-
     config_path = Path.cwd() / 'moose-config.json'
+
     print(f'Reading MOOSE config from: \n{str(config_path)}\n')
+
     moose_config = MooseConfig()
     moose_config.read_config(config_path)
 
     print('Creating the MooseRunner with the specified config.\n')
+
     moose_runner = MooseRunner(moose_config)
 
 
     print('Setting the input file and run parallelisation options.\n')
+
     moose_runner.set_run_opts(n_tasks = 1,
                           n_threads = 4,
                           redirect_out = True)
