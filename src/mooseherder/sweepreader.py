@@ -88,6 +88,7 @@ class SweepReader:
             output_files = output_files + self.read_output_key(int(sweep_iter))
 
         self._output_files = output_files
+        #print(output_files)
         return self._output_files
 
 
@@ -224,7 +225,7 @@ class SweepReader:
         sweep_results = list([])
         for ll in self._output_files:
             for ff in ll:
-                if ff is not None:
+                if ff.exists():
                     sweep_results.append(self.read_results_once(ff,read_config))
 
         return sweep_results
