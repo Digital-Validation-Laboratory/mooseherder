@@ -73,7 +73,7 @@ p_ratio = 0.3
     type = Transient
     petsc_options_iname = '-pc_type'
     petsc_options_value = 'lu'
-    end_time = 5
+    end_time = 2
     dt = 1
 []
   

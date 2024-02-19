@@ -1,13 +1,21 @@
-# MOOSE output files
+# MOOSE config/output files
 *.e
-examples/moose-workdir-*
+examples/sim-workdir-*
 examples/*.csv
-scripts/moose-workdir-*
+scripts/sim-workdir-*
 scripts/*.csv
+tests/sim-workdir-*
 *.processor.*
+# Keep MOOSE output files used for pytest
+!examples/example_output/sim-workdir-*/*.e
+!tests/output/*.e
+!tests/output/sim-workdir-*/*.e
 
 # Gmsh output files
 *.msh
+
+# VS Code
+.vscode/
 
 # Byte-compiled / optimized / DLL files
 __pycache__/
