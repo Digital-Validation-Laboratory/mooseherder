@@ -1,6 +1,6 @@
 """
 ==============================================================================
-EXMAPLE 6: Run MOOSE once with mooseherder and read the exodus output
+EXMAPLE: Run MOOSE once with mooseherder and read the exodus output
 
 Author: Lloyd Fletcher
 ==============================================================================
@@ -19,7 +19,7 @@ def main() -> None:
     """main: run moose once and read the exodus output
     """
     print('='*80)
-    print('EXAMPLE 6: Run MOOSE once, read exodus.')
+    print('EXAMPLE: Run MOOSE once, read exodus.')
     print('='*80)
     print('Generating exodus output to read by running MOOSE once.')
 

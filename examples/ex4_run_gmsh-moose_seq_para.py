@@ -1,6 +1,6 @@
 '''
 ==============================================================================
-EXAMPLE 4: Run parallel gmsh+MOOSE simulation editing the gmsh parameters only
+EXAMPLE: Run parallel gmsh+MOOSE simulation editing the gmsh parameters only
 
 Author: Lloyd Fletcher, Rory Spencer
 ==============================================================================
@@ -20,7 +20,7 @@ def main():
     """main _summary_
     """
     print("-"*80)
-    print('EXAMPLE 4: Herd Setup')
+    print('EXAMPLE: Herd Setup')
     print("-"*80)
 
     # Setup MOOSE runner and input modifier
@@ -73,7 +73,7 @@ def main():
 
     print()
     print("-"*80)
-    print('EXAMPLE 4a: Run Gmsh+MOOSE once, modify gmsh only')
+    print('EXAMPLE: Run Gmsh+MOOSE once, modify gmsh only')
     print("-"*80)
 
     # Single run saved in moose-workdir-1
@@ -94,7 +94,7 @@ def main():
     print("-"*80)
     print()
     print("-"*80)
-    print('EXAMPLE 4c: Run MOOSE in parallel, modify gmsh only')
+    print('EXAMPLE: Run MOOSE in parallel, modify gmsh only')
     print("-"*80)
 
     # Run all variable combinations across 4 MOOSE instances with two runs saved in

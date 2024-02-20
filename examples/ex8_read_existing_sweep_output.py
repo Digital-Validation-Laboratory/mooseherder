@@ -1,6 +1,6 @@
 '''
 ==============================================================================
-EXAMPLE 8: Read existing sweep results
+EXAMPLE: Read existing sweep results
 
 Author: Lloyd Fletcher
 ==============================================================================
@@ -16,7 +16,7 @@ def main() -> None:
     """main:
     """
     print("-"*80)
-    print('EXAMPLE 8: Read Existing Sweep Results')
+    print('EXAMPLE: Read Existing Sweep Results')
     print("-"*80)
 
     base_dir = Path('examples/example_output/')

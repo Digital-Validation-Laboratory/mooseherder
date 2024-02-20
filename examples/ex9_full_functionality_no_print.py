@@ -18,6 +18,7 @@ USER_DIR = Path.home()
 
 def main() -> None:
     print('Start minimal full functionality example')
+
     moose_input = Path('scripts/moose/moose-mech-simple.i')
     moose_modifier = InputModifier(moose_input,'#','')
 

@@ -1,6 +1,6 @@
 '''
 ==============================================================================
-EXAMPLE 7b: Run MOOSE in parallel multiple times then read sweep results
+EXAMPLE: Run MOOSE in parallel multiple times then read sweep results
 
 Author: Lloyd Fletcher, Rory Spencer
 ==============================================================================
@@ -22,7 +22,7 @@ def main() -> None:
     """main: parallel herd run once and read
     """
     print("-"*80)
-    print('EXAMPLE 7b: Parallel Herd Setup & Run')
+    print('EXAMPLE: Parallel Herd Setup & Run')
     print("-"*80)
     # Setup the MOOSE input modifier and runner
     moose_input = Path('scripts/moose/moose-mech-simple.i')
@@ -73,7 +73,7 @@ def main() -> None:
         print('------------------------------------------')
 
     print("-"*80)
-    print('EXAMPLE 7b: Read Herd Sweep Output')
+    print('EXAMPLE: Read Herd Sweep Output')
     print("-"*80)
     sweep_reader = SweepReader(dir_manager,num_para_read=4)
     output_files = sweep_reader.read_all_output_keys()

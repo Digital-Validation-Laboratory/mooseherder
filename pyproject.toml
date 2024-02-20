@@ -4,7 +4,7 @@ build-backend = "setuptools.build_meta"
 
 [project]
 name = "mooseherder"
-version = "0.0.1"
+version = "0.1.0"
 description = "A python herder for calling MOOSE and gmsh to run parallel parametric sweeps of simulations."
 authors = [
   { name = "thescepticalrabbit", email = "thescepticalrabbit@gmail.com" },
