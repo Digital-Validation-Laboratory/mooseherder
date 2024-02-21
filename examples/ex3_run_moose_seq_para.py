@@ -1,6 +1,6 @@
 '''
 ==============================================================================
-EXAMPLE 3: Run MOOSE in sequential then parallel mode with mooseherder
+EXAMPLE: Run MOOSE in sequential then parallel mode with mooseherder
 
 Author: Lloyd Fletcher, Rory Spencer
 ==============================================================================
@@ -19,7 +19,7 @@ def main():
     """main: run moose once, sequential then parallel.
     """
     print("-"*80)
-    print('EXAMPLE 3: Herd Setup')
+    print('EXAMPLE: Herd Setup')
     print("-"*80)
 
     config_path = Path.cwd() / 'moose-config.json'
@@ -64,7 +64,7 @@ def main():
 
     print()
     print("-"*80)
-    print('EXAMPLE 3a: Run MOOSE once')
+    print('EXAMPLE: Run MOOSE once')
     print("-"*80)
 
     # Single run saved in moose-workdir-1
@@ -75,7 +75,7 @@ def main():
     print()
 
     print("-"*80)
-    print('EXAMPLE 3b: Run MOOSE sequentially')
+    print('EXAMPLE: Run MOOSE sequentially')
     print("-"*80)
 
     # Run all variable combinations (8) sequentially in moose-workdir-1
@@ -86,7 +86,7 @@ def main():
     print()
 
     print("-"*80)
-    print('EXAMPLE 3c: Run MOOSE in parallel')
+    print('EXAMPLE: Run MOOSE in parallel')
     print("-"*80)
 
     # Run all variable combinations across 4 MOOSE instances with two runs saved in
