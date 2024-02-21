@@ -8,8 +8,8 @@ version = "0.1.0"
 description = "A python herder for calling MOOSE and gmsh to run parallel parametric sweeps of simulations."
 authors = [
   { name = "thescepticalrabbit", email = "thescepticalrabbit@gmail.com" },
-  { name = "fusmatrs", email = ""},
-  { name = "lukethehuman", email = ""},
+  { name = "fusmatrs", email = "rory.spencer@ukaea.uk"},
+  { name = "lukethehuman", email = "luke.humphrey@ukaea.uk"},
 ]
 license = { file = "LICENSE" }
 readme = "README.md"
