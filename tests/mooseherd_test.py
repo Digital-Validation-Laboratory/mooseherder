@@ -116,13 +116,13 @@ def test_create_herd_gmsh(herd_gmsh: MooseHerd) -> None:
     assert herd_gmsh is not None
 
 
-def test_set_input_copy_name(herd: MooseHerd) -> None:
-    new_name = 'sim-name'
-    herd.set_input_copy_name(new_name)
-    assert herd._input_name == new_name
+def test_set_input_copy_names(herd: MooseHerd) -> None:
+    new_names = ['sim-name']
+    herd.set_input_copy_names(new_names)
+    assert herd._input_names == new_names
 
-    herd.set_input_copy_name()
-    assert herd._input_name == 'sim'
+    herd.set_input_copy_names()
+    assert herd._input_names == ['sim-1']
 
 
 def test_set_keep_flag(herd: MooseHerd) -> None:

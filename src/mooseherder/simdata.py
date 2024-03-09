@@ -73,14 +73,15 @@ class SimData:
 
 @dataclass
 class SimReadConfig:
-    """ Used to specify names of variables to be read into the SimData class.
+    """ Used to specify na mes of variables to be read into the SimData class.
         This class allows the user to only extract the required variables by
         name.
     """
+    time: bool | None = True
+    coords: bool | None = True
+    connect: bool | None = True
     sidesets: npt.NDArray | None = None
     node_vars: npt.NDArray | None = None
     elem_vars: list[tuple[str,int]] | None = None
     glob_vars: npt.NDArray | None = None
 
-
-#TODO: add conversion to Rory's pycoatl format -> spatial data.

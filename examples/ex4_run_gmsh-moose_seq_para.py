@@ -24,7 +24,6 @@ def main():
     print("-"*80)
 
     # Setup MOOSE runner and input modifier
-
     moose_input = Path('scripts/moose/moose-mech-gmsh.i')
     moose_modifier = InputModifier(moose_input,'#','')
 

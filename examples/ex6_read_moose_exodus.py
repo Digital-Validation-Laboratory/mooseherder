@@ -9,11 +9,17 @@ import time
 from pprint import pprint
 from pathlib import Path
 import numpy as np
+from typing import Any
 from mooseherder import MooseRunner
 from mooseherder import MooseConfig
 from mooseherder import ExodusReader
 
 USER_DIR = Path.home()
+
+
+def print_attrs(in_obj: Any) -> None:
+    _ = [print(aa) for aa in dir(in_obj) if '__' not in aa]
+
 
 def main() -> None:
     """main: run moose once and read the exodus output
@@ -57,7 +63,7 @@ def main() -> None:
     pprint(type(all_sim_data))
     print()
     print('Attributes of SimData:')
-    [print(aa) for aa in dir(all_sim_data) if '__' not in aa]
+    print_attrs(all_sim_data)
     print()
 
     print('Read only specific node/element/global variables using SimReadConfig.')
@@ -66,7 +72,7 @@ def main() -> None:
     pprint(type(read_config))
     print()
     print('Attributes of SimReadConfig:')
-    [print(aa) for aa in dir(read_config) if '__' not in aa]
+    print_attrs(read_config)
     print()
 
     print('Set any attribute of SimReadConfig to None to not read data.')
@@ -74,6 +80,27 @@ def main() -> None:
     read_config.elem_vars = None
     sim_data = exodus_reader.read_sim_data(read_config)
     print(f'sim_data.elem_vars = {sim_data.elem_vars}')
+    print()
+
+    print('The attributes of SimReadConfig for time, coords and connect ')
+    print('can be set to None or False to not be read or True to be read.')
+    print('Here we turn off reading for time, coords and connect:')
+    read_config.time = False
+    read_config.coords = False
+    read_config.connect = False
+    sim_data = exodus_reader.read_sim_data(read_config)
+    print(f'sim_data.time = {sim_data.time}')
+    print(f'sim_data.coords = {sim_data.coords}')
+    print(f'sim_data.connect = {sim_data.connect}')
+    print()
+    print('Turning back on reading for time, coords and connect.')
+    read_config.time = True
+    read_config.coords = True
+    read_config.connect = True
+    sim_data = exodus_reader.read_sim_data(read_config)
+    print(f'sim_data.time = {sim_data.time}')
+    print(f'sim_data.coords = {sim_data.coords}')
+    print(f'sim_data.connect = {sim_data.connect}')
     print()
 
     print('Set attributes of SimReadConfig to a list of names as np.array')
@@ -85,9 +112,9 @@ def main() -> None:
     print()
 
     print('Element variables are an exception as they also need a block.')
-    read_config.elem_vars = [('strain_xx',1),('stress_yy',1)]
+    read_config.elem_vars = [('strain_xx',1),('strain_yy',1)]
     sim_data = exodus_reader.read_sim_data(read_config)
-    print("sim_data.elem_vars[('stress_xx',1)] = ")
+    print("sim_data.elem_vars[('strain_xx',1)] = ")
     pprint(sim_data.elem_vars[('strain_xx',1)]) # type: ignore
     print()
 

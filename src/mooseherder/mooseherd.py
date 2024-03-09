@@ -16,6 +16,11 @@ from mooseherder.simrunner import SimRunner
 from mooseherder.inputmodifier import InputModifier
 
 
+class MooseHerdError(Exception):
+    """MooseHerdError: custom error class for flagging errors with the moose
+    herd.
+    """
+
 class MooseHerd:
     """ MooseHerd class that can run parametric sweeps of simulation chains in
     parallel with configurable parallelisation options. Takes a list of
@@ -45,9 +50,13 @@ class MooseHerd:
         self._modifiers = input_mods
         self._dir_manager = dir_manager
 
+        if len(self._runners) != len(self._modifiers):
+            raise MooseHerdError('The sim runner list and the input modifier '+
+                                 'list must be the same length')
+
         self._n_para_sims = 2
 
-        self._input_name = 'sim'
+        self._input_names = [f'sim-{ii+1}' for ii,_ in enumerate(sim_runners)]
 
         self._keep_all = True
 
@@ -60,16 +69,30 @@ class MooseHerd:
         self._iter_run_time = -1.0
 
 
-    def set_input_copy_name(self, input_name: str = 'sim') -> None:
+    def set_input_copy_names(self, input_names: list[str] | None = None) -> None:
         """set_input_copy_name: sets the name that will be used when copying
         input files to the working directories for the sweep. The defualt name
-        is 'sim' so the first combination of variables in the simulation chain
-        will be called 'sim-1'.
+        is 'sim-i' so the first combination of variables in the simulation chain
+        will be called 'sim-1-1'.
 
         Args:
-            input_name (str, optional): _description_. Defaults to 'sim'.
+            input_names (list[str] | None, optional): List of name prefixes to
+                be used for the simulation files. Defaults to None.
+
+        Raises:
+            MooseHerdError: The lengths of the sim runner list and the input
+                modifier lists are not the same.
         """
-        self._input_name = input_name
+        if input_names is None:
+            self._input_names = [f'sim-{ii+1}' for ii,_ in enumerate(self._runners)]
+            return
+
+        if len(input_names) != len(self._runners):
+            raise MooseHerdError(f'The length of the input names ({len(input_names)})'
+                                 'must match the length of the sim runners ' +
+                                 f'and input modifiers ({len(self._runners)})')
+
+        self._input_names = input_names
 
 
     def set_keep_flag(self, keep_all: bool = True) -> None:
@@ -154,14 +177,11 @@ class MooseHerd:
         """
         name = self._get_process_name()
 
-        # If we are calling this from main we need to set the process number
         if name == 'MainProcess':
             worker_num = '1'
         else:
             worker_num = name.split('-',1)[1]
 
-        # Process number keeps increasing so need to update with
-        # multiple calls to run_para/seq
         if int(worker_num) > self._n_para_sims:
             worker_num = str((int(worker_num) % self._n_para_sims)+1)
 
@@ -250,7 +270,7 @@ class MooseHerd:
         run_files = list([])
         for ii,mm in enumerate(self._modifiers):
             ext = mm.get_input_file().suffix
-            run_files.append(run_dir / (self._input_name +'-'+run_num+ext))
+            run_files.append(run_dir / (self._input_names[ii] +'-'+run_num+ext))
             self._mod_input(mm,var_list[ii],run_files[ii])
 
         output_list = list([])
@@ -284,7 +304,7 @@ class MooseHerd:
 
 
     def _end_sweep(self, start_sweep_time: float,
-                   output_files: list[list[Path]]) -> None:
+                   output_files: list[list[Path | None]]) -> None:
         """_end_sweep: helper function called at the end of runseq/para.
         Reacords the sweep run time. Increments the iteration counters. and
         writes the output key and sweep variables to the first workers

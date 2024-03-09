@@ -164,7 +164,7 @@ class DirectoryManager:
         return self._run_dirs[dir_num]
 
 
-    def set_output_paths(self, output_paths: list[list[Path]]) -> None:
+    def set_output_paths(self, output_paths: list[list[Path | None]]) -> None:
         """set_output_paths: sets the list of lists to the simulation output
         based on herder input.
 
@@ -176,7 +176,7 @@ class DirectoryManager:
         self._output_paths = output_paths
 
 
-    def get_output_paths(self) -> list[list[Path]]:
+    def get_output_paths(self) -> list[list[Path | None]]:
         """get_output_paths: returns the list of lists to the simulation output
         files.
 
@@ -250,7 +250,8 @@ class DirectoryManager:
 
 
 
-def output_paths_to_str(output_files: list[list[Path]]) -> list[list[str]]:
+def output_paths_to_str(output_files: list[list[Path | None]]
+                        ) -> list[list[str | None]]:
     """output_paths_to_str: helper function for converting the output paths
     to strings to allow them to be saved as json.
 
@@ -264,14 +265,18 @@ def output_paths_to_str(output_files: list[list[Path]]) -> list[list[str]]:
     for sim_iter in output_files:
         iter_output = list([])
         for output_path in sim_iter:
-            iter_output.append(str(output_path))
+            if output_path is None:
+                iter_output.append(None)
+            else:
+                iter_output.append(str(output_path))
 
         str_output.append(iter_output)
 
     return str_output
 
 
-def output_str_to_paths(output_files: list[list[str]]) -> list[list[Path]]:
+def output_str_to_paths(output_files: list[list[str | None]]
+                        ) -> list[list[Path | None]]:
     """output_str_to_paths: helper function to convert strings read from output
     key json to paths.
 
@@ -287,7 +292,10 @@ def output_str_to_paths(output_files: list[list[str]]) -> list[list[Path]]:
     for sim_iter in output_files:
         iter_output = list([])
         for output_path in sim_iter:
-            iter_output.append(Path(output_path))
+            if output_path is None:
+                iter_output.append(None)
+            else:
+                iter_output.append(Path(output_path))
 
         str_output.append(iter_output)
 
