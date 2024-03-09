@@ -13,6 +13,11 @@ import numpy.typing as npt
 class SimData:
     """ Data class for finite element simulation output.
     """
+    num_spat_dims: int = 3
+    ''' Number of spatial dimensions in the simulation, required to determine
+    element types given that all coords are padded to [x,y,z]. Allows for 2D and
+    1D simulations using any combination of the [x,y,z] axes.
+    '''
 
     time: npt.NDArray | None = None
     ''' Vector of time steps with dimensions [t].

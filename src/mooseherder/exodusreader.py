@@ -311,7 +311,7 @@ class ExodusReader(OutputReader):
         blocks = [ii+1 for ii in range(self.get_num_elem_blocks())] # type: ignore
         names_blocks = list([])
 
-        for nn in self.get_elem_var_names():
+        for nn in self.get_elem_var_names(): # type: ignore
             for bb in blocks:
                 names_blocks.append((str(nn),bb))
 
@@ -424,7 +424,7 @@ class ExodusReader(OutputReader):
         return self.get_glob_vars(self.get_glob_var_names())
 
 
-    def get_coords(self) -> np.ndarray:
+    def get_coords(self) -> tuple[np.ndarray,int]:
         """Gets the nodal coordinates in each spatial dimension setting any
         undefined dimensions to zeros.
 
@@ -451,9 +451,7 @@ class ExodusReader(OutputReader):
         y = self._expand_coord(y,num_coords)
         z = self._expand_coord(z,num_coords)
 
-        self.coords = np.vstack((x,y,z)).T
-
-        return self.coords
+        return (np.vstack((x,y,z)).T,num_coords)
 
 
     def _expand_coord(self, coord: np.ndarray, dim: int) -> np.ndarray:
@@ -532,7 +530,7 @@ class ExodusReader(OutputReader):
         if read_config.time:
             data.time = self.get_time()
         if read_config.coords:
-            data.coords = self.get_coords()
+            (data.coords,data.num_spat_dims) = self.get_coords()
         if read_config.connect:
             data.connect = self.get_connectivity()
 
@@ -553,7 +551,7 @@ class ExodusReader(OutputReader):
         data = SimData()
 
         data.time = self.get_time()
-        data.coords = self.get_coords()
+        (data.coords,data.num_spat_dims) = self.get_coords()
         data.connect = self.get_connectivity()
         data.side_sets = self.get_all_sidesets()
         data.node_vars = self.get_all_node_vars()
