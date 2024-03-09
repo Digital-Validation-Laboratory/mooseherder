@@ -179,7 +179,7 @@ class SweepReader:
 
     def read_results_once(self,
                           output_files: list[Path | None],
-                          read_configs: list[SimReadConfig] | None = None
+                          read_config: SimReadConfig | None = None
                           ) -> list[SimData | None]:
         """read_results_once: reads a specific simulation at the specified
         path based on the specified read configuration. If the read
@@ -194,23 +194,23 @@ class SweepReader:
         """
         data_list = list([])
 
-        for ii,ff in enumerate(output_files):
+        for ff in output_files:
             if ff is None:
                 data_list.append(None)
             else:
                 #TODO: replace with output reader ABC
                 reader = ExodusReader(ff)
-                if read_configs is None:
+                if read_config is None:
                     data_list.append(reader.read_all_sim_data())
                 else:
-                    data_list.append(reader.read_sim_data(read_configs[ii]))
+                    data_list.append(reader.read_sim_data(read_config))
 
         return data_list
 
 
     def read_results_sequential(self,
                                 sweep_iter: int | None = None,
-                                read_configs: list[list[SimReadConfig]] | None = None
+                                read_config: SimReadConfig | None = None
                                 ) -> list[list[SimData]]:
         """read_results_sequential: reads the variable sweep results
         sequentially. Can read a specific iteration with a specific read config
@@ -232,17 +232,14 @@ class SweepReader:
 
         sweep_results = list([])
         for ii,ff in enumerate(self._output_files):
-            if read_configs is None:
-                sweep_results.append(self.read_results_once(ff,None))
-            else:
-                sweep_results.append(self.read_results_once(ff,read_configs[ii]))
+            sweep_results.append(self.read_results_once(ff,read_config))
 
         return sweep_results
 
 
     def read_results_para(self,
                           sweep_iter: int | None = None,
-                          read_configs: list[list[SimReadConfig]] | None = None
+                          read_config: SimReadConfig | None = None
                           ) -> list[list[SimData]]:
         """read_results_para: reads the variable sweep results in parallel
         Can read a specific iteration with a specific read config but defaults
@@ -263,13 +260,9 @@ class SweepReader:
 
         with Pool(self._n_para_read) as pool:
             processes = list([])
-            for ii,ff in enumerate(self._output_files):
-                if read_configs is None:
+            for ff in self._output_files:
                     processes.append(pool.apply_async(
-                        self.read_results_once, args=(ff,None)))
-                else:
-                    processes.append(pool.apply_async(
-                        self.read_results_once, args=(ff,read_configs[ii])))
+                        self.read_results_once, args=(ff,read_config)))
 
             sweep_results = [pp.get() for pp in processes]
 

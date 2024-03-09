@@ -1,6 +1,6 @@
 '''
 ==============================================================================
-EXAMPLE: Run MOOSE in sequential then parallel mode then read sweep results
+EXAMPLE: Run Gmsh+MOOSE in parallel multiple times then read sweep results
 
 Author: Lloyd Fletcher, Rory Spencer
 ==============================================================================
@@ -8,20 +8,20 @@ Author: Lloyd Fletcher, Rory Spencer
 import time
 from pathlib import Path
 from pprint import pprint
-import numpy as np
 from mooseherder import MooseHerd
 from mooseherder import MooseRunner
 from mooseherder import MooseConfig
-from mooseherder import GmshRunner
 from mooseherder import InputModifier
+from mooseherder import GmshRunner
 from mooseherder import DirectoryManager
-from mooseherder import SweepReader
 from mooseherder import ExodusReader
+from mooseherder import SweepReader
 
+NUM_PARA_RUNS = 3
 USER_DIR = Path.home()
 
 def main() -> None:
-    """main: parallel herd run once and read
+    """main: parallel herd run multiple times and read
     """
     print("-"*80)
     print('EXAMPLE: Parallel Herd Setup & Run')
@@ -72,65 +72,44 @@ def main() -> None:
 
     print('Herd sweep variables:')
     pprint(var_sweep)
-
-    print()
-    print('Running MOOSE in parallel.')
-    herd.run_para(var_sweep)
-
-    print(f'Run time (parallel) = {herd.get_sweep_time():.3f} seconds')
-    print("-"*80)
     print()
 
+    # Run all variable combinations across 4 MOOSE instances with two runs saved in
+    # each moose-workdir
+    for rr in range(NUM_PARA_RUNS):
+        herd.run_para(var_sweep)
+
+        print(f'Run time (para {rr+1}) = {herd.get_sweep_time():.3f} seconds')
+        print('------------------------------------------')
+
     print("-"*80)
-    print('EXAMPLE: Read Herd Output')
+    print('EXAMPLE: Read Herd Sweep Output')
     print("-"*80)
     sweep_reader = SweepReader(dir_manager,num_para_read=4)
     output_files = sweep_reader.read_all_output_keys()
-
+    print('Extracting SimReadConfig from the first moose run at:')
+    print(output_files[0][1])
+    print()
     read_config = ExodusReader(output_files[0][1]).get_read_config()
-    read_config.time_inds = np.array([0,2])
+    #TODO: modify the read config here
 
     print('Herd output files (from output_keys.json):')
     pprint(output_files)
     print()
 
     print("-"*80)
-    print('Reading the first output file, no SimReadConfig = read all.')
-    print('Returns the first sim chain as list of SimData objects.')
-    print()
-    sim_data_chain = sweep_reader.read_results_once(output_files[1])
-    print(sim_data_chain[0])
-    print()
-
-    print("-"*80)
-    print('Reading all output files sequentially as a list(SimData).')
-    print('All function parameters blank to read everything.')
-    print()
-    start_time = time.perf_counter()
-    sweep_results_seq = sweep_reader.read_results_sequential(read_config=read_config)
-    read_time_seq = time.perf_counter() - start_time
-
-    print(f'Number of simulations read: {len(sweep_results_seq):d}')
-
-    print("-"*80)
     print('Reading all output files in parallel as list(SimData).')
-    print('All function parameters blank to read everything.')
     print()
-
     start_time = time.perf_counter()
-    sweep_results_para = sweep_reader.read_results_para(read_config=read_config)
+    read_all = sweep_reader.read_results_para()
     read_time_para = time.perf_counter() - start_time
 
-    print(f'Number of simulations outputs: {len(sweep_results_para):d}')
-
+    print(f'Number of simulations outputs: {len(read_all):d}')
     print()
     print("="*80)
-    print(f'Read time sequential = {read_time_seq:.6f} seconds')
     print(f'Read time parallel   = {read_time_para:.6f} seconds')
     print("="*80)
     print()
-
-    print(sweep_results_para[0][1].node_vars['disp_x'].shape)
 
 
 if __name__ == '__main__':

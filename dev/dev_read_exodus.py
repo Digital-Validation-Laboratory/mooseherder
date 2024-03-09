@@ -69,7 +69,12 @@ def main() -> None:
     print_attrs(read_config)
     print()
 
+    read_config.time_inds = np.array([0,2])
     sim_data = exodus_reader.read_sim_data(read_config)
+    print('simdata.time=')
+    print(sim_data.time)
+    print(sim_data.node_vars['disp_x'].shape)
+    print(sim_data.node_vars['disp_y'].shape)
     print()
 
 

@@ -6,7 +6,7 @@ Authors: Lloyd Fletcher
 ===============================================================================
 """
 from dataclasses import dataclass
-import numpy.typing as npt
+import numpy as np
 
 
 @dataclass
@@ -19,18 +19,18 @@ class SimData:
     1D simulations using any combination of the [x,y,z] axes.
     '''
 
-    time: npt.NDArray | None = None
+    time: np.ndarray | None = None
     ''' Vector of time steps with dimensions [t].
         Defaults to None.
     '''
 
-    coords: npt.NDArray | None = None
+    coords: np.ndarray | None = None
     ''' Array of nodal coordinates in N by 3 where N is the number of nodes
         columns are [x,y,z] coordinates and rows are the nth node.
         Defaults to None.
     '''
 
-    connect: dict[str,npt.NDArray] | None = None
+    connect: dict[str,np.ndarray] | None = None
     ''' Element connectivity table:
         key = 'connectX' where X is the subdomain e.g. connect1
         Element table given as E by n_e rows where E is the number of elements
@@ -38,7 +38,7 @@ class SimData:
         Defaults to None.
     '''
 
-    side_sets: dict[tuple[str,str],npt.NDArray] | None = None
+    side_sets: dict[tuple[str,str],np.ndarray] | None = None
     ''' Sidesets by name and associated node and element numbers.
         key = (name, 'node' or 'elem') e.g. ('bottom','node') will return node
         numbers associated with associated with sideset called 'bottom' as a
@@ -47,7 +47,7 @@ class SimData:
         Defaults to None.
     '''
 
-    node_vars: dict[str,npt.NDArray] | None = None
+    node_vars: dict[str,np.ndarray] | None = None
     ''' Nodal variable by name.
         key = 'name' e.g. 'disp_x' or 'temp'
         Gives the nodal variable as a numpy array, N by t where N is the number
@@ -57,7 +57,7 @@ class SimData:
         Defaults to None.
     '''
 
-    elem_vars: dict[tuple[str,int],npt.NDArray] | None = None
+    elem_vars: dict[tuple[str,int],np.ndarray] | None = None
     ''' Element variables by name and block.
         key = (name, block num)
         Gives the element variable as a numpy array, E by t where E is the
@@ -67,7 +67,7 @@ class SimData:
         Defaults to None.
     '''
 
-    glob_vars: dict[str,npt.NDArray] | None = None
+    glob_vars: dict[str,np.ndarray] | None = None
     ''' Global variables by name. Global variable include postprocessors and
         extracted reactions at boundaries.
         key = name (as specified in input file post-processor), e.g. 'react_y'
@@ -85,8 +85,9 @@ class SimReadConfig:
     time: bool | None = True
     coords: bool | None = True
     connect: bool | None = True
-    sidesets: npt.NDArray | None = None
-    node_vars: npt.NDArray | None = None
+    sidesets: np.ndarray | None = None
+    node_vars: np.ndarray | None = None
     elem_vars: list[tuple[str,int]] | None = None
-    glob_vars: npt.NDArray | None = None
+    glob_vars: np.ndarray | None = None
+    time_inds: np.ndarray | None = None
 

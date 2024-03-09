@@ -192,8 +192,15 @@ class ExodusReader(OutputReader):
             node_key = self.get_key(nn,all_names,node_key_tag)
             elem_key = self.get_key(nn,all_names,elem_key_tag)
 
-            side_sets[(nn,'node')] = self.get_var(node_key)
-            side_sets[(nn,'elem')] = self.get_var(elem_key)
+            if node_key is None:
+                side_sets[(nn,'node')] = None
+            else:
+                side_sets[(nn,'node')] = self.get_var(node_key)
+
+            if elem_key is None:
+                side_sets[(nn,'elem')] = None
+            else:
+                side_sets[(nn,'elem')] = self.get_var(elem_key)
 
         return side_sets
 
@@ -224,7 +231,10 @@ class ExodusReader(OutputReader):
         return self.get_names('name_nod_var')
 
 
-    def get_node_vars(self, names: np.ndarray | None) -> dict[str,np.ndarray] | None:
+    def get_node_vars(self,
+                      names: np.ndarray | None,
+                      time_inds: np.ndarray | None  = None
+                      ) -> dict[str,np.ndarray] | None:
         """get_node_vars: gets the specified nodal variables as a dictionary
         keyed by the variable name (e.g. 'disp_x') where the nodal variable is
         given as a numpy array of dimensions NxT where N is the number of nodes
@@ -250,7 +260,7 @@ class ExodusReader(OutputReader):
         for nn in names: # type: ignore
             inds = np.where(all_names == nn)[0]
             key = f'{key_tag}{inds[0]+1:d}'
-            vars[nn] = self.get_var(key)
+            vars[nn] = self.get_var(key,time_inds)
 
         return vars
 
@@ -318,7 +328,9 @@ class ExodusReader(OutputReader):
         return names_blocks
 
 
-    def get_elem_vars(self, names_blocks: list[tuple[str,int]] | None
+    def get_elem_vars(self,
+                      names_blocks: list[tuple[str,int]] | None,
+                      time_inds: np.ndarray | None = None
                       ) -> dict[tuple[str,int],np.ndarray] | None:
         """get_elem_vars: gets the element variables as a dictionary keyed by
         tuples which containg the element variable name and the block number.
@@ -346,7 +358,7 @@ class ExodusReader(OutputReader):
         vars = dict({})
         for nn in names_blocks:
             key = self.get_key(nn[0],all_names,key_tag) + f'eb{nn[1]:d}' # type: ignore
-            vars[nn] = self.get_var(key)
+            vars[nn] = self.get_var(key,time_inds)
 
         return vars
 
@@ -380,7 +392,9 @@ class ExodusReader(OutputReader):
         return self.get_names('name_glo_var')
 
 
-    def get_glob_vars(self, names: np.ndarray | None
+    def get_glob_vars(self,
+                      names: np.ndarray | None,
+                      time_inds: np.ndarray | None  = None
                       ) -> dict[str, np.ndarray] | None:
         """get_glob_vars: gets the specified global variables as a dictionary
         keyed by the variable name specified in the MOOSE input file. The data
@@ -406,7 +420,12 @@ class ExodusReader(OutputReader):
         glob_vars = dict({})
         for nn in names: # type: ignore
             inds = np.where(all_names == nn)[0]
-            glob_vars[nn] = np.array(self._data.variables[key][:,inds[0]])
+            if time_inds is None:
+                glob_vars[nn] = np.array(self._data.variables[key][:,inds[0]])
+            else:
+                data = np.array(self._data.variables[key][:,inds[0]])
+                data = data[time_inds]
+                glob_vars[nn] = data
 
         return glob_vars
 
@@ -473,7 +492,7 @@ class ExodusReader(OutputReader):
         return coord
 
 
-    def get_time(self) -> np.ndarray:
+    def get_time(self, time_inds: np.ndarray | None = None) -> np.ndarray:
         """Get a vector of simulation time steps.
 
         Returns:
@@ -481,10 +500,15 @@ class ExodusReader(OutputReader):
                 of time steps and the values of the elements are the simulation
                 time and each time step.
         """
+        time_steps = np.array([]
+                              )
         if 'time_whole' in self._data.variables:
-            return np.array(self._data.variables['time_whole'])
+            time_steps = np.array(self._data.variables['time_whole'])
 
-        return np.array([])
+            if time_inds is not None:
+                time_steps = time_steps[time_inds]
+
+        return time_steps
 
 
     def print_vars(self) -> None:
@@ -528,16 +552,20 @@ class ExodusReader(OutputReader):
         data = SimData()
 
         if read_config.time:
-            data.time = self.get_time()
+            data.time = self.get_time(read_config.time_inds)
         if read_config.coords:
             (data.coords,data.num_spat_dims) = self.get_coords()
         if read_config.connect:
             data.connect = self.get_connectivity()
 
         data.side_sets = self.get_sidesets(read_config.sidesets)
-        data.node_vars = self.get_node_vars(read_config.node_vars)
-        data.elem_vars = self.get_elem_vars(read_config.elem_vars)
-        data.glob_vars = self.get_glob_vars(read_config.glob_vars)
+
+        data.node_vars = self.get_node_vars(read_config.node_vars,
+                                            read_config.time_inds)
+        data.elem_vars = self.get_elem_vars(read_config.elem_vars,
+                                            read_config.time_inds)
+        data.glob_vars = self.get_glob_vars(read_config.glob_vars,
+                                            read_config.time_inds)
 
         return data
 

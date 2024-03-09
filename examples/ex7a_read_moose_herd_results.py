@@ -83,7 +83,7 @@ def main() -> None:
     print("-"*80)
     print('Reading the first output file, no SimReadConfig = read all.')
     print('Returns as SimData object.')
-    single_sim_data = sweep_reader.read_results_once(output_files[0][0])
+    single_sim_data = sweep_reader.read_results_once(output_files[0])
     print(type(single_sim_data))
     print()
 
