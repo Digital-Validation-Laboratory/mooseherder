@@ -9,9 +9,9 @@ Author: Lloyd Fletcher
 import time
 import os, shutil
 from pathlib import Path
-from mooseherder import MooseConfig
-from mooseherder import GmshRunner
-from mooseherder import MooseRunner
+from mooseherder import (MooseConfig,
+                        GmshRunner,
+                        MooseRunner)
 
 USER_DIR = Path.home()
 

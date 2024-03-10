@@ -6,12 +6,12 @@ Author: Lloyd Fletcher
 ==============================================================================
 """
 from pathlib import Path
-from mooseherder import MooseHerd
-from mooseherder import MooseRunner
-from mooseherder import MooseConfig
-from mooseherder import InputModifier
-from mooseherder import DirectoryManager
-from mooseherder import SweepReader
+from mooseherder import (MooseHerd,
+                         MooseRunner,
+                         MooseConfig,
+                         InputModifier,
+                         DirectoryManager,
+                         SweepReader)
 
 NUM_PARA_RUNS = 3
 USER_DIR = Path.home()

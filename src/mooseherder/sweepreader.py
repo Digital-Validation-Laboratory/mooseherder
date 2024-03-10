@@ -164,6 +164,8 @@ class SweepReader:
             if search_str in ff:
                 found_files.append(Path(ff))
 
+        found_files.sort()
+
         return found_files
 
 
@@ -190,7 +192,9 @@ class SweepReader:
             read_config (SimReadConfig | None): class to specify the data to read
 
         Returns:
-            SimData: data class for holding the simulation data.
+            list[SimData | None]: list of data classes holding the simulation
+                data for each simulation in the chain. Will be None for a pre-
+                processor like Gmsh that has not output.
         """
         data_list = list([])
 
@@ -253,8 +257,9 @@ class SweepReader:
                 to None.
 
         Returns:
-            list[SimData]: list of SimData objects containing the simulation
-                results corresponding to each combination of variables
+            list[list[SimData]]: list of lists of SimData objects containing the
+                simulation results corresponding to each combination of
+                variables.
         """
         self._start_read_output_keys(sweep_iter)
 

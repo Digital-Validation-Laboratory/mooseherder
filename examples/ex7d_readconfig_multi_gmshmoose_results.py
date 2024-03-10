@@ -1,6 +1,7 @@
 '''
 ==============================================================================
 EXAMPLE: Run Gmsh+MOOSE in parallel multiple times then read sweep results
+with a specific read config to extract certain time steps.
 
 Author: Lloyd Fletcher, Rory Spencer
 ==============================================================================
@@ -8,14 +9,16 @@ Author: Lloyd Fletcher, Rory Spencer
 import time
 from pathlib import Path
 from pprint import pprint
-from mooseherder import MooseHerd
-from mooseherder import MooseRunner
-from mooseherder import MooseConfig
-from mooseherder import InputModifier
-from mooseherder import GmshRunner
-from mooseherder import DirectoryManager
-from mooseherder import ExodusReader
-from mooseherder import SweepReader
+import numpy as np
+
+from mooseherder import (MooseHerd,
+                         MooseRunner,
+                         MooseConfig,
+                         InputModifier,
+                         GmshRunner,
+                         DirectoryManager,
+                         ExodusReader,
+                         SweepReader)
 
 NUM_PARA_RUNS = 3
 USER_DIR = Path.home()
@@ -26,6 +29,7 @@ def main() -> None:
     print("-"*80)
     print('EXAMPLE: Parallel Herd Setup & Run')
     print("-"*80)
+
     # Setup the MOOSE input modifier and runner
     moose_input = Path('scripts/moose/moose-mech-simple.i')
     moose_modifier = InputModifier(moose_input,'#','')
@@ -85,27 +89,47 @@ def main() -> None:
     print("-"*80)
     print('EXAMPLE: Read Herd Sweep Output')
     print("-"*80)
+
     sweep_reader = SweepReader(dir_manager,num_para_read=4)
     output_files = sweep_reader.read_all_output_keys()
-    print('Extracting SimReadConfig from the first moose run at:')
-    print(output_files[0][1])
-    print()
-    read_config = ExodusReader(output_files[0][1]).get_read_config()
-    #TODO: modify the read config here
 
     print('Herd output files (from output_keys.json):')
     pprint(output_files)
     print()
 
+    print('Extracting SimReadConfig from the first moose run at:')
+    print(output_files[0][1])
+    print()
+
+    exodus_reader = ExodusReader(output_files[0][1]) # type: ignore
+    read_config = exodus_reader.get_read_config()
+
+    sim_time = exodus_reader.get_time()
+    read_config.time_inds = np.arange(0,sim_time.shape[0],2) # type: ignore
+
+    print('Simulation time steps from the first MOOSE run:')
+    print('sim_time=')
+    print(sim_time)
+    print()
+
+    print('Indices of the time steps that will be extracted from the sims.')
+    print('read_config.time_inds=')
+    print(read_config.time_inds)
+    print()
+
     print("-"*80)
     print('Reading all output files in parallel as list(SimData).')
     print()
+
     start_time = time.perf_counter()
-    read_all = sweep_reader.read_results_para()
+    read_all = sweep_reader.read_results_para(read_config=read_config)
     read_time_para = time.perf_counter() - start_time
 
     print(f'Number of simulations outputs: {len(read_all):d}')
+    print('Time steps extracted from the first MOOSE simulation:')
+    print(read_all[0][1].time)
     print()
+
     print("="*80)
     print(f'Read time parallel   = {read_time_para:.6f} seconds')
     print("="*80)

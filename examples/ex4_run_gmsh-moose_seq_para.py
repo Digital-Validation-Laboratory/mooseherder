@@ -6,13 +6,12 @@ Author: Lloyd Fletcher, Rory Spencer
 ==============================================================================
 '''
 from pathlib import Path
-from mooseherder import MooseHerd
-from mooseherder import MooseRunner
-from mooseherder import MooseConfig
-from mooseherder import GmshRunner
-from mooseherder import InputModifier
-from mooseherder import DirectoryManager
-
+from mooseherder import (MooseHerd,
+                         MooseRunner,
+                         MooseConfig,
+                         GmshRunner,
+                         InputModifier,
+                         DirectoryManager)
 
 USER_DIR = Path.home()
 

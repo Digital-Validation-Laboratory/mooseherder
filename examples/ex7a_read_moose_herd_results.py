@@ -8,12 +8,12 @@ Author: Lloyd Fletcher, Rory Spencer
 import time
 from pathlib import Path
 from pprint import pprint
-from mooseherder import MooseHerd
-from mooseherder import MooseRunner
-from mooseherder import MooseConfig
-from mooseherder import InputModifier
-from mooseherder import DirectoryManager
-from mooseherder import SweepReader
+from mooseherder import (MooseHerd,
+                         MooseRunner,
+                         MooseConfig,
+                         InputModifier,
+                         DirectoryManager,
+                         SweepReader)
 
 USER_DIR = Path.home()
 

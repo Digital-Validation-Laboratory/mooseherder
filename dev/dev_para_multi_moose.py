@@ -21,7 +21,7 @@ from mooseherder import ExodusReader
 USER_DIR = Path.home()
 
 def main() -> None:
-    """main: parallel herd run once and read
+    """main: parallel herd run multiple times and read
     """
     print("-"*80)
     print('EXAMPLE: Parallel Herd Setup & Run')
@@ -72,6 +72,7 @@ def main() -> None:
 
     print('Herd sweep variables:')
     pprint(var_sweep)
+    print()
 
     print()
     print('Running MOOSE in parallel.')
@@ -87,7 +88,7 @@ def main() -> None:
     sweep_reader = SweepReader(dir_manager,num_para_read=4)
     output_files = sweep_reader.read_all_output_keys()
 
-    read_config = ExodusReader(output_files[0][1]).get_read_config()
+    read_config = ExodusReader(output_files[0][1]).get_read_config() # type: ignore
     read_config.time_inds = np.array([0,2])
 
     print('Herd output files (from output_keys.json):')
@@ -130,7 +131,7 @@ def main() -> None:
     print("="*80)
     print()
 
-    print(sweep_results_para[0][1].node_vars['disp_x'].shape)
+    print(sweep_results_para[0][1].node_vars['disp_x'].shape) # type: ignore
 
 
 if __name__ == '__main__':

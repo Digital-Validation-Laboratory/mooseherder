@@ -8,13 +8,13 @@ Author: Lloyd Fletcher, Rory Spencer
 import time
 from pathlib import Path
 from pprint import pprint
-from mooseherder import MooseHerd
-from mooseherder import MooseRunner
-from mooseherder import MooseConfig
-from mooseherder import InputModifier
-from mooseherder import GmshRunner
-from mooseherder import DirectoryManager
-from mooseherder import SweepReader
+from mooseherder import (MooseHerd,
+                         MooseRunner,
+                         GmshRunner,
+                         MooseConfig,
+                         InputModifier,
+                         DirectoryManager,
+                         SweepReader)
 
 NUM_PARA_RUNS = 3
 USER_DIR = Path.home()

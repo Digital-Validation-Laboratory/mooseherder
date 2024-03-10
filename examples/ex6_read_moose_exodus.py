@@ -8,11 +8,11 @@ Author: Lloyd Fletcher
 import time
 from pprint import pprint
 from pathlib import Path
-import numpy as np
 from typing import Any
-from mooseherder import MooseRunner
-from mooseherder import MooseConfig
-from mooseherder import ExodusReader
+import numpy as np
+from mooseherder import (MooseRunner,
+                         MooseConfig,
+                         ExodusReader)
 
 USER_DIR = Path.home()
 
