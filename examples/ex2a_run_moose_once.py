@@ -7,8 +7,8 @@ Author: Lloyd Fletcher
 """
 import time
 from pathlib import Path
-from mooseherder import MooseConfig
-from mooseherder import MooseRunner
+from mooseherder import (MooseConfig,
+                         MooseRunner)
 
 def main() -> None:
     """main: run moose once with runner class

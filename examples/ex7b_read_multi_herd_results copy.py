@@ -8,18 +8,18 @@ Author: Lloyd Fletcher, Rory Spencer
 import time
 from pathlib import Path
 from pprint import pprint
-from mooseherder import MooseHerd
-from mooseherder import MooseRunner
-from mooseherder import MooseConfig
-from mooseherder import InputModifier
-from mooseherder import DirectoryManager
-from mooseherder import SweepReader
+from mooseherder import (MooseHerd,
+                         MooseRunner,
+                         MooseConfig,
+                         InputModifier,
+                         DirectoryManager,
+                         SweepReader)
 
 NUM_PARA_RUNS = 3
 USER_DIR = Path.home()
 
 def main() -> None:
-    """main: parallel herd run once and read
+    """main: parallel herd run multiple times and read
     """
     print("-"*80)
     print('EXAMPLE: Parallel Herd Setup & Run')
@@ -105,11 +105,6 @@ def main() -> None:
     print(f'Read time parallel   = {read_time_para:.6f} seconds')
     print("="*80)
     print()
-    print('NOTE: the specific variables read from the exodus file can be controlled')
-    print('using the mooseherder.simdata.SimReadConfig class - see the simdata module')
-    print('and example 6 using the ExodusReader class.')
-    print()
-
 
 if __name__ == '__main__':
     main()

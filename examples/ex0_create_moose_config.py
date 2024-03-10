@@ -6,7 +6,7 @@ Author: Lloyd Fletcher
 ==============================================================================
 """
 from pathlib import Path
-from mooseherder.mooseconfig import MooseConfig
+from mooseherder import MooseConfig
 
 
 def main() -> None:

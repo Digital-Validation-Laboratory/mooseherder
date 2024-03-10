@@ -7,7 +7,7 @@ Author: Lloyd Fletcher
 """
 import time
 from pathlib import Path
-from mooseherder.gmshrunner import GmshRunner
+from mooseherder import GmshRunner
 
 USER_DIR = Path.home()
 
