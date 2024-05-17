@@ -47,7 +47,7 @@ class MooseHerd:
 
         self._n_para_sims = 2
 
-        self._input_name = 'sim'
+        self._input_name = ['sim_'+chr(x) for x in range(97,97+max([len(self._modifiers),len(self._runners)]))]
 
         self._keep_all = True
 
@@ -60,16 +60,19 @@ class MooseHerd:
         self._iter_run_time = -1.0
 
 
-    def set_input_copy_name(self, input_name: str = 'sim') -> None:
+    def set_input_copy_name(self, input_name: list[str]) -> None:
         """set_input_copy_name: sets the name that will be used when copying
-        input files to the working directories for the sweep. The defualt name
-        is 'sim' so the first combination of variables in the simulation chain
-        will be called 'sim-1'.
+        input files to the working directories for the sweep. The list should contain
+        a name for each of the runners in the herd.  If None is supplied
+        the name reverts to default which is sim_a, sim_b... etc for each runner.
 
         Args:
-            input_name (str, optional): _description_. Defaults to 'sim'.
+            input_name list[str]: list of strings that name each of the sim_runners.
         """
-        self._input_name = input_name
+        if input_name is not None:
+            self._input_name = input_name
+        else:
+            ['sim_'+chr(x) for x in range(97,97+len(self._runners))]
 
 
     def set_keep_flag(self, keep_all: bool = True) -> None:
@@ -205,6 +208,10 @@ class MooseHerd:
         """
         if mod_vars is not None:
             modifier.update_vars(mod_vars)
+        # Need some way of getting the worker number into the moose file.
+        if 'file_number' in modifier.get_var_keys():
+            file_number =int(save_file.stem.split('-')[-1])
+            modifier.update_vars({'file_number':file_number})
         modifier.write_file(save_file)
 
 
@@ -250,7 +257,8 @@ class MooseHerd:
         run_files = list([])
         for ii,mm in enumerate(self._modifiers):
             ext = mm.get_input_file().suffix
-            run_files.append(run_dir / (self._input_name +'-'+run_num+ext))
+            run_files.append(run_dir / (self._input_name[ii] +'-'+run_num+ext))
+            #run_files.append(run_dir / (mm.get_input_file().stem +ext))
             self._mod_input(mm,var_list[ii],run_files[ii])
 
         output_list = list([])
