@@ -39,7 +39,7 @@ def main() -> None:
     gmsh_input = Path('scripts/gmsh/gmsh_tens_spline_2d.geo')
     gmsh_modifier = InputModifier(gmsh_input,'//',';')
 
-    gmsh_path = USER_DIR / 'moose-workdir/gmsh/bin/gmsh'
+    gmsh_path = USER_DIR / 'gmsh/bin/gmsh'
     gmsh_runner = GmshRunner(gmsh_path)
     gmsh_runner.set_input_file(gmsh_input)
 
@@ -74,7 +74,7 @@ def main() -> None:
     print()
 
     # Run all variable combinations across 4 MOOSE instances with two runs saved in
-    # each moose-workdir
+    # each sim-workdir
     for rr in range(NUM_PARA_RUNS):
         herd.run_para(var_sweep)
 

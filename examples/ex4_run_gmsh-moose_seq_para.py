@@ -36,7 +36,7 @@ def main():
     gmsh_input = Path('scripts/gmsh/gmsh_tens_spline_2d.geo')
     gmsh_modifier = InputModifier(gmsh_input,'//',';')
 
-    gmsh_path = USER_DIR / 'moose-workdir/gmsh/bin/gmsh'
+    gmsh_path = USER_DIR / 'gmsh/bin/gmsh'
     gmsh_runner = GmshRunner(gmsh_path)
     gmsh_runner.set_input_file(gmsh_input)
 
@@ -74,7 +74,7 @@ def main():
     print('EXAMPLE: Run Gmsh+MOOSE once, modify gmsh only')
     print("-"*80)
 
-    # Single run saved in moose-workdir-1
+    # Single run saved in sim-workdir-1
     herd.run_once(0,var_sweep[0])
 
     print(f'Run time (once) = {herd.get_iter_time():.3f}) seconds')
@@ -85,7 +85,7 @@ def main():
     print('EXAMPLE 4b: Run MOOSE sequentially, modify gmsh only')
     print("-"*80)
 
-    # Run all variable combinations (8) sequentially in moose-workdir-1
+    # Run all variable combinations (8) sequentially in sim-workdir-1
     herd.run_sequential(var_sweep)
 
     print(f'Run time (sequential) = {herd.get_sweep_time():.3f} seconds')
@@ -96,7 +96,7 @@ def main():
     print("-"*80)
 
     # Run all variable combinations across 4 MOOSE instances with two runs saved in
-    # each moose-workdir
+    # each sim-workdir
     herd.run_para(var_sweep)
 
     print(f'Run time (parallel) = {herd.get_sweep_time():.3f} seconds')

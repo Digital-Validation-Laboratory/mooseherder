@@ -66,7 +66,7 @@ def main():
     print('EXAMPLE: Run MOOSE once')
     print("-"*80)
 
-    # Single run saved in moose-workdir-1
+    # Single run saved in sim-workdir-1
     herd.run_once(0,moose_vars[0])
 
     print(f'Run time (once) = {herd.get_iter_time():.3f} seconds')
@@ -77,7 +77,7 @@ def main():
     print('EXAMPLE: Run MOOSE sequentially')
     print("-"*80)
 
-    # Run all variable combinations (8) sequentially in moose-workdir-1
+    # Run all variable combinations (8) sequentially in sim-workdir-1
     herd.run_sequential(moose_vars)
 
     print(f'Run time (seq) = {herd.get_sweep_time():.3f} seconds')
@@ -89,7 +89,7 @@ def main():
     print("-"*80)
 
     # Run all variable combinations across 4 MOOSE instances with two runs saved in
-    # each moose-workdir
+    # each sim-workdir
     herd.run_para(moose_vars)
 
     print(f'Run time (para) = {herd.get_sweep_time():.3f} seconds')

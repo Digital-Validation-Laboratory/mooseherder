@@ -29,7 +29,7 @@ def config_dict_str() -> dict[str,str]:
 @pytest.fixture
 def config_dict_broken_path() -> dict[str, Path | str]:
     return {'main_path': Path().home() / 'no-exist',
-            'app_path': Path().home() / 'moose-workdir/no-exist',
+            'app_path': Path().home() / 'no-exist',
             'app_name': 'broken-opt'}
 
 

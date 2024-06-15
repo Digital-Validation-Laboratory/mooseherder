@@ -7,7 +7,8 @@ Author: Lloyd Fletcher
 ==============================================================================
 """
 import time
-import os, shutil
+import os
+import shutil
 from pathlib import Path
 from mooseherder import (MooseConfig,
                         GmshRunner,
@@ -22,7 +23,7 @@ def main():
     print('EXAMPLE: Run Gmsh+MOOSE once')
     print("-"*80)
 
-    gmsh_path = USER_DIR / 'moose-workdir/gmsh/bin/gmsh'
+    gmsh_path = USER_DIR / 'gmsh/bin/gmsh'
     gmsh_runner = GmshRunner(gmsh_path)
 
     gmsh_input = Path('scripts/gmsh/gmsh_tens_spline_2d.geo')

@@ -18,7 +18,7 @@ print('------------------------------------------')
 
 # Create the moose runner with correct paths to moose and apps
 moose_dir = USER_DIR / 'moose'
-moose_app_dir = USER_DIR / 'moose-workdir/proteus'
+moose_app_dir = USER_DIR / 'proteus'
 moose_app_name = 'proteus-opt'
 moose_runner = MooseRunner(moose_dir,moose_app_dir,moose_app_name)
 

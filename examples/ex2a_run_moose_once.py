@@ -26,7 +26,7 @@ def main() -> None:
 
     print('Setting the input file and run parallelisation options.\n')
 
-    moose_runner.set_run_opts(n_tasks = 2,
+    moose_runner.set_run_opts(n_tasks = 1,
                               n_threads = 4,
                               redirect_out = True)
 
