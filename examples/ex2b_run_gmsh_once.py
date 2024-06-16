@@ -17,7 +17,7 @@ def main():
     print("-"*80)
     print('EXAMPLE: Run Gmsh 2D once')
     print("-"*80)
-    gmsh_path = USER_DIR / 'moose-workdir/gmsh/bin/gmsh'
+    gmsh_path = USER_DIR / 'gmsh/bin/gmsh'
     gmsh_runner = GmshRunner(gmsh_path)
 
     gmsh_input = Path('scripts/gmsh/gmsh_tens_spline_2d.geo')
@@ -28,7 +28,7 @@ def main():
 
     print('Running gmsh...')
     start_time = time.perf_counter()
-    gmsh_runner.run()
+    gmsh_runner.run(gmsh_input,parse_only=True)
     run_time = time.perf_counter() - start_time
 
     print()
@@ -39,7 +39,7 @@ def main():
     print("-"*80)
     print('EXAMPLE: Run Gmsh 3D once')
     print("-"*80)
-    gmsh_path = USER_DIR / 'moose-workdir/gmsh/bin/gmsh'
+    gmsh_path = USER_DIR / 'gmsh/bin/gmsh'
     gmsh_runner = GmshRunner(gmsh_path)
 
     gmsh_input = Path('scripts/gmsh/gmsh_tens_spline_3d.geo')

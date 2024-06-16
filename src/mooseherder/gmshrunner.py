@@ -71,7 +71,7 @@ class GmshRunner(SimRunner):
         self._input_path = input_path
 
 
-    def run(self, input_file: Path | None = None) -> None:
+    def run(self, input_file: Path | None = None, parse_only: bool = True) -> None:
         """Run the geo file to create the mesh.
 
         Args:
@@ -94,7 +94,11 @@ class GmshRunner(SimRunner):
         if self._input_path is None:
             raise RuntimeError("Specify input *.geo file before running gmsh.")
 
-        self._run_str = f'{self._gmsh_app} {self._input_path}'
+        flags = ""
+        if parse_only is True:
+            flags = "-parse_and_exit"
+
+        self._run_str = f'{self._gmsh_app} {flags} {self._input_path}'
         os.system(self._run_str)
 
 

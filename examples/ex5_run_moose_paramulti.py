@@ -69,7 +69,7 @@ def main():
     print("-"*80)
 
     # Run all variable combinations across 4 MOOSE instances with two runs saved in
-    # each moose-workdir
+    # each sim-workdir
     for rr in range(NUM_PARA_RUNS):
         herd.run_para(moose_vars)
 

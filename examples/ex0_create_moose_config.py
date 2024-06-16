@@ -13,7 +13,7 @@ def main() -> None:
     """main: create moose config json
     """
     config = {'main_path': Path.home()/ 'moose',
-            'app_path': Path.home() / 'moose-workdir/proteus',
+            'app_path': Path.home() / 'proteus',
             'app_name': 'proteus-opt'}
 
     moose_config = MooseConfig(config)

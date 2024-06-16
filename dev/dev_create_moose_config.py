@@ -4,7 +4,7 @@ from mooseherder.mooseconfig import MooseConfig
 USER_DIR = Path.home()
 
 config = {'main_path': USER_DIR / 'moose',
-          'app_path': USER_DIR / 'moose-workdir/proteus',
+          'app_path': USER_DIR / 'proteus',
           'app_name': 'proteus-opt'}
 
 moose_config = MooseConfig(config)
