@@ -130,50 +130,50 @@ def test_get_output_path(runner: MooseRunner,input_runner: MooseRunner):
 @pytest.mark.parametrize(
     ('opts','expected'),
     (
-        ((1,1,False), 'proteus-opt --n-threads=1 -i moose-test.i'),
-        ((1,2,False), 'proteus-opt --n-threads=2 -i moose-test.i'),
-        ((1,2,True), 'proteus-opt --n-threads=2 -i moose-test.i --redirect-stdout'),
-        ((2,2,False), 'mpirun -np 2 proteus-opt --n-threads=2 -i moose-test.i'),
-        ((2,2,True), 'mpirun -np 2 proteus-opt --n-threads=2 -i moose-test.i --redirect-stdout'),
+        ((1,1,False), ['proteus-opt','--n-threads=1','-i','moose-test.i']),
+        ((1,2,False), ['proteus-opt','--n-threads=2','-i','moose-test.i']),
+        ((1,2,True), ['proteus-opt','--n-threads=2','-i','moose-test.i','--redirect-stdout']),
+        ((2,2,False), ['mpirun','-np','2','proteus-opt','--n-threads=2','-i','moose-test.i']),
+        ((2,2,True), ['mpirun','-np','2','proteus-opt','--n-threads=2','-i','moose-test.i','--redirect-stdout']),
     )
 )
-def test_assemble_run_str(opts: tuple[int,int,bool],
+def test_assemble_arg_list(opts: tuple[int,int,bool],
                           expected: str,
                           input_runner: MooseRunner) -> None:
     input_runner.set_run_opts(opts[0],opts[1],opts[2])
-    assert input_runner.assemble_run_str() == expected
+    assert input_runner.assemble_arg_list() == expected
 
 
 @pytest.mark.parametrize(
     ('opts','expected'),
     (
-        ((1,1,False), 'proteus-opt --n-threads=1 -i moose-test.i'),
-        ((1,2,False), 'proteus-opt --n-threads=2 -i moose-test.i'),
-        ((1,2,True), 'proteus-opt --n-threads=2 -i moose-test.i --redirect-stdout'),
-        ((2,2,False), 'mpirun -np 2 proteus-opt --n-threads=2 -i moose-test.i'),
-        ((2,2,True), 'mpirun -np 2 proteus-opt --n-threads=2 -i moose-test.i --redirect-stdout'),
+        ((1,1,False), ['proteus-opt','--n-threads=1','-i','moose-test.i']),
+        ((1,2,False), ['proteus-opt','--n-threads=2','-i','moose-test.i']),
+        ((1,2,True), ['proteus-opt','--n-threads=2','-i','moose-test.i','--redirect-stdout']),
+        ((2,2,False), ['mpirun','-np','2','proteus-opt','--n-threads=2','-i','moose-test.i']),
+        ((2,2,True), ['mpirun','-np','2','proteus-opt','--n-threads=2','-i','moose-test.i','--redirect-stdout']),
     )
 )
-def test_assemble_run_str_with_input(opts: tuple[int,int,bool],
+def test_assemble_arg_list_with_input(opts: tuple[int,int,bool],
                                      expected: str,
                                      runner: MooseRunner,
                                      input_path: Path) -> None:
     runner.set_run_opts(opts[0],opts[1],opts[2])
-    assert runner.assemble_run_str(input_path) == expected
+    assert runner.assemble_arg_list(input_path) == expected
 
 
-def test_assemble_run_str_err(runner: MooseRunner) -> None:
+def test_assemble_arg_list_err(runner: MooseRunner) -> None:
     with pytest.raises(RuntimeError) as err_info:
-        runner.assemble_run_str()
+        runner.assemble_arg_list()
 
     msg, = err_info.value.args
     assert msg == 'No input file specified, set one using set_input_file or by passing on into this function.'
 
 
-def test_assemble_run_str_err_with_input(runner: MooseRunner,
+def test_assemble_arg_list_err_with_input(runner: MooseRunner,
                                          input_noexist: Path) -> None:
     with pytest.raises(FileNotFoundError) as err_info:
-        runner.assemble_run_str(input_noexist)
+        runner.assemble_arg_list(input_noexist)
 
     msg, = err_info.value.args
     assert msg == 'Input file does not exist.'

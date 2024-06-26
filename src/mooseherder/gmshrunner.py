@@ -104,7 +104,8 @@ class GmshRunner(SimRunner):
         print(f'arg_list={self._arg_list}')
 
         subprocess.run(self._arg_list,
-                       shell=False)
+                       shell=False,
+                       check=False)
 
 
     def get_output_path(self) -> Path | None:
