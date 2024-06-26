@@ -27,7 +27,7 @@ def main() -> None:
     print('Setting the input file and run parallelisation options.\n')
 
     moose_runner.set_run_opts(n_tasks = 1,
-                              n_threads = 4,
+                              n_threads = 8,
                               redirect_out = False)
 
     input_file = Path('scripts/moose/moose-mech-simple.i')
@@ -35,7 +35,7 @@ def main() -> None:
 
     # Run the MOOSE!
     print('Running moose with:')
-    print(moose_runner.get_run_str())
+    print(moose_runner.get_arg_list())
 
     start_time = time.perf_counter()
     moose_runner.run()

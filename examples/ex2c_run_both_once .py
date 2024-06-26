@@ -68,7 +68,7 @@ def main():
 
     # Run the MOOSE!
     print('Running moose with:')
-    print(moose_runner.get_run_str())
+    print(moose_runner.get_arg_list())
     print()
 
     moose_start = time.perf_counter()

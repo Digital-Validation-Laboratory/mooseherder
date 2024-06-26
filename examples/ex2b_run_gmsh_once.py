@@ -50,7 +50,7 @@ def main():
 
     print('Running gmsh...')
     start_time = time.perf_counter()
-    gmsh_runner.run()
+    gmsh_runner.run(gmsh_input,parse_only=True)
     run_time = time.perf_counter() - start_time
 
     print()
