@@ -29,7 +29,7 @@ class MooseRunner(SimRunner):
         self._n_threads = 1
         self._n_tasks = 1
         self._redirect_stdout = True
-        self._run_str = ''
+        self._arg_list = list('')
         self._input_path = None
 
 
@@ -126,7 +126,7 @@ class MooseRunner(SimRunner):
             raise FileNotFoundError("Input file does not exist.")
 
         self._input_path = input_path
-        self.assemble_run_str()
+        self.assemble_arg_list()
 
     def get_input_dir(self) -> Path | None:
         """Gets the path to the directory for the specified input file.
@@ -167,15 +167,15 @@ class MooseRunner(SimRunner):
         return self._input_path.parent / (self._input_path.stem +'_out.e')
 
 
-    def get_run_str(self) -> str:
+    def get_arg_list(self) -> list[str]:
         """Run string getter.
 
         Returns:
             str: command line string to run MOOSE.
         """
-        return self._run_str
+        return self._arg_list
 
-    def assemble_run_str(self, input_file = None) -> str:
+    def assemble_arg_list(self, input_file = None) -> list[str]:
         """Assmebles the command line string to run MOOSE based on current
         options.
 
@@ -193,24 +193,20 @@ class MooseRunner(SimRunner):
         if self._input_path is None:
             raise RuntimeError('No input file specified, set one using set_input_file or by passing on into this function.')
 
-        if self._redirect_stdout:
-            redirect_str = ' --redirect-stdout'
-        else:
-            redirect_str = ''
-
+        arg_list = []
         if self._n_tasks > 1:
-            run_str = 'mpirun -np ' + str(self._n_tasks) + ' '\
-                            + str(self._config['app_name']) \
-                            + ' --n-threads=' + str(self._n_threads) + ' -i ' \
-                            + str(self._input_path.name) + redirect_str
-        else:
-            run_str = str(self._config['app_name']) + \
-                            ' --n-threads=' + str(self._n_threads) + ' -i ' \
-                            + str(self._input_path.name) + redirect_str
+            arg_list = ['mpirun','-np',str(self._n_tasks)]
 
-        self._run_str = run_str
+        arg_list = arg_list + [str(self._config['app_name']) \
+                    ,f'--n-threads={self._n_threads}','-i' \
+                    ,str(self._input_path.name)]
 
-        return self._run_str
+        if self._redirect_stdout:
+            arg_list = arg_list + ['--redirect-stdout']
+
+        self._arg_list = arg_list
+
+        return self._arg_list
 
 
     def run(self, input_file = None) -> None:
@@ -229,8 +225,8 @@ class MooseRunner(SimRunner):
 
         self.set_env_vars()
 
-        self.assemble_run_str()
-        subprocess.run(self._run_str,
-                       shell=True,
+        self.assemble_arg_list()
+        subprocess.run(self._arg_list,
+                       shell=False,
                        cwd=str(self._input_path.parent),
                        check=False)
