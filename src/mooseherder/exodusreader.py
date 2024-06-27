@@ -319,7 +319,7 @@ class ExodusReader(OutputReader):
             return None
 
         blocks = [ii+1 for ii in range(self.get_num_elem_blocks())] # type: ignore
-        names_blocks = list([])
+        names_blocks = list()
 
         for nn in self.get_elem_var_names(): # type: ignore
             for bb in blocks:

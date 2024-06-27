@@ -26,7 +26,7 @@ class DirectoryManager:
         self._sub_dir = 'sim-workdir'
         self._base_dir = Path().cwd()
         self._run_dirs = self._set_run_dirs()
-        self._output_paths = list([])
+        self._output_paths = list()
         self._output_key_tag = 'output-key'
         self._sweep_var_tag = 'sweep-vars'
 
@@ -40,7 +40,7 @@ class DirectoryManager:
         Returns:
             list[Path]:
         """
-        run_dirs = list([])
+        run_dirs = list()
         for nn in range(self._n_dirs): # type: ignore
             run_dirs.append(self._base_dir / (self._sub_dir + '-' + str(nn+1)))
 
@@ -261,9 +261,9 @@ def output_paths_to_str(output_files: list[list[Path | None]]
     Returns:
         list[list[str]]: as input with Path converted to str
     """
-    str_output = list([])
+    str_output = list()
     for sim_iter in output_files:
-        iter_output = list([])
+        iter_output = list()
         for output_path in sim_iter:
             if output_path is None:
                 iter_output.append(None)
@@ -287,10 +287,10 @@ def output_str_to_paths(output_files: list[list[str | None]]
     Returns:
         list[list[Path]]: as input with str converted to Path.
     """
-    str_output = list([])
+    str_output = list()
 
     for sim_iter in output_files:
-        iter_output = list([])
+        iter_output = list()
         for output_path in sim_iter:
             if output_path is None:
                 iter_output.append(None)

@@ -68,7 +68,7 @@ def main() -> None:
     p0 = [1E-3,2E-3]
     p1 = [1.5E-3,2E-3]
     p2 = [1E-3,3E-3]
-    var_sweep = list([])
+    var_sweep = list()
     for nn in p0:
         for ee in p1:
             for pp in p2:

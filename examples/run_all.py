@@ -13,7 +13,7 @@ from pprint import pprint
 EXAMPLE_DIR = Path('examples/')
 all_files = os.listdir(EXAMPLE_DIR)
 
-example_files = list([])
+example_files = list()
 for ff in all_files:
     if ('ex' in ff) and ('.py' in ff):
         example_files.append(EXAMPLE_DIR / ff)

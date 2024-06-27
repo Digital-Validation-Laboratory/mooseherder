@@ -33,7 +33,7 @@ class SweepReader:
                 parallel. Defaults to 1.
         """
         self._dir_manager = dir_manager
-        self._output_files = list([])
+        self._output_files = list()
         self._n_para_read = num_para_read
 
 
@@ -81,7 +81,7 @@ class SweepReader:
         if len(output_paths) == 0:
             raise FileNotFoundError("No output key json files found.")
 
-        output_files = list([])
+        output_files = list()
         for output_path in output_paths:
             sweep_iter = output_path.name.split('.')[0].split('-')[-1]
             output_files = output_files + self.read_output_key(int(sweep_iter))
@@ -136,7 +136,7 @@ class SweepReader:
         if len(sweep_var_paths) == 0:
             raise FileNotFoundError("No sweep variable json files found.")
 
-        sweep_vars = list([])
+        sweep_vars = list()
         for ii,_ in enumerate(sweep_var_paths):
             sweep_vars = sweep_vars  + self.read_sweep_var_file(ii+1)
 
@@ -156,7 +156,7 @@ class SweepReader:
         Returns:
             list[Path]: list of paths to the files found with the string.
         """
-        found_files = list([])
+        found_files = list()
 
         all_files = os.listdir(search_path)
 
@@ -196,7 +196,7 @@ class SweepReader:
                 data for each simulation in the chain. Will be None for a pre-
                 processor like Gmsh that has not output.
         """
-        data_list = list([])
+        data_list = list()
 
         for ff in output_files:
             if ff is None:
@@ -234,7 +234,7 @@ class SweepReader:
         """
         self._start_read_output_keys(sweep_iter)
 
-        sweep_results = list([])
+        sweep_results = list()
         for ii,ff in enumerate(self._output_files):
             sweep_results.append(self.read_results_once(ff,read_config))
 
@@ -264,7 +264,7 @@ class SweepReader:
         self._start_read_output_keys(sweep_iter)
 
         with Pool(self._n_para_read) as pool:
-            processes = list([])
+            processes = list()
             for ff in self._output_files:
                     processes.append(pool.apply_async(
                         self.read_results_once, args=(ff,read_config)))

@@ -57,7 +57,7 @@ def moose_sweep() -> list[list[dict]]:
     e_mod = [1e9,2e9]
     p_rat = [0.3,0.35]
 
-    moose_vars = list([])
+    moose_vars = list()
     for ee in e_mod:
         for pp in p_rat:
             moose_vars.append([{'e_modulus':ee,'p_ratio':pp}])

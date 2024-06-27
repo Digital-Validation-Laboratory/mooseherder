@@ -56,7 +56,7 @@ class MooseHerd:
 
         self._keep_all = True
 
-        self._var_sweep = list([])
+        self._var_sweep = list()
 
         self._sweep_iter = 0
         self._sweep_run_time = -1.0
@@ -263,13 +263,13 @@ class MooseHerd:
         run_dir = self._dir_manager.get_run_dir(int(worker_num)-1)
         run_num = self._get_run_num(sim_iter,worker_num)
 
-        run_files = list([])
+        run_files = list()
         for ii,mm in enumerate(self._modifiers):
             ext = mm.get_input_file().suffix
             run_files.append(run_dir / (self._input_names[ii] +'-'+run_num+ext))
             self._mod_input(mm,var_list[ii],run_files[ii])
 
-        output_list = list([])
+        output_list = list()
         for ii,rr in enumerate(self._runners):
             output_list.append(self._run(rr,run_files[ii]))
 
@@ -343,7 +343,7 @@ class MooseHerd:
         """
         start_sweep_time = self._start_sweep(var_sweep)
 
-        output_files = list([])
+        output_files = list()
 
         ii = self._sim_iter
         for vv in var_sweep:
@@ -378,7 +378,7 @@ class MooseHerd:
         sweep_start_time = self._start_sweep(var_sweep)
 
         with Pool(self._n_para_sims) as pool:
-            processes = list([])
+            processes = list()
 
             ii = self._sim_iter
             for vv in var_sweep:

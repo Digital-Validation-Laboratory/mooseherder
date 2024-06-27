@@ -52,7 +52,7 @@ def main() -> None:
     n_elem_y = [10,20]
     e_mod = [1e9,2e9]
     p_rat = [0.3,0.35]
-    moose_vars = list([])
+    moose_vars = list()
     for nn in n_elem_y:
         for ee in e_mod:
             for pp in p_rat:
