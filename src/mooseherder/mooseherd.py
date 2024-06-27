@@ -50,9 +50,9 @@ class MooseHerd:
         self._modifiers = input_mods
         self._dir_manager = dir_manager
 
-        if len(self._runners) != len(self._modifiers):
-            raise MooseHerdError('The sim runner list and the input modifier '+
-                                 'list must be the same length')
+        #if len(self._runners) != len(self._modifiers):
+        #    raise MooseHerdError('The sim runner list and the input modifier '+
+        #                         'list must be the same length')
 
         self._n_para_sims = 2
 

@@ -236,7 +236,7 @@ class SweepReader:
         """
         self._start_read_output_keys(sweep_iter)
 
-        sweep_results = list([])
+        sweep_results = list()
         for ii,ff in enumerate(self._output_files):
             sweep_results.append(self.read_results_once(ff,read_config))
 
@@ -266,7 +266,7 @@ class SweepReader:
         self._start_read_output_keys(sweep_iter)
 
         with Pool(self._n_para_read) as pool:
-            processes = list([])
+            processes = list()
             for ff in self._output_files:
                     processes.append(pool.apply_async(
                         self.read_results_once, args=(ff,read_config)))
