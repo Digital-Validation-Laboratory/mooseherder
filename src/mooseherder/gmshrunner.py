@@ -6,6 +6,7 @@ Authors: Rory Spencer, Lloyd Fletcher
 ===============================================================================
 '''
 import os
+import subprocess
 from pathlib import Path
 from mooseherder.simrunner import SimRunner
 
@@ -26,7 +27,7 @@ class GmshRunner(SimRunner):
             self.set_gmsh_app(gmsh_app)
 
         self._input_path = None
-        self._run_str = ""
+        self._arg_list = []
 
     def set_gmsh_app(self, gmsh_app: Path) -> None: # type: ignore
         """Sets path to the gmsh app.
@@ -71,7 +72,7 @@ class GmshRunner(SimRunner):
         self._input_path = input_path
 
 
-    def run(self, input_file: Path | None = None) -> None:
+    def run(self, input_file: Path | None = None, parse_only: bool = True) -> None:
         """Run the geo file to create the mesh.
 
         Args:
@@ -94,8 +95,17 @@ class GmshRunner(SimRunner):
         if self._input_path is None:
             raise RuntimeError("Specify input *.geo file before running gmsh.")
 
-        self._run_str = f'{self._gmsh_app} {self._input_path}'
-        os.system(self._run_str)
+        arg_list = [str(self._gmsh_app)]
+        if parse_only is True:
+            arg_list = arg_list+["-parse_and_exit"]
+
+        self._arg_list = arg_list + [str(self._input_path)]
+
+        print(f'arg_list={self._arg_list}')
+
+        subprocess.run(self._arg_list,
+                       shell=False,
+                       check=False)
 
 
     def get_output_path(self) -> Path | None:

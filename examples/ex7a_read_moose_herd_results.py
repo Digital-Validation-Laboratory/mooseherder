@@ -1,6 +1,6 @@
 '''
 ==============================================================================
-EXAMPLE 7a: Run MOOSE in sequential then parallel mode then read sweep results
+EXAMPLE: Run MOOSE in sequential then parallel mode then read sweep results
 
 Author: Lloyd Fletcher, Rory Spencer
 ==============================================================================
@@ -8,12 +8,12 @@ Author: Lloyd Fletcher, Rory Spencer
 import time
 from pathlib import Path
 from pprint import pprint
-from mooseherder import MooseHerd
-from mooseherder import MooseRunner
-from mooseherder import MooseConfig
-from mooseherder import InputModifier
-from mooseherder import DirectoryManager
-from mooseherder import SweepReader
+from mooseherder import (MooseHerd,
+                         MooseRunner,
+                         MooseConfig,
+                         InputModifier,
+                         DirectoryManager,
+                         SweepReader)
 
 USER_DIR = Path.home()
 
@@ -21,7 +21,7 @@ def main() -> None:
     """main: parallel herd run once and read
     """
     print("-"*80)
-    print('EXAMPLE 7a: Parallel Herd Setup & Run')
+    print('EXAMPLE: Parallel Herd Setup & Run')
     print("-"*80)
     # Setup the MOOSE input modifier and runner
     moose_input = Path('scripts/moose/moose-mech-simple.i')
@@ -71,7 +71,7 @@ def main() -> None:
     print()
 
     print("-"*80)
-    print('EXAMPLE 7a: Read Herd Output')
+    print('EXAMPLE: Read Herd Output')
     print("-"*80)
     sweep_reader = SweepReader(dir_manager,num_para_read=4)
     output_files = sweep_reader.read_all_output_keys()
@@ -83,7 +83,7 @@ def main() -> None:
     print("-"*80)
     print('Reading the first output file, no SimReadConfig = read all.')
     print('Returns as SimData object.')
-    single_sim_data = sweep_reader.read_results_once(output_files[0][0])
+    single_sim_data = sweep_reader.read_results_once(output_files[0])
     print(type(single_sim_data))
     print()
 

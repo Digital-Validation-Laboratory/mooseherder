@@ -37,7 +37,7 @@ class SweepReader:
         self._n_para_read = num_para_read
 
 
-    def read_output_key(self, sweep_iter: int) -> list[list[Path]]:
+    def read_output_key(self, sweep_iter: int) -> list[list[Path | None]]:
         """read_output_key: reads the output key json file produced by running
         the variable sweep. The output key file maps which simulation were run
         in a given sub directory.
@@ -62,7 +62,7 @@ class SweepReader:
         return dm.output_str_to_paths(output_files)
 
 
-    def read_all_output_keys(self) -> list[list[Path]]:
+    def read_all_output_keys(self) -> list[list[Path | None]]:
         """read_all_output_keys: as read_output_keys() but finds all output key
         files in the first sub-directory and reads them.
 
@@ -83,7 +83,7 @@ class SweepReader:
             raise FileNotFoundError("No output key json files found.")
 
         output_files = list([])
-        for ii,output_path in enumerate(output_paths):
+        for output_path in output_paths:
             sweep_iter = output_path.name.split('.')[0].split('-')[-1]
             output_files = output_files + self.read_output_key(int(sweep_iter))
 
@@ -166,10 +166,12 @@ class SweepReader:
             if search_str in ff:
                 found_files.append(Path(ff))
 
+        found_files.sort()
+
         return found_files
 
 
-    def get_output_files(self) -> list[list[Path]]:
+    def get_output_files(self) -> list[list[Path | None]]:
         """get_output_files
 
         Returns:
@@ -180,31 +182,42 @@ class SweepReader:
 
 
     def read_results_once(self,
-                          output_file: Path,
-                          read_config: SimReadConfig | None = None) -> SimData:
+                          output_files: list[Path | None],
+                          read_config: SimReadConfig | None = None
+                          ) -> list[SimData | None]:
         """read_results_once: reads a specific simulation at the specified
         path based on the specified read configuration. If the read
         configuration is None then read everything.
 
         Args:
             output_file (Path): Path to the file to read
-            read_config (SimReadConfig | None): _description_
+            read_config (SimReadConfig | None): class to specify the data to read
 
         Returns:
-            SimData: _description_
+            list[SimData | None]: list of data classes holding the simulation
+                data for each simulation in the chain. Will be None for a pre-
+                processor like Gmsh that has not output.
         """
-        reader = ExodusReader(output_file)
+        data_list = list([])
 
-        if read_config is None:
-            return reader.read_all_sim_data()
+        for ff in output_files:
+            if ff is None:
+                data_list.append(None)
+            else:
+                #TODO: replace with output reader ABC
+                reader = ExodusReader(ff)
+                if read_config is None:
+                    data_list.append(reader.read_all_sim_data())
+                else:
+                    data_list.append(reader.read_sim_data(read_config))
 
-        return reader.read_sim_data(read_config)
+        return data_list
 
 
     def read_results_sequential(self,
                                 sweep_iter: int | None = None,
                                 read_config: SimReadConfig | None = None
-                                ) -> list[SimData]:
+                                ) -> list[list[SimData]]:
         """read_results_sequential: reads the variable sweep results
         sequentially. Can read a specific iteration with a specific read config
         but defaults to reading everything found in the simulation directories.
@@ -217,16 +230,15 @@ class SweepReader:
                 to None.
 
         Returns:
-            list[SimData]: list of SimData objects containing the simulation
-                results corresponding to each combination of variables
+            list[list[SimData]]: list of lists of SimData objects containing the
+                simulation results corresponding to each combination of
+                variables.
         """
         self._start_read_output_keys(sweep_iter)
 
         sweep_results = list([])
-        for ll in self._output_files:
-            for ff in ll:
-                if ff.exists():
-                    sweep_results.append(self.read_results_once(ff,read_config))
+        for ii,ff in enumerate(self._output_files):
+            sweep_results.append(self.read_results_once(ff,read_config))
 
         return sweep_results
 
@@ -234,7 +246,7 @@ class SweepReader:
     def read_results_para(self,
                           sweep_iter: int | None = None,
                           read_config: SimReadConfig | None = None
-                          ) -> list[SimData]:
+                          ) -> list[list[SimData]]:
         """read_results_para: reads the variable sweep results in parallel
         Can read a specific iteration with a specific read config but defaults
         to reading everything found in the simulation directories.
@@ -247,18 +259,17 @@ class SweepReader:
                 to None.
 
         Returns:
-            list[SimData]: list of SimData objects containing the simulation
-                results corresponding to each combination of variables
+            list[list[SimData]]: list of lists of SimData objects containing the
+                simulation results corresponding to each combination of
+                variables.
         """
         self._start_read_output_keys(sweep_iter)
 
         with Pool(self._n_para_read) as pool:
             processes = list([])
-            for ll in self._output_files:
-                for ff in ll:
-                    if ff is not None:
-                        processes.append(pool.apply_async(
-                            self.read_results_once, args=(ff,read_config)))
+            for ff in self._output_files:
+                    processes.append(pool.apply_async(
+                        self.read_results_once, args=(ff,read_config)))
 
             sweep_results = [pp.get() for pp in processes]
 

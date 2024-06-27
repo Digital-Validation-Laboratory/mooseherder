@@ -16,6 +16,11 @@ from mooseherder.simrunner import SimRunner
 from mooseherder.inputmodifier import InputModifier
 
 
+class MooseHerdError(Exception):
+    """MooseHerdError: custom error class for flagging errors with the moose
+    herd.
+    """
+
 class MooseHerd:
     """ MooseHerd class that can run parametric sweeps of simulation chains in
     parallel with configurable parallelisation options. Takes a list of
@@ -44,6 +49,10 @@ class MooseHerd:
         self._runners = sim_runners
         self._modifiers = input_mods
         self._dir_manager = dir_manager
+
+        if len(self._runners) != len(self._modifiers):
+            raise MooseHerdError('The sim runner list and the input modifier '+
+                                 'list must be the same length')
 
         self._n_para_sims = 2
 
@@ -157,14 +166,11 @@ class MooseHerd:
         """
         name = self._get_process_name()
 
-        # If we are calling this from main we need to set the process number
         if name == 'MainProcess':
             worker_num = '1'
         else:
             worker_num = name.split('-',1)[1]
 
-        # Process number keeps increasing so need to update with
-        # multiple calls to run_para/seq
         if int(worker_num) > self._n_para_sims:
             worker_num = str((int(worker_num) % self._n_para_sims)+1)
 
@@ -292,7 +298,7 @@ class MooseHerd:
 
 
     def _end_sweep(self, start_sweep_time: float,
-                   output_files: list[list[Path]]) -> None:
+                   output_files: list[list[Path | None]]) -> None:
         """_end_sweep: helper function called at the end of runseq/para.
         Reacords the sweep run time. Increments the iteration counters. and
         writes the output key and sweep variables to the first workers

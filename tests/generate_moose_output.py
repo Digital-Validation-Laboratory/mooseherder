@@ -18,7 +18,7 @@ print('------------------------------------------')
 
 # Create the moose runner with correct paths to moose and apps
 moose_dir = USER_DIR / 'moose'
-moose_app_dir = USER_DIR / 'moose-workdir/proteus'
+moose_app_dir = USER_DIR / 'proteus'
 moose_app_name = 'proteus-opt'
 moose_runner = MooseRunner(moose_dir,moose_app_dir,moose_app_name)
 
@@ -39,7 +39,7 @@ for ii in input_files:
 
     moose_runner.set_input_file(ii)
     print('Running moose test case with:')
-    print(moose_runner.get_run_str())
+    print(moose_runner.get_arg_list())
 
     moose_runner.run()
     run_time = time.perf_counter() - start_time

@@ -1,18 +1,17 @@
 '''
 ==============================================================================
-EXAMPLE 4: Run parallel gmsh+MOOSE simulation editing the gmsh parameters only
+EXAMPLE: Run parallel gmsh+MOOSE simulation editing the gmsh parameters only
 
 Author: Lloyd Fletcher, Rory Spencer
 ==============================================================================
 '''
 from pathlib import Path
-from mooseherder import MooseHerd
-from mooseherder import MooseRunner
-from mooseherder import MooseConfig
-from mooseherder import GmshRunner
-from mooseherder import InputModifier
-from mooseherder import DirectoryManager
-
+from mooseherder import (MooseHerd,
+                         MooseRunner,
+                         MooseConfig,
+                         GmshRunner,
+                         InputModifier,
+                         DirectoryManager)
 
 USER_DIR = Path.home()
 
@@ -20,11 +19,10 @@ def main():
     """main _summary_
     """
     print("-"*80)
-    print('EXAMPLE 4: Herd Setup')
+    print('EXAMPLE: Herd Setup')
     print("-"*80)
 
     # Setup MOOSE runner and input modifier
-
     moose_input = Path('scripts/moose/moose-mech-gmsh.i')
     moose_modifier = InputModifier(moose_input,'#','')
 
@@ -49,6 +47,7 @@ def main():
 
     # Start the herd and create working directories
     herd = MooseHerd(sim_runners,input_modifiers,dir_manager)
+    herd.set_num_para_sims(n_para=4)
     # Don't have to clear directories on creation of the herd but we do so here
     # so that directory creation doesn't raise errors
     dir_manager.set_base_dir(Path('examples/'))
@@ -72,10 +71,10 @@ def main():
 
     print()
     print("-"*80)
-    print('EXAMPLE 4a: Run Gmsh+MOOSE once, modify gmsh only')
+    print('EXAMPLE: Run Gmsh+MOOSE once, modify gmsh only')
     print("-"*80)
 
-    # Single run saved in moose-workdir-1
+    # Single run saved in sim-workdir-1
     herd.run_once(0,var_sweep[0])
 
     print(f'Run time (once) = {herd.get_iter_time():.3f}) seconds')
@@ -86,18 +85,18 @@ def main():
     print('EXAMPLE 4b: Run MOOSE sequentially, modify gmsh only')
     print("-"*80)
 
-    # Run all variable combinations (8) sequentially in moose-workdir-1
+    # Run all variable combinations (8) sequentially in sim-workdir-1
     herd.run_sequential(var_sweep)
 
     print(f'Run time (sequential) = {herd.get_sweep_time():.3f} seconds')
     print("-"*80)
     print()
     print("-"*80)
-    print('EXAMPLE 4c: Run MOOSE in parallel, modify gmsh only')
+    print('EXAMPLE: Run MOOSE in parallel, modify gmsh only')
     print("-"*80)
 
     # Run all variable combinations across 4 MOOSE instances with two runs saved in
-    # each moose-workdir
+    # each sim-workdir
     herd.run_para(var_sweep)
 
     print(f'Run time (parallel) = {herd.get_sweep_time():.3f} seconds')

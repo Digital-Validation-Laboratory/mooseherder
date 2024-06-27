@@ -24,11 +24,11 @@ NUM_CALLS = 3
 BASE_DIR = Path('tests/')
 
 MOOSE_PATH = Path.home()/'moose'
-MOOSE_APP_PATH = Path().home()/'moose-workdir'/'proteus'
+MOOSE_APP_PATH = Path().home()/'proteus'
 MOOSE_APP_NAME = 'proteus-opt'
 MOOSE_INPUT = Path('tests/moose/moose-test.i')
 
-GMSH_APP_PATH = Path().home() / 'moose-workdir/gmsh/bin/gmsh'
+GMSH_APP_PATH = Path().home() / 'gmsh/bin/gmsh'
 GMSH_INPUT = Path('tests/gmsh/gmsh-test.geo')
 
 OUTPUT_PATH = Path('tests/output/')

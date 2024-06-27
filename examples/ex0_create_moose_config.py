@@ -1,12 +1,12 @@
 """
 ==============================================================================
-EXAMPLE 0: Create moose-config.json
+EXAMPLE: Create moose-config.json
 
 Author: Lloyd Fletcher
 ==============================================================================
 """
 from pathlib import Path
-from mooseherder.mooseconfig import MooseConfig
+from mooseherder import MooseConfig
 
 
 def main() -> None:

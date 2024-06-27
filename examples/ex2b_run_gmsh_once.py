@@ -1,13 +1,13 @@
 """
 ==============================================================================
-EXAMPLE 2b: Run gmsh with mooseherder once
+EXAMPLE: Run gmsh with mooseherder once
 
 Author: Lloyd Fletcher
 ==============================================================================
 """
 import time
 from pathlib import Path
-from mooseherder.gmshrunner import GmshRunner
+from mooseherder import GmshRunner
 
 USER_DIR = Path.home()
 
@@ -15,7 +15,7 @@ def main():
     """main: create mesh with gmsh in 2D then 3D
     """
     print("-"*80)
-    print('EXAMPLE 2b: Run Gmsh 2D once')
+    print('EXAMPLE: Run Gmsh 2D once')
     print("-"*80)
     gmsh_path = USER_DIR / 'src/gmsh/bin/gmsh'
     gmsh_runner = GmshRunner(gmsh_path)
@@ -28,7 +28,7 @@ def main():
 
     print('Running gmsh...')
     start_time = time.perf_counter()
-    gmsh_runner.run()
+    gmsh_runner.run(gmsh_input,parse_only=True)
     run_time = time.perf_counter() - start_time
 
     print()
@@ -37,7 +37,7 @@ def main():
     print()
 
     print("-"*80)
-    print('EXAMPLE 2b: Run Gmsh 3D once')
+    print('EXAMPLE: Run Gmsh 3D once')
     print("-"*80)
     gmsh_path = USER_DIR / 'src/gmsh/bin/gmsh'
     gmsh_runner = GmshRunner(gmsh_path)
@@ -50,7 +50,7 @@ def main():
 
     print('Running gmsh...')
     start_time = time.perf_counter()
-    gmsh_runner.run()
+    gmsh_runner.run(gmsh_input,parse_only=True)
     run_time = time.perf_counter() - start_time
 
     print()

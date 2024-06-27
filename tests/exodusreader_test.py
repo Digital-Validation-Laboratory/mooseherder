@@ -248,7 +248,7 @@ def test_get_all_glob_vars(reader: ExodusReader) -> None:
         assert glob_vars[gg].shape == (NUM_TIME_STEPS,)
 
 def test_get_coords(reader: ExodusReader) -> None:
-    coords = reader.get_coords()
+    (coords,_) = reader.get_coords()
     assert coords.shape == (NUM_NODES,3)
 
 
@@ -276,7 +276,8 @@ def test_get_read_config(reader: ExodusReader) -> None:
     config = reader.get_read_config()
 
     for ff in fields(config):
-        assert getattr(config,ff.name) is not None
+        if ff.name != 'time_inds':
+            assert getattr(config,ff.name) is not None
 
     assert (config.sidesets == SIDESET_NAMES).all()
     assert (config.node_vars == NODE_VAR_NAMES).all()

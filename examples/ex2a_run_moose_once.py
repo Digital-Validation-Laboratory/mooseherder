@@ -1,20 +1,20 @@
 """
 ==============================================================================
-EXAMPLE 2a: Run MOOSE using mooseherder once
+EXAMPLE: Run MOOSE using mooseherder once
 
 Author: Lloyd Fletcher
 ==============================================================================
 """
 import time
 from pathlib import Path
-from mooseherder import MooseConfig
-from mooseherder import MooseRunner
+from mooseherder import (MooseConfig,
+                         MooseRunner)
 
 def main() -> None:
     """main: run moose once with runner class
     """
     print("-"*80)
-    print('EXAMPLE 2a: Run MOOSE once')
+    print('EXAMPLE: Run MOOSE once')
     print("-"*80)
 
     config_path = Path.cwd() / 'moose-config.json'
@@ -25,13 +25,17 @@ def main() -> None:
     moose_runner = MooseRunner(moose_config)
 
     print('Setting the input file and run parallelisation options.\n')
-    moose_runner.set_run_opts(n_tasks = 1, n_threads = 4, redirect_out = False)
+
+    moose_runner.set_run_opts(n_tasks = 1,
+                              n_threads = 8,
+                              redirect_out = False)
+
     input_file = Path('scripts/moose/moose-mech-simple.i')
     moose_runner.set_input_file(input_file)
 
     # Run the MOOSE!
     print('Running moose with:')
-    print(moose_runner.get_run_str())
+    print(moose_runner.get_arg_list())
 
     start_time = time.perf_counter()
     moose_runner.run()

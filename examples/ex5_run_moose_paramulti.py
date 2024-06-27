@@ -1,16 +1,16 @@
 '''
 ==============================================================================
-EXMAPLE 5: Run MOOSE in sequential then parallel mode with mooseherder
+EXMAPLE: Run MOOSE in sequential then parallel mode with mooseherder
 
 Author: Lloyd Fletcher, Rory Spencer
 ==============================================================================
 '''
 from pathlib import Path
-from mooseherder import MooseHerd
-from mooseherder import MooseRunner
-from mooseherder import MooseConfig
-from mooseherder import InputModifier
-from mooseherder import DirectoryManager
+from mooseherder import (MooseHerd,
+                         MooseRunner,
+                         MooseConfig,
+                         InputModifier,
+                         DirectoryManager)
 
 NUM_PARA_RUNS = 3
 USER_DIR = Path.home()
@@ -19,7 +19,7 @@ def main():
     """main: run moose once, sequential then parallel.
     """
     print("-"*80)
-    print('EXMAPLE 5: Herd Setup')
+    print('EXMAPLE: Herd Setup')
     print("-"*80)
 
     # Setup the MOOSE input modifier and runner
@@ -65,11 +65,11 @@ def main():
 
     print()
     print("-"*80)
-    print('EXMAPLE 5: Run MOOSE in parallel x3')
+    print('EXMAPLE: Run MOOSE in parallel x3')
     print("-"*80)
 
     # Run all variable combinations across 4 MOOSE instances with two runs saved in
-    # each moose-workdir
+    # each sim-workdir
     for rr in range(NUM_PARA_RUNS):
         herd.run_para(moose_vars)
 

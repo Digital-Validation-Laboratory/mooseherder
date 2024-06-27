@@ -1,17 +1,16 @@
 '''
 ==============================================================================
-EXAMPLE 3: Run MOOSE in sequential then parallel mode with mooseherder
+EXAMPLE: Run MOOSE in sequential then parallel mode with mooseherder
 
 Author: Lloyd Fletcher, Rory Spencer
 ==============================================================================
 '''
 from pathlib import Path
-from mooseherder import MooseHerd
-from mooseherder import MooseRunner
-from mooseherder import InputModifier
-from mooseherder import MooseConfig
-from mooseherder import DirectoryManager
-
+from mooseherder import (MooseHerd,
+                         MooseRunner,
+                         InputModifier,
+                         DirectoryManager,
+                         MooseConfig)
 
 USER_DIR = Path.home()
 
@@ -19,7 +18,7 @@ def main():
     """main: run moose once, sequential then parallel.
     """
     print("-"*80)
-    print('EXAMPLE 3: Herd Setup')
+    print('EXAMPLE: Herd Setup')
     print("-"*80)
 
     config_path = Path.cwd() / 'moose-config.json'
@@ -64,10 +63,10 @@ def main():
 
     print()
     print("-"*80)
-    print('EXAMPLE 3a: Run MOOSE once')
+    print('EXAMPLE: Run MOOSE once')
     print("-"*80)
 
-    # Single run saved in moose-workdir-1
+    # Single run saved in sim-workdir-1
     herd.run_once(0,moose_vars[0])
 
     print(f'Run time (once) = {herd.get_iter_time():.3f} seconds')
@@ -75,10 +74,10 @@ def main():
     print()
 
     print("-"*80)
-    print('EXAMPLE 3b: Run MOOSE sequentially')
+    print('EXAMPLE: Run MOOSE sequentially')
     print("-"*80)
 
-    # Run all variable combinations (8) sequentially in moose-workdir-1
+    # Run all variable combinations (8) sequentially in sim-workdir-1
     herd.run_sequential(moose_vars)
 
     print(f'Run time (seq) = {herd.get_sweep_time():.3f} seconds')
@@ -86,11 +85,11 @@ def main():
     print()
 
     print("-"*80)
-    print('EXAMPLE 3c: Run MOOSE in parallel')
+    print('EXAMPLE: Run MOOSE in parallel')
     print("-"*80)
 
     # Run all variable combinations across 4 MOOSE instances with two runs saved in
-    # each moose-workdir
+    # each sim-workdir
     herd.run_para(moose_vars)
 
     print(f'Run time (para) = {herd.get_sweep_time():.3f} seconds')

@@ -1,6 +1,6 @@
 """
 ==============================================================================
-EXAMPLE 1b: Modify input script for gmsh with mooseherder
+EXAMPLE: Modify input script for gmsh with mooseherder
 
 Author: Lloyd Fletcher
 ==============================================================================
@@ -15,7 +15,7 @@ def main() -> None:
     """main: modify gmsh input and save to file
     """
     print("-"*80)
-    print("EXAMPLE 1b: Modify gmsh input script")
+    print("EXAMPLE: Modify gmsh input script")
     print("-"*80)
     gmsh_mod = InputModifier(GMSH_INPUT, "//", ";")
 

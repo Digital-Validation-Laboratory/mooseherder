@@ -14,13 +14,13 @@ USER_DIR = Path.home()
 
 
 def test_gmsh_exists():
-    exist_gmsh_path = USER_DIR / 'moose-workdir/gmsh/bin/gmsh'
+    exist_gmsh_path = USER_DIR / 'gmsh/bin/gmsh'
     assert exist_gmsh_path.is_file()
 
 
 @pytest.fixture()
 def gmsh_path() -> Path:
-    return USER_DIR / 'moose-workdir/gmsh/bin/gmsh'
+    return USER_DIR / 'gmsh/bin/gmsh'
 
 
 @pytest.fixture()
