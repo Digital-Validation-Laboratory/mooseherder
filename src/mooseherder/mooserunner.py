@@ -227,6 +227,6 @@ class MooseRunner(SimRunner):
 
         self.assemble_arg_list()
         subprocess.run(self._arg_list,
-                       shell=False,
+                       shell=True,
                        cwd=str(self._input_path.parent),
                        check=False)
