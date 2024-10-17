@@ -101,7 +101,7 @@ class GmshRunner(SimRunner):
 
         self._arg_list = arg_list + [str(self._input_path)]
 
-        print(f'arg_list={self._arg_list}')
+        #print(f'arg_list={self._arg_list}')
 
         subprocess.run(self._arg_list,
                        shell=False,
