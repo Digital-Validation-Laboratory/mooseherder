@@ -97,7 +97,7 @@ class GmshRunner(SimRunner):
 
         arg_list = [str(self._gmsh_app)]
         if parse_only is True:
-            arg_list = arg_list+["-parse_and_exit", "-v 0"]
+            arg_list = arg_list+["-parse_and_exit", "-v", "0"]
 
         self._arg_list = arg_list + [str(self._input_path)]
 
